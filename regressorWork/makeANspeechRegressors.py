@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.0
+#       jupytext_version: 1.16.4
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -32,6 +32,7 @@ plt.ion()
 # %autoreload 2
 
 # %%
+doParallel = True
 n_jobs = 16
 parallelBackend = "loky"
 
@@ -40,10 +41,13 @@ parallelBackend = "loky"
 # mainDirs=['/Users/karl/map/stimAndPredictors/targets/','/Users/karl/map/stimAndPredictors/distractors/','/Users/karl/map/stimAndPredictors/mixes/']
 # regTypes=['target','distractor','mix']
 
+mainDirSuff = ""
+# mainDirSuff = "Inverted"
+
 mainDirs = [
-    "/Users/karl/map/stimAndPredictors/targets/",
-    "/Users/karl/map/stimAndPredictors/distractors/",
-    "/Users/karl/map/stimAndPredictors/mixes/",
+    f"/Volumes/Seagate/map/stimAndPredictors/targets{mainDirSuff}/",
+    f"/Volumes/Seagate/map/stimAndPredictors/distractors{mainDirSuff}/",
+    f"/Volumes/Seagate/map/stimAndPredictors/mixes{mainDirSuff}/",
 ]
 regTypes = ["target", "distractor", "mix"]
 conditions = ["A", "B", "C", "D"]
@@ -234,133 +238,165 @@ dBSPLs = np.stack(
 anf_types = ["hsr"]  # select lsr, msr, or hsr for spont rate
 
 # fileSuffix='_ANmodel.pickle'
-fileSuffix = "_ANmodel_correctedLevels.pickle"
+# fileSuffix = "_ANmodel_correctedLevels.pickle"
+fileSuffix = "_ANmodel_maxFs.pickle"
 
 # cfs=(125, 20000, 100)  # This was in the Cochlea repository example
 # cfs=(125, 6000, 50)  # 43 comes from the scripting I inherited from Maddox/Vrishab
-cfs = (125, 16000, 43)  # 43 comes from the scripting I inherited from Maddox/Vrishab
+# cfs = (125, 16000, 43)  # 43 comes from the scripting I inherited from Maddox/Vrishab
 
 fsForModel = 100000  # This is the sampling rate that the Zilany/Carney model needs to run it, so upsample if we don't have that
-fsForRegressor = 5000  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
+# fsForRegressor = 5000  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
+fsForRegressor = 16384  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
+
+# numBandsAll = [43, 100]
+numBandsAll = [43]
+
 
 # %%
-for i, mainDir in enumerate(mainDirs):
+def doMultANmodels(
+    i,
+    j,
+    k,
+    condition,
+    regTypes,
+    mainDir,
+    fsForModel,
+    fsForRegressor,
+    dBSPLs,
+    skipDist,
+    anf_types,
+    cfs,
+    fileSuffix,
+):
 
-    for j, condition in enumerate(conditions):
+    ### Make sound
+    # fs = 100e3
+    # t = np.arange(0, 0.1, 1/fs)
+    # s = dsp.chirp(t, 80, t[-1], 20000)
+    # s = cochlea.set_dbspl(s, 50)
+    # s = np.concatenate( (s, np.zeros(int(10e-3 * fs))) )
 
-        # for k in np.arange(1,17):
+    t0 = time.time()
 
-        def doMultANmodels(
-            i,
-            j,
-            k,
-            condition,
-            regTypes,
-            mainDir,
+    # stimulus=sp.io.loadmat(f'{regressorDir}{matFileName}')[matFieldName]
+
+    wavFileName = f"{condition}_{regTypes[i]}{k}.wav"
+
+    fs, stimulus = sp.io.wavfile.read(mainDir + wavFileName)
+    print(
+        f"Wav file has been read in with sampling rate of {fs} resulting in stimulus of shape {stimulus.shape}"
+    )
+    print("\n")
+    # stimulus=stimulus.squeeze()
+    # print(stimulus.shape)
+    # fs=sp.io.loadmat(f'{regressorDir}{matFileName}')['fs']
+    stimulus = sp.signal.resample(stimulus, int(len(stimulus) * fsForModel / fs))
+
+    # Because of copying and pasting from MATLAB, the dimensions don't come in the same order as the loops, so unfortunately it's not [i,j,k]
+    stimulus = cochlea.set_dbspl(stimulus, dBSPLs[i, k - 1, j])
+
+    print(
+        f"Stimulus has been resampled and normalized resulting in shape {stimulus.shape}"
+    )
+    print("\n")
+
+    # if regTypes[i]=='distractor' and not np.any(skipDist[j]==k):
+    if not np.any(skipDist[j] == k) or regTypes[i] != "distractor":
+
+        ### Run model
+        rates = cochlea.run_zilany2014_rate(
+            stimulus,
             fsForModel,
-            fsForRegressor,
-            dBSPLs,
-            skipDist,
-            anf_types,
-            cfs,
-            fileSuffix,
-        ):
-
-            ### Make sound
-            # fs = 100e3
-            # t = np.arange(0, 0.1, 1/fs)
-            # s = dsp.chirp(t, 80, t[-1], 20000)
-            # s = cochlea.set_dbspl(s, 50)
-            # s = np.concatenate( (s, np.zeros(int(10e-3 * fs))) )
-
-            t0 = time.time()
-
-            # stimulus=sp.io.loadmat(f'{regressorDir}{matFileName}')[matFieldName]
-
-            wavFileName = f"{condition}_{regTypes[i]}{k}.wav"
-
-            fs, stimulus = sp.io.wavfile.read(mainDir + wavFileName)
-            print(
-                f"Wav file has been read in with sampling rate of {fs} resulting in stimulus of shape {stimulus.shape}"
-            )
-            print("\n")
-            # stimulus=stimulus.squeeze()
-            # print(stimulus.shape)
-            # fs=sp.io.loadmat(f'{regressorDir}{matFileName}')['fs']
-            stimulus = sp.signal.resample(
-                stimulus, int(len(stimulus) * fsForModel / fs)
-            )
-
-            # Because of copying and pasting from MATLAB, the dimensions don't come in the same order as the loops, so unfortunately it's not [i,j,k]
-            stimulus = cochlea.set_dbspl(stimulus, dBSPLs[i, k - 1, j])
-
-            print(
-                f"Stimulus has been resampled and normalized resulting in shape {stimulus.shape}"
-            )
-            print("\n")
-
-            # if regTypes[i]=='distractor' and not np.any(skipDist[j]==k):
-            if not np.any(skipDist[j] == k) or regTypes[i] != "distractor":
-
-                ### Run model
-                rates = cochlea.run_zilany2014_rate(
-                    stimulus,
-                    fsForModel,
-                    anf_types=anf_types,
-                    cf=cfs,
-                    powerlaw="approximate",
-                    species="human",
-                )
-
-                rates = rates.to_numpy()
-
-                rates = rates.mean(axis=1)
-
-                rates = sp.signal.resample(
-                    rates, int(len(rates) * fsForRegressor / fsForModel)
-                )
-
-                t1 = time.time()
-
-                print(f"AN model took {t1-t0} seconds to run")
-                print(f"AN model to be saved is shape {rates.shape}")
-                print("\n")
-
-                eb.save.pickle(
-                    rates, f"{mainDir}predictors/{wavFileName[:-4]}{fileSuffix}"
-                )
-
-                print(f"Done creating and saving AN model for {wavFileName}")
-                print("\n")
-                print("\n")
-
-        joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
-            joblib.delayed(doMultANmodels)(
-                i,
-                j,
-                k,
-                condition,
-                regTypes,
-                mainDir,
-                fsForModel,
-                fsForRegressor,
-                dBSPLs,
-                skipDist,
-                anf_types,
-                cfs,
-                fileSuffix,
-            )
-            for k in np.arange(1, 17)
+            anf_types=anf_types,
+            cf=cfs,
+            powerlaw="approximate",
+            species="human",
         )
 
-        ### Plot rates
-        # fig, ax = plt.subplots()
-        # img = ax.imshow(
-        #    rates.T,
-        #    aspect='auto'
-        # )
-        # plt.colorbar(img)
-        # plt.show()
+        rates = rates.to_numpy()
+
+        rates = rates.mean(
+            axis=1
+        )  # Uncomment this line to take the average response from all fibers that were modeled
+
+        rates = sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel))
+
+        t1 = time.time()
+
+        print(f"AN model took {t1-t0} seconds to run")
+        print(f"AN model to be saved is shape {rates.shape}")
+        print("\n")
+
+        eb.save.pickle(rates, f"{mainDir}predictors/{wavFileName[:-4]}{fileSuffix}")
+
+        print(f"Done creating and saving AN model for {wavFileName}")
+        print("\n")
+        print("\n")
+
+
+for numBands in numBandsAll:
+
+    # fileSuffix = f"_ANmodel_correctedLevels_{numBands}bands.pickle"
+
+    cfs = (
+        125,
+        16000,
+        numBands,
+    )  # 43 comes from the scripting I inherited from Maddox/Vrishab
+
+    for i, mainDir in enumerate(mainDirs):
+
+        for j, condition in enumerate(conditions):
+
+            if doParallel:
+
+                joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
+                    joblib.delayed(doMultANmodels)(
+                        i,
+                        j,
+                        k,
+                        condition,
+                        regTypes,
+                        mainDir,
+                        fsForModel,
+                        fsForRegressor,
+                        dBSPLs,
+                        skipDist,
+                        anf_types,
+                        cfs,
+                        fileSuffix,
+                    )
+                    for k in np.arange(1, 17)
+                )
+
+            else:
+
+                for k in np.arange(1, 17):
+                    doMultANmodels(
+                        i,
+                        j,
+                        k,
+                        condition,
+                        regTypes,
+                        mainDir,
+                        fsForModel,
+                        fsForRegressor,
+                        dBSPLs,
+                        skipDist,
+                        anf_types,
+                        cfs,
+                        fileSuffix,
+                    )
+
+            ### Plot rates
+            # fig, ax = plt.subplots()
+            # img = ax.imshow(
+            #    rates.T,
+            #    aspect='auto'
+            # )
+            # plt.colorbar(img)
+            # plt.show()
 
 # %%
 # print(type(rates))
