@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.0
+#       jupytext_version: 1.16.4
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -20,9 +20,10 @@ import numpy as np
 import scipy as sp
 
 # %%
-mainDir = "/Users/karl/map/"
+# mainDir = "/Users/karl/map/"
+mainDir = "/Volumes/Seagate/map/"
 
-subject = "R3045"
+subject = "R3184"
 
 subDirs = "/eegAndMeg/eeg/"
 # subDirs='/ffrTests/'
@@ -168,9 +169,9 @@ def process_initial_raw_eeg(readpath, writepath, refs=None, freqsToNotch=None):
 try:  # Try to load the raw fif file, which will work if we've made it before
     process_initial_raw_eeg(
         mainDir + subject + subDirs + subject + "_" + runName + ".fif",
-        "/Users/karl/map/" + subject + subDirs,
-        refs,
-        freqsToNotch,
+        mainDir + subject + subDirs,
+        refs=refs,
+        freqsToNotch=freqsToNotch,
     )
 except:  # if it doesn't exist, we'll make it first, and then load it
     targetFiles = sorted(
@@ -182,9 +183,9 @@ except:  # if it doesn't exist, we'll make it first, and then load it
         raw.save(targetFiles[0][:-4] + ".fif")
         process_initial_raw_eeg(
             mainDir + subject + subDirs + subject + "_" + runName + ".fif",
-            "/Users/karl/map/" + subject + subDirs,
-            refs,
-            freqsToNotch,
+            mainDir + subject + subDirs,
+            refs=refs,
+            freqsToNotch=freqsToNotch,
         )
     elif len(targetFiles) == 2:
         print(
@@ -196,9 +197,9 @@ except:  # if it doesn't exist, we'll make it first, and then load it
         raw.save(targetFiles[0][:-4] + ".fif")
         process_initial_raw_eeg(
             mainDir + subject + subDirs + subject + "_" + runName + ".fif",
-            "/Users/karl/map/" + subject + subDirs,
-            refs,
-            freqsToNotch,
+            mainDir + subject + subDirs,
+            refs=refs,
+            freqsToNotch=freqsToNotch,
         )
     else:
         print("something is wrong")

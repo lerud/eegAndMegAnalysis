@@ -39,6 +39,7 @@ plt.ion()
 
 
 def computeTrfs(
+    parentDir,
     subject,
     presStopCorrection,
     badChanList,
@@ -46,6 +47,8 @@ def computeTrfs(
     typeOfRegressor,
     nameOfRegressor,
     regressorDir,
+    trialsToAnalyze=None,
+    filenameSuffix="",
 ):
 
     # %%
@@ -75,11 +78,14 @@ def computeTrfs(
 
     doPlotting = False
 
-    doParallel = False
+    doParallel = True
     n_jobs = 16
+    # n_jobs = 8
     # n_jobs = -1
     parallelBackend = "loky"
-    # parallelBackend='multiprocessing'
+    # parallelBackend = "sequential"
+    # parallelBackend = "threading"
+    # parallelBackend = "multiprocessing"
 
     if presStopCorrection is None:
         doPresentation = False
@@ -115,7 +121,7 @@ def computeTrfs(
     # eegLocation='/Users/karl/Dropbox/UMD/multilevel0/230908/'
     # eegLocation='/Users/karl/Dropbox/UMD/R2881/eegAndMeg/eeg/'
     # eegLocation='/Users/karl/map/R3045/eegAndMeg/eeg/'
-    eegLocation = "/Users/karl/map/" + subject + subDirs
+    eegLocation = parentDir + subject + subDirs
 
     # bdfFilename='multilevel0_tones.bdf'
     # bdfFilename='R3045_tones.bdf'
@@ -281,6 +287,7 @@ def computeTrfs(
 
     # %%
     t0 = time.time()
+    justDidIt = False
 
     if denoiseMatlab:
 
@@ -340,11 +347,7 @@ def computeTrfs(
     else:
 
         print(f"Set to NOT load tsPCA/SNS denoised dataset output from MATLAB")
-        if os.path.exists(eegLocation + "noDenoiseMatlab-raw.fif"):
-            denoised = mne.io.read_raw_fif(
-                eegLocation + "noDenoiseMatlab-raw.fif", preload=True
-            )
-        else:
+        if not os.path.exists(eegLocation + "noDenoiseMatlab-raw.fif"):
             denoised = mne.io.read_raw_fif(eegLocation + fifFilename, preload=True)
             print("\n")
             print(f"Took {time.time()-t0} seconds to load raw fif")
@@ -362,9 +365,7 @@ def computeTrfs(
             )
             denoised.save(eegLocation + "noDenoiseMatlab-raw.fif")
             print(f"Took {time.time()-t2} seconds")
-
-    # %%
-    events = mne.find_events(denoised, shortest_event=0)
+            justDidIt = True
 
     # %%
     if denoiseMatlab:
@@ -405,12 +406,26 @@ def computeTrfs(
             print(f"Took {t1-t0} seconds")
             print("\n")
         else:
-            print(f"Resampling raw file and events matrix for fs {fs}")
+            print(
+                f"Loading raw file if necessary, and resampling raw data and events matrix for fs {fs}"
+            )
             t0 = time.time()
-            denoised, events = denoised.resample(sfreq=fs, events=events, verbose=True)
+            if not justDidIt:
+                denoised = mne.io.read_raw_fif(
+                    eegLocation + "noDenoiseMatlab-raw.fif", preload=True
+                )
+            events = mne.find_events(denoised, shortest_event=0)
             t1 = time.time()
             print("\n")
-            print(f"Took {t1-t0} seconds to calculate")
+            print(
+                f"Took {t1-t0} seconds to load raw fif file (if not already loaded) and calculate events matrix"
+            )
+            print("\n")
+            print("Now resampling raw data and events matrix")
+            denoised, events = denoised.resample(sfreq=fs, events=events, verbose=True)
+            t2 = time.time()
+            print("\n")
+            print(f"Took {t2-t1} seconds to calculate")
             print("\n")
             print("Now pickling and saving resampled raw file and events matrix")
             eb.save.pickle(
@@ -621,11 +636,9 @@ def computeTrfs(
         "Cz",
     ]
 
-    channelFile = glob.glob("/Users/karl/map/" + subject + "/digitization/*eeg*.elp")
+    channelFile = glob.glob(parentDir + subject + "/digitization/*eeg*.elp")
     if len(channelFile) == 0:
-        channelFile = glob.glob(
-            "/Users/karl/map/" + subject + "/digitization/*EEG*.elp"
-        )
+        channelFile = glob.glob(parentDir + subject + "/digitization/*EEG*.elp")
     print(f"Using the channel file {channelFile[0]}")
 
     digMontage = mne.channels.read_dig_polhemus_isotrak(
@@ -750,7 +763,9 @@ def computeTrfs(
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
                 ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                    regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}").x
+                    regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}")
+                    if isinstance(regressor, eb._data_obj.NDVar):
+                        regressor = regressor.x
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None  # and in that case, save it as None, and just add zeros to the TRF matrix below
 
@@ -790,7 +805,9 @@ def computeTrfs(
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
                 ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                    regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}").x
+                    regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}")
+                    if isinstance(regressor, eb._data_obj.NDVar):
+                        regressor = regressor.x
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None  # and in that case, save it as None, and just add zeros to the TRF matrix below
 
@@ -1107,7 +1124,8 @@ def computeTrfs(
     # trialsToAnalyze=[2,3,6,7,10,11,14,15,18,19,22,23,26,27,30,31]  # Female target trials
     # trialsToAnalyze=[2,3,10,11,14,15,18,19,22,23,26,27]  # Female only trials
 
-    trialsToAnalyze = np.arange(32)  # Zero indexed
+    if trialsToAnalyze is None:
+        trialsToAnalyze = np.arange(32)  # Zero indexed
 
     if doPresentation:
 
@@ -1220,7 +1238,7 @@ def computeTrfs(
         )
 
         evokedTimePres.save(
-            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}-ave.fif",
+            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
             overwrite=True,
         )
 
@@ -1234,7 +1252,7 @@ def computeTrfs(
         )
 
         evokedTimeTrig.save(
-            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}-ave.fif",
+            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
             overwrite=True,
         )
 
@@ -1348,7 +1366,14 @@ def computeTrfs(
 
 
 def computeSources(
-    subject, useAvgBrain, badChanList, typeOfRegressor, nameOfRegressor, bandpassFreqs
+    parentDir,
+    subject,
+    useAvgBrain,
+    badChanList,
+    typeOfRegressor,
+    nameOfRegressor,
+    bandpassFreqs,
+    filenameSuffix,
 ):
     # # %%
     # useAvgBrain = False
@@ -1380,7 +1405,7 @@ def computeSources(
 
     subDirs = "/eegAndMeg/eeg/"
 
-    eegLocation = "/Users/karl/map/" + subject + subDirs
+    eegLocation = parentDir + subject + subDirs
 
     doPlotting = False
 
@@ -1409,7 +1434,7 @@ def computeSources(
     labels_vol = ["Left-Thalamus-Proper", "Right-Thalamus-Proper", "Brain-Stem"]
 
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}-ave.fif"
+        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evoked.set_eeg_reference(projection=True)
@@ -1461,11 +1486,9 @@ def computeSources(
         "Cz",
     ]
 
-    channelFile = glob.glob("/Users/karl/map/" + subject + "/digitization/*eeg*.elp")
+    channelFile = glob.glob(parentDir + subject + "/digitization/*eeg*.elp")
     if len(channelFile) == 0:
-        channelFile = glob.glob(
-            "/Users/karl/map/" + subject + "/digitization/*EEG*.elp"
-        )
+        channelFile = glob.glob(parentDir + subject + "/digitization/*EEG*.elp")
     print(f"Using the channel file {channelFile[0]}")
 
     digMontage = mne.channels.read_dig_polhemus_isotrak(
@@ -1692,5 +1715,5 @@ def computeSources(
             stc,
             stc_vec,
         ),
-        f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}.pickle",
+        f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
     )
