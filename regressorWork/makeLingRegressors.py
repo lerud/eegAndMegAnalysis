@@ -126,13 +126,15 @@ distractors = [
 ]
 distractors = [distractors[i] for i in matrixOrder]
 
-fs = 2000  # Sampling rate of regressors to make; probably 2000, which would be the same as other slower time-scale regressors such as envelope etc.
+fs = 500  # Sampling rate of regressors to make; probably 2000, which would be the same as other slower time-scale regressors such as envelope etc.
 
 
 doGaussian = True
-# gaussianSD = 20  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (so consult the sampling rate)
-# gaussianSD = 30  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (so consult the sampling rate)
-gaussianSD = 40  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (so consult the sampling rate)
+# gaussianSD = 10 * fs / 1000  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (ms * fs / 1000)
+gaussianSD = (
+    15 * fs / 1000
+)  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (ms * fs / 1000)
+# gaussianSD = 20 * fs / 1000  # One standard deviation of the gaussians that will be made at the onset times, in units of samples (ms * fs / 1000)
 
 # wordPredictorName = "~wordOnsets.pickle"
 # phonePredictorName = "~phoneOnsets.pickle"
@@ -140,8 +142,10 @@ gaussianSD = 40  # One standard deviation of the gaussians that will be made at 
 # phonePredictorName = "~phoneOnsets_gaussian.pickle"
 # wordPredictorName = "~wordOnsets_gaussian20SD.pickle"
 # phonePredictorName = "~phoneOnsets_gaussian20SD.pickle"
-wordPredictorName = "~wordOnsets_gaussian40SD.pickle"
-phonePredictorName = "~phoneOnsets_gaussian40SD.pickle"
+# wordPredictorName = "~wordOnsets_gaussian40SD.pickle"
+# phonePredictorName = "~phoneOnsets_gaussian40SD.pickle"
+wordPredictorName = "~wordOnsets_gaussian15msSD.pickle"
+phonePredictorName = "~phoneOnsets_gaussian15msSD.pickle"
 
 # %%
 for counterbalance in range(

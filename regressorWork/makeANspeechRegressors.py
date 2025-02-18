@@ -239,7 +239,7 @@ anf_types = ["hsr"]  # select lsr, msr, or hsr for spont rate
 
 # fileSuffix='_ANmodel.pickle'
 # fileSuffix = "_ANmodel_correctedLevels.pickle"
-fileSuffix = "_ANmodel_maxFs.pickle"
+# fileSuffix = "_ANmodel_maxFs.pickle"
 
 # cfs=(125, 20000, 100)  # This was in the Cochlea repository example
 # cfs=(125, 6000, 50)  # 43 comes from the scripting I inherited from Maddox/Vrishab
@@ -249,8 +249,8 @@ fsForModel = 100000  # This is the sampling rate that the Zilany/Carney model ne
 # fsForRegressor = 5000  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
 fsForRegressor = 16384  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
 
-# numBandsAll = [43, 100]
-numBandsAll = [43]
+numBandsAll = [43, 100]
+# numBandsAll = [43]
 
 
 # %%
@@ -316,9 +316,7 @@ def doMultANmodels(
 
         rates = rates.to_numpy()
 
-        rates = rates.mean(
-            axis=1
-        )  # Uncomment this line to take the average response from all fibers that were modeled
+        # rates = rates.mean(axis=1)  # Uncomment this line to take the average response from all fibers that were modeled
 
         rates = sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel))
 
@@ -337,7 +335,7 @@ def doMultANmodels(
 
 for numBands in numBandsAll:
 
-    # fileSuffix = f"_ANmodel_correctedLevels_{numBands}bands.pickle"
+    fileSuffix = f"_ANmodel_maxFs_{numBands}bands.pickle"
 
     cfs = (
         125,

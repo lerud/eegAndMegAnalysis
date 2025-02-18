@@ -23,7 +23,7 @@ import scipy as sp
 # mainDir = "/Users/karl/map/"
 mainDir = "/Volumes/Seagate/map/"
 
-subject = "R3184"
+subject = "R3214"
 
 subDirs = "/eegAndMeg/eeg/"
 # subDirs='/ffrTests/'
@@ -36,6 +36,9 @@ runName = "maintask"
 
 refs = ["EXG3", "EXG4"]
 freqsToNotch = np.arange(60, 8192, 60)
+
+# cropStart = None  # Do this usually
+cropStart = 100  # In units of seconds; for the R3214 dataset because we started with the Presentation audio settings incorrect. Then we started over, but didn't restart the EEG recording
 
 
 # %%
@@ -180,6 +183,10 @@ except:  # if it doesn't exist, we'll make it first, and then load it
     if len(targetFiles) == 1:
         print(f"There is 1 bdf file being processed: {targetFiles[0]}")
         raw = mne.io.read_raw_bdf(targetFiles[0])
+
+        if cropStart is not None:
+            raw.crop(tmin=cropStart)
+
         raw.save(targetFiles[0][:-4] + ".fif")
         process_initial_raw_eeg(
             mainDir + subject + subDirs + subject + "_" + runName + ".fif",

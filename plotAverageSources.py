@@ -115,6 +115,25 @@ def extractSourcesSingleCondition(
         # eegLocation = "/Users/karl/map/" + subject + subDirs
         eegLocation = "/Volumes/Seagate/map/" + subject + subDirs
 
+        # (
+        #     subject,
+        #     mriSubject,
+        #     labels_vol,
+        #     src_surf,
+        #     src_vol,
+        #     src_mix,
+        #     fwd_surf,
+        #     fwd_vol,
+        #     fwd_mix,
+        #     inverse_operator_surf,
+        #     inverse_operator_vol,
+        #     inverse_operator_mix,
+        #     stc,
+        #     stc_vec,
+        # ) = eb.load.unpickle(
+        #     f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
+        # )
+
         (
             subject,
             mriSubject,
@@ -125,10 +144,6 @@ def extractSourcesSingleCondition(
             fwd_surf,
             fwd_vol,
             fwd_mix,
-            inverse_operator_surf,
-            inverse_operator_vol,
-            inverse_operator_mix,
-            stc,
             stc_vec,
         ) = eb.load.unpickle(
             f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
@@ -373,16 +388,20 @@ def extractSourcesSingleCondition(
         allSourceTimeCoursesAvg,
         ymax,
         ymin,
-        stc._times,
+        stc_vec._times,
     )
 
 
 # %%
 
 # %%
-nameOfRegressor = "_ANmodel_correctedLevels"
-lenResponse = 425
-fs = 5000
+# nameOfRegressor = "_ANmodel_correctedLevels"
+# lenResponse = 425
+# fs = 5000
+
+nameOfRegressor = "_ANmodel_maxFs"
+lenResponse = 1393
+fs = 16384
 
 # nameOfRegressor = "~gammatone-1"
 # lenResponse = 1100
@@ -399,14 +418,14 @@ timeToAddToStart = 0
 doPC = True
 
 nonVecMode = "mean_flip"
-doVec = False
+doVec = True
 
 
 subjects_dir = os.path.expandvars("$SUBJECTS_DIR")
 
 subDirs = "/eegAndMeg/eeg/"
 
-
+# This is everybody
 subjectsToAverage = [
     "R3045",
     "R3089",
@@ -418,7 +437,28 @@ subjectsToAverage = [
     "R2877",
     "R3157",
     "R2783",
+    "R3170",
+    "R3172",
+    "R3193",
+    "R3184",
+    "R3214",
 ]
+
+# subjectsToAverage = [
+#     "R3089",
+#     "R3093",
+#     "R3095",
+#     "R3151",
+#     "R2774",
+#     "R3152",
+#     "R2877",
+#     "R3157",
+#     "R2783",
+#     "R3170",
+#     "R3172",
+#     "R3184",
+#     "R3214",
+# ]
 
 
 # subjectsToAverage = [
@@ -529,7 +569,7 @@ ax0.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][7][:, 2] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][7][:, 2] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -547,7 +587,7 @@ ax1.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][7][:, 0] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][7][:, 0] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -565,7 +605,7 @@ ax2.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][0][:, 0] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][0][:, 0] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -582,7 +622,7 @@ ax3.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][1][:, 0] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][1][:, 0] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -599,7 +639,7 @@ ax4.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][6][:, 0] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][6][:, 0] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -616,10 +656,10 @@ ax5.plot(
     times,
     rampFunction
     * np.stack(
-        (
+        [
             allSourcesAllConds[condLabels[i]][7][:, :2].mean(axis=1)
             for i in range(len(condLabels))
-        ),
+        ],
         axis=1,
     ),
 )
@@ -637,7 +677,7 @@ ax6.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][7][:, 1] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][7][:, 1] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -655,7 +695,7 @@ ax7.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][0][:, 1] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][0][:, 1] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -673,7 +713,7 @@ ax8.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][1][:, 1] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][1][:, 1] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -690,7 +730,7 @@ ax9.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][6][:, 1] for i in range(len(condLabels))),
+        [allSourcesAllConds[condLabels[i]][6][:, 1] for i in range(len(condLabels))],
         axis=1,
     ),
 )
@@ -711,24 +751,39 @@ fig1.set_facecolor(facecolor)
 # %%
 # colors2 = ["red", "green", "blue"]
 # colors2 = ["blue", "green", "red"]
-colors2 = ["green", "red", "blue"]
-# colors2 = ["cyan", "green", "red", "brown", "blue"]
+
+# colors2 = ["green", "red", "blue"]
+colors2 = ["cyan", "green", "red", "brown", "blue"]
 custom_cycler2 = cycler(color=colors2)
-plt.figure()
-plt.gca().set_prop_cycle(custom_cycler2)
+plt.figure(figsize=[12, 5])
+axAbr = plt.axes()
+axAbr.set_prop_cycle(custom_cycler2)
+for spine in axAbr.spines.values():
+    spine.set_visible(False)
+axAbr.axhline(0, color="black", linestyle="--")
+axAbr.axvline(0, color="black", linestyle="--")
 # plt.gca().set_facecolor(facecolor)
-plt.plot(
+axAbr.plot(
     times,
     rampFunction
     * np.stack(
-        (allSourcesAllConds[condLabels[i]][7][:, :2].mean(axis=1) for i in [1, 4, 0]),
+        [
+            allSourcesAllConds[condLabels[i]][7][:, :2].mean(axis=1)
+            for i in [1, 2, 3, 4, 0]
+        ],
         axis=1,
     ),
     linewidth=3,
     alpha=0.75,
 )
-plt.gca().autoscale(enable=True, axis="both", tight=True)
-# plt.grid()
+# axAbr.set_ylim([ymin * yScaleUp * scaleDown, ymax * yScaleUp * scaleDown])
+axAbr.set_title("Thalamus and Brainstem", fontsize=16)
+axAbr.set_xlabel("Time (sec)", fontsize=16)
+axAbr.set_ylabel("Current (a.u.)", fontsize=16)
+plt.tick_params("x", labelsize=16)
+plt.tick_params("y", labelsize=16)
+axAbr.autoscale(enable=True, axis="x", tight=True)
+axAbr.grid()
 
 
 # ymax = np.max([subcortTimeCoursesAvg.max(), allSourceTimeCoursesAvg.max()])
@@ -774,5 +829,7 @@ plt.gca().autoscale(enable=True, axis="both", tight=True)
 # # ax8.plot(stc._times,subcortTimeCourses[:,1,:].T)
 # # ax8.set_ylim([ymin, ymax])
 # ax8.legend(labels_vol)
+
+# %%
 
 # %%

@@ -41,60 +41,60 @@ parentDir = "/Volumes/Seagate/map/"
 subDirs = "/eegAndMeg/eeg/"
 nChannels = 32
 
+# filePrefix = "evoked"
+filePrefix = "recField"
+
+
 # %%
-nameOfRegressor = "_ANmodel_correctedLevels"
-lenResponse = 425
+# nameOfRegressor = "_ANmodel_correctedLevels"
+# lenResponse = 425
 # lenToRamp = .008
-lenToRamp = 0
+# # lenToRamp = 0
+# expToRamp = 2
+
+nameOfRegressor = "_ANmodel_maxFs"
+lenResponse = 1393
+lenToRamp = 0.008
+# lenToRamp = 0
 expToRamp = 2
 
 # nameOfRegressor = "~gammatone-1"
-# lenResponse = 1100
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
 # nameOfRegressor = "~gammatone-on-1"
-# lenResponse = 1100
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~wordOnsets"
-# lenResponse = 1100
+# nameOfRegressor = "~wordOnsets_gaussian15msSD"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~phoneOnsets"
-# lenResponse = 1100
+# nameOfRegressor = "~phoneOnsets_gaussian15msSD"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~wordOnsets_gaussian"
-# lenResponse = 1100
+# nameOfRegressor = "~phsurp"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~phoneOnsets_gaussian"
-# lenResponse = 1100
+# nameOfRegressor = "~cohtent"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~wordOnsets_gaussian20SD"
-# lenResponse = 1100
+# nameOfRegressor = "~wordprob"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
-# nameOfRegressor = "~phoneOnsets_gaussian20SD"
-# lenResponse = 1100
-# lenToRamp = 0
-# expToRamp = 2
-
-# nameOfRegressor = "~wordOnsets_gaussian40SD"
-# lenResponse = 1100
-# lenToRamp = 0
-# expToRamp = 2
-
-# nameOfRegressor = "~phoneOnsets_gaussian40SD"
-# lenResponse = 1100
+# nameOfRegressor = "~wordsurp"
+# lenResponse = 426
 # lenToRamp = 0
 # expToRamp = 2
 
@@ -105,6 +105,7 @@ timeToAddToStart = 0
 complexSubtypeNames = [" (real)", " (imag)", " (abs)", " (phase)"]
 
 ci = 0.95  # confidence interval for shading
+
 
 # subjectsToAverage = [
 #     "R3045",
@@ -117,31 +118,32 @@ ci = 0.95  # confidence interval for shading
 #     "R2877",
 #     "R3157",
 #     "R2783",
+#     "R3170",
+#     "R3172",
+#     "R3193",
+#     "R3184",
+#     "R3214",
 # ]
 
-
-subjectsToAverage = [
-    "R3045",
-    "R3089",
-    "R3093",
-    "R3095",
-    "R3151",
-    "R2774",
-    "R3152",
-    "R2877",
-    "R3157",
-    "R2783",
-    "R3170",
-    "R3172",
-    "R3193",
-    "R3184",
-]
+# subjectsToAverage = [
+#     "R3045",
+#     "R3089",
+#     "R3093",
+#     "R3095",
+#     "R3157",
+#     "R2783",
+#     "R3170",
+#     "R3172",
+#     "R3193",
+#     "R3184",
+#     "R3214",
+# ]
 
 # subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877", "R3157"]
 # subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
 # subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
 # subjectsToAverage=["R2877", "R3151", "R3152"]
-# subjectsToAverage = ["R2783"]
+subjectsToAverage = ["R3151"]
 
 
 # %%
@@ -242,7 +244,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -299,7 +301,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -325,7 +327,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -351,7 +353,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -377,7 +379,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -411,7 +413,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -437,7 +439,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -463,7 +465,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -489,7 +491,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -515,7 +517,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -541,7 +543,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -567,7 +569,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -593,7 +595,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -619,7 +621,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -645,7 +647,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -671,7 +673,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -697,7 +699,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -723,7 +725,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -749,7 +751,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -775,7 +777,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -801,7 +803,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
@@ -827,7 +829,7 @@ avgMat = np.zeros((lenResponse, nChannels, len(subjectsToAverage)))
 for i, subject in enumerate(subjectsToAverage):
     eegLocation = parentDir + subject + subDirs
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}{filePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
