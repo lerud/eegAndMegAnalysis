@@ -218,14 +218,15 @@ def computeTrfs(
     exgLabels = ["EXG1", "EXG2", "EXG3", "EXG4", "EXG5", "EXG6", "EXG7", "EXG8"]
 
     if nameOfRegressor[0] == "_":
-        fs = 5000  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
+        # fs = 5000  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
+        fs = 16384  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
     else:
-        fs = 2000  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
+        fs = 500  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
 
     if nameOfRegressor[0] == "~":
         eps = 1e7
-    # eps = 1e3
-    # eps = 1e0
+        # eps = 1e3
+        # eps = 1e0
     else:
         eps = 0
 
@@ -241,7 +242,7 @@ def computeTrfs(
         windowStart = (
             -0.1
         )  # Time to analyze previous to event onset, in seconds. Will be converted to sample time for deconvolution below
-        windowEnd = 0.45
+        windowEnd = 0.75
 
     printAllEvents = False
 
@@ -398,9 +399,17 @@ def computeTrfs(
         if os.path.exists(eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"):
             print(f"Unpickling saved resampled raw file and events matrix for fs {fs}")
             t0 = time.time()
-            denoised, events = eb.load.unpickle(
-                eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
-            )
+            if fs != 16384:
+                denoised, events = eb.load.unpickle(
+                    eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
+                )
+            else:
+                denoised = mne.io.read_raw_fif(
+                    eegLocation + "noDenoiseMatlab-raw.fif", preload=True
+                )
+                events = eb.load.unpickle(
+                    eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
+                )
             print("\n")
             t1 = time.time()
             print(f"Took {t1-t0} seconds")
@@ -422,15 +431,23 @@ def computeTrfs(
             )
             print("\n")
             print("Now resampling raw data and events matrix")
-            denoised, events = denoised.resample(sfreq=fs, events=events, verbose=True)
+            if fs == denoised.info["sfreq"]:
+                denoised = denoised.resample(sfreq=fs, events=events, verbose=True)
+            else:
+                denoised, events = denoised.resample(
+                    sfreq=fs, events=events, verbose=True
+                )
             t2 = time.time()
             print("\n")
             print(f"Took {t2-t1} seconds to calculate")
             print("\n")
             print("Now pickling and saving resampled raw file and events matrix")
-            eb.save.pickle(
-                (denoised, events), eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
-            )
+            if fs != 16384:
+                eb.save.pickle(
+                    (denoised, events), eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
+                )
+            else:
+                eb.save.pickle(events, eegLocation + f"noDenoiseMatlab-fs{fs}.pickle")
             t2 = time.time()
             print(f"Took {t2-t1} seconds")
             print("\n")
@@ -750,7 +767,7 @@ def computeTrfs(
             # regressor=createPredictorTimeseries(stimTimes, fs, int(epochLength*fs), values=invVarProp)
             # regressor=createPredictorTimeseries(stimTimes, fs, int(epochLength*fs))
 
-            if fs == 5000:  # If fs is 5000 it is probably the AN model...
+            if fs == 16384:  # If fs is 5000 it is probably the AN model...
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
                 ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
@@ -758,7 +775,7 @@ def computeTrfs(
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None
             elif (
-                fs == 2000
+                fs == 500
             ):  # Else it is probably a regressor from Eelbrain, so it's an NDVar so we need .x
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
@@ -766,6 +783,10 @@ def computeTrfs(
                     regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}")
                     if isinstance(regressor, eb._data_obj.NDVar):
                         regressor = regressor.x
+                        lenRegressor = len(regressor)
+                        regressor = sp.signal.resample(
+                            regressor, int(lenRegressor / 4)
+                        )  # The Eelbrain regressors are made with fs=2000, so use a magic number for now and resample them for fs=500
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None  # and in that case, save it as None, and just add zeros to the TRF matrix below
 
@@ -792,7 +813,7 @@ def computeTrfs(
             # regressor=createPredictorTimeseries(stimTimes, fs, int(epochLength*fs), values=invVarProp)
             # regressor=createPredictorTimeseries(stimTimes, fs, int(epochLength*fs))
 
-            if fs == 5000:  # If fs is 5000 it is probably the AN model...
+            if fs == 16384:  # If fs is 5000 it is probably the AN model...
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
                 ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
@@ -800,7 +821,7 @@ def computeTrfs(
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None
             elif (
-                fs == 2000
+                fs == 500
             ):  # Else it is probably a regressor from Eelbrain, so it's an NDVar so we need .x
                 if (
                     not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
@@ -808,6 +829,10 @@ def computeTrfs(
                     regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i]}")
                     if isinstance(regressor, eb._data_obj.NDVar):
                         regressor = regressor.x
+                        lenRegressor = len(regressor)
+                        regressor = sp.signal.resample(
+                            regressor, int(lenRegressor / 4)
+                        )  # The Eelbrain regressors are made with fs=2000, so use a magic number for now and resample them for fs=500
                 else:  # otherwise save it as None, and just add NaNs to the TRF matrix below
                     regressor = None  # and in that case, save it as None, and just add zeros to the TRF matrix below
 
@@ -856,42 +881,59 @@ def computeTrfs(
     # %%
     tDeconv = time.time()
 
+    if trialsToAnalyze is None:
+        trialsToAnalyze = np.arange(32)  # Zero indexed
+
+    regressorsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze)))
+
     if doPresentation:
 
-        TRFsFreqPres = np.zeros(
-            [
-                len(allPresEpochs),
-                int(2 * (lenToAnalyze * fs - windowStart * fs)),
-                nChannels,
-            ]
-        )
-        TRFsTimePres = np.zeros(
-            [len(allPresEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
-        )
+        # TRFsFreqPres = np.zeros(
+        #     [
+        #         len(allPresEpochs),
+        #         int(2 * (lenToAnalyze * fs - windowStart * fs)),
+        #         nChannels,
+        #     ]
+        # )
+        # TRFsTimePres = np.zeros(
+        #     [len(allPresEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
+        # )
 
-        def doAllPresentationEpochs(
-            i,
-            allPresEpochs,
-            allRegressors,
-            regressorNames,
-            fs,
-            lenToAnalyze,
-            eps,
-            windowStart,
-            windowEnd,
-            edgePad,
-        ):
+        # def doAllPresentationEpochs(
+        #     i,
+        #     allPresEpochs,
+        #     allRegressors,
+        #     regressorNames,
+        #     fs,
+        #     lenToAnalyze,
+        #     eps,
+        #     windowStart,
+        #     windowEnd,
+        #     edgePad,
+        # ):
+
+        presEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
+
+        for count, i in enumerate(trialsToAnalyze):
+
             epoch = allPresEpochs[i]
-            if allRegressors[i] is not None:
-                regressor = allRegressors[i]
-            else:
-                regressor = allRegressors[i - 2]
-            currentEpochMat = epoch.get_data().squeeze().T
+
+            # if allRegressors[i] is not None:
+            #     regressor = allRegressors[i]
+            # else:
+            #     regressor = allRegressors[i - 2]
+
+            regressor = allRegressors[i]
+
+            currentEpochMat = (
+                epoch.get_data().squeeze().T
+            )  # Time is now the first dimension (dimension 0)
+
             print(
                 f"Regressor {regressorNames[i]} is shape {regressor.shape}, which is {regressor.shape[0]/fs} seconds, while"
             )
             print(
-                f"EEG response matrix {i} for Triggy triggers is shape {currentEpochMat.shape}, which corresponds to {currentEpochMat.shape[0]/fs} seconds;"
+                f"EEG response matrix {i} for Presentation triggers is shape {currentEpochMat.shape}, which corresponds to {currentEpochMat.shape[0]/fs} seconds;"
             )
             print(
                 f"Now resampling EEG response matrix to be length {regressor.shape[0]}"
@@ -901,100 +943,133 @@ def computeTrfs(
             print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
             print("\n")
             # response=epoch.get_data().squeeze().T
-            TRFfreq, TRFtime = deconvMain(
-                regressor[: lenToAnalyze * fs],
-                response[: lenToAnalyze * fs, :],
-                eps,
-                windowStart=(windowStart - edgePad) * fs,
-                windowEnd=(windowEnd + edgePad) * fs,
-            )
+
+            regressorsToDo[:, count] = regressor[: lenToAnalyze * fs]
+            presEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
+
+            # TRFfreq, TRFtime = deconvMain(
+            #     regressor[: lenToAnalyze * fs],
+            #     response[: lenToAnalyze * fs, :],
+            #     eps,
+            #     windowStart=(windowStart - edgePad) * fs,
+            #     windowEnd=(windowEnd + edgePad) * fs,
+            # )
+
             # if regressor.shape[0]>response.shape[0]:
             #    TRF=deconvMain(regressor[:response.shape[0]], response, eps, windowStart=windowStart*fs)
             # else:
             #    TRF=deconvMain(regressor, response[:regressor.shape[0]], eps, windowStart=windowStart*fs)
             # TRFsFreqTrig[i,:TRFfreq.shape[0],:]=TRFfreq
             # TRFsTimeTrig[i,:TRFtime.shape[0],:]=TRFtime
-            TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
-            TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
-            if allRegressors[i] is not None:
-                return TRFfreq, TRFtime
-            else:
-                return TRFfreq * np.nan, TRFtime * np.nan
 
-        if doParallel:
+            # TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
+            # TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
+            # if allRegressors[i] is not None:
+            #     return TRFfreq, TRFtime
+            # else:
+            #     return TRFfreq * np.nan, TRFtime * np.nan
 
-            results = joblib.Parallel(
-                n_jobs=n_jobs, backend=parallelBackend, verbose=49
-            )(
-                joblib.delayed(doAllPresentationEpochs)(
-                    i,
-                    allPresEpochs,
-                    allRegressors,
-                    regressorNames,
-                    fs,
-                    lenToAnalyze,
-                    eps,
-                    windowStart,
-                    windowEnd,
-                    edgePad,
-                )
-                for i in range(len(allPresEpochs))
-            )
+        print("Now z-scoring regressor matrix...")
+        regressorsToDo = sp.stats.zscore(regressorsToDo)
+        print("\n")
+        print("Done")
+        print("\n")
+        print("Now z-scoring response matrix...")
+        presEpochsToDo = sp.stats.zscore(presEpochsToDo)
+        print("\n")
+        print("Done")
+        print("\n")
 
-            for i in range(len(results)):
-                TRFsFreqPres[i, : results[i][0].shape[0], :] = results[i][0]
-                TRFsTimePres[i, : results[i][1].shape[0], :] = results[i][1]
+        rfPres = mne.decoding.ReceptiveField(
+            windowStart - edgePad, windowEnd + edgePad, fs, estimator=eps, n_jobs=n_jobs
+        )
+        rfPres.fit(regressorsToDo[:, :, np.newaxis], presEpochsToDo)
+        TRFsTimePres = (
+            rfPres.coef_[:, 0, int(edgePad * fs) : int(-edgePad * fs - 1)].squeeze().T
+        )
 
-            del results
+        # if doParallel:
 
-        else:
+        #     results = joblib.Parallel(
+        #         n_jobs=n_jobs, backend=parallelBackend, verbose=49
+        #     )(
+        #         joblib.delayed(doAllPresentationEpochs)(
+        #             i,
+        #             allPresEpochs,
+        #             allRegressors,
+        #             regressorNames,
+        #             fs,
+        #             lenToAnalyze,
+        #             eps,
+        #             windowStart,
+        #             windowEnd,
+        #             edgePad,
+        #         )
+        #         for i in range(len(allPresEpochs))
+        #     )
 
-            for i in range(len(allPresEpochs)):
-                TRFfreq, TRFtime = doAllPresentationEpochs(
-                    i,
-                    allPresEpochs,
-                    allRegressors,
-                    regressorNames,
-                    fs,
-                    lenToAnalyze,
-                    eps,
-                    windowStart,
-                    windowEnd,
-                    edgePad,
-                )
-                TRFsFreqPres[i, : TRFfreq.shape[0], :] = TRFfreq
-                TRFsTimePres[i, : TRFtime.shape[0], :] = TRFtime
+        #     for i in range(len(results)):
+        #         TRFsFreqPres[i, : results[i][0].shape[0], :] = results[i][0]
+        #         TRFsTimePres[i, : results[i][1].shape[0], :] = results[i][1]
+
+        #     del results
+
+        # else:
+
+        #     for i in range(len(allPresEpochs)):
+        #         TRFfreq, TRFtime = doAllPresentationEpochs(
+        #             i,
+        #             allPresEpochs,
+        #             allRegressors,
+        #             regressorNames,
+        #             fs,
+        #             lenToAnalyze,
+        #             eps,
+        #             windowStart,
+        #             windowEnd,
+        #             edgePad,
+        #         )
+        #         TRFsFreqPres[i, : TRFfreq.shape[0], :] = TRFfreq
+        #         TRFsTimePres[i, : TRFtime.shape[0], :] = TRFtime
 
     if doTriggy:
 
-        TRFsFreqTrig = np.zeros(
-            [
-                len(allTrigEpochs),
-                int(2 * (lenToAnalyze * fs - windowStart * fs)),
-                nChannels,
-            ]
-        )
-        TRFsTimeTrig = np.zeros(
-            [len(allTrigEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
-        )
+        # TRFsFreqTrig = np.zeros(
+        #     [
+        #         len(allTrigEpochs),
+        #         int(2 * (lenToAnalyze * fs - windowStart * fs)),
+        #         nChannels,
+        #     ]
+        # )
+        # TRFsTimeTrig = np.zeros(
+        #     [len(allTrigEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
+        # )
 
-        def doAllTriggyEpochs(
-            i,
-            allTrigEpochs,
-            allRegressors,
-            regressorNames,
-            fs,
-            lenToAnalyze,
-            eps,
-            windowStart,
-            windowEnd,
-            edgePad,
-        ):
+        # def doAllTriggyEpochs(
+        #     i,
+        #     allTrigEpochs,
+        #     allRegressors,
+        #     regressorNames,
+        #     fs,
+        #     lenToAnalyze,
+        #     eps,
+        #     windowStart,
+        #     windowEnd,
+        #     edgePad,
+        # ):
+        trigEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
+
+        for count, i in enumerate(trialsToAnalyze):
+
             epoch = allTrigEpochs[i]
-            if allRegressors[i] is not None:
-                regressor = allRegressors[i]
-            else:
-                regressor = allRegressors[i - 2]
+
+            # if allRegressors[i] is not None:
+            #     regressor = allRegressors[i]
+            # else:
+            #     regressor = allRegressors[i - 2]
+
+            regressor = allRegressors[i]
+
             currentEpochMat = epoch.get_data().squeeze().T
             print(
                 f"Regressor {regressorNames[i]} is shape {regressor.shape}, which is {regressor.shape[0]/fs} seconds, while"
@@ -1010,76 +1085,99 @@ def computeTrfs(
             print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
             print("\n")
             # response=epoch.get_data().squeeze().T
-            TRFfreq, TRFtime = deconvMain(
-                regressor[: lenToAnalyze * fs],
-                response[: lenToAnalyze * fs, :],
-                eps,
-                windowStart=(windowStart - edgePad) * fs,
-                windowEnd=(windowEnd + edgePad) * fs,
-            )
+
+            regressorsToDo[:, count] = regressor[: lenToAnalyze * fs]
+            trigEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
+
+            # TRFfreq, TRFtime = deconvMain(
+            #     regressor[: lenToAnalyze * fs],
+            #     response[: lenToAnalyze * fs, :],
+            #     eps,
+            #     windowStart=(windowStart - edgePad) * fs,
+            #     windowEnd=(windowEnd + edgePad) * fs,
+            # )
             # if regressor.shape[0]>response.shape[0]:
             #    TRF=deconvMain(regressor[:response.shape[0]], response, eps, windowStart=windowStart*fs)
             # else:
             #    TRF=deconvMain(regressor, response[:regressor.shape[0]], eps, windowStart=windowStart*fs)
             # TRFsFreqTrig[i,:TRFfreq.shape[0],:]=TRFfreq
             # TRFsTimeTrig[i,:TRFtime.shape[0],:]=TRFtime
-            TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
-            TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
-            if allRegressors[i] is not None:
-                return TRFfreq, TRFtime
-            else:
-                return TRFfreq * np.nan, TRFtime * np.nan
+            # TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
+            # TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
+            # if allRegressors[i] is not None:
+            #     return TRFfreq, TRFtime
+            # else:
+            #     return TRFfreq * np.nan, TRFtime * np.nan
 
-        if doParallel:
+        print("Now z-scoring regressor matrix...")
+        regressorsToDo = sp.stats.zscore(regressorsToDo)
+        print("\n")
+        print("Done")
+        print("\n")
+        print("Now z-scoring response matrix...")
+        trigEpochsToDo = sp.stats.zscore(trigEpochsToDo)
+        print("\n")
+        print("Done")
+        print("\n")
 
-            results = joblib.Parallel(
-                n_jobs=n_jobs, backend=parallelBackend, verbose=49
-            )(
-                joblib.delayed(doAllTriggyEpochs)(
-                    i,
-                    allTrigEpochs,
-                    allRegressors,
-                    regressorNames,
-                    fs,
-                    lenToAnalyze,
-                    eps,
-                    windowStart,
-                    windowEnd,
-                    edgePad,
-                )
-                for i in range(len(allTrigEpochs))
-            )
+        rfTrig = mne.decoding.ReceptiveField(
+            windowStart - edgePad, windowEnd + edgePad, fs, estimator=eps, n_jobs=n_jobs
+        )
+        rfTrig.fit(regressorsToDo[:, :, np.newaxis], trigEpochsToDo)
+        TRFsTimeTrig = (
+            rfTrig.coef_[:, 0, int(edgePad * fs) : int(-edgePad * fs - 1)].squeeze().T
+        )
 
-            for i in range(len(results)):
-                TRFsFreqTrig[i, : results[i][0].shape[0], :] = results[i][0]
-                TRFsTimeTrig[i, : results[i][1].shape[0], :] = results[i][1]
+        # if doParallel:
 
-            del results
+        #     results = joblib.Parallel(
+        #         n_jobs=n_jobs, backend=parallelBackend, verbose=49
+        #     )(
+        #         joblib.delayed(doAllTriggyEpochs)(
+        #             i,
+        #             allTrigEpochs,
+        #             allRegressors,
+        #             regressorNames,
+        #             fs,
+        #             lenToAnalyze,
+        #             eps,
+        #             windowStart,
+        #             windowEnd,
+        #             edgePad,
+        #         )
+        #         for i in range(len(allTrigEpochs))
+        #     )
 
-        else:
+        #     for i in range(len(results)):
+        #         TRFsFreqTrig[i, : results[i][0].shape[0], :] = results[i][0]
+        #         TRFsTimeTrig[i, : results[i][1].shape[0], :] = results[i][1]
 
-            for i in range(len(allTrigEpochs)):
-                TRFfreq, TRFtime = doAllTriggyEpochs(
-                    i,
-                    allTrigEpochs,
-                    allRegressors,
-                    regressorNames,
-                    fs,
-                    lenToAnalyze,
-                    eps,
-                    windowStart,
-                    windowEnd,
-                    edgePad,
-                )
-                TRFsFreqTrig[i, : TRFfreq.shape[0], :] = TRFfreq
-                TRFsTimeTrig[i, : TRFtime.shape[0], :] = TRFtime
+        #     del results
+
+        # else:
+
+        #     for i in range(len(allTrigEpochs)):
+        #         TRFfreq, TRFtime = doAllTriggyEpochs(
+        #             i,
+        #             allTrigEpochs,
+        #             allRegressors,
+        #             regressorNames,
+        #             fs,
+        #             lenToAnalyze,
+        #             eps,
+        #             windowStart,
+        #             windowEnd,
+        #             edgePad,
+        #         )
+        #         TRFsFreqTrig[i, : TRFfreq.shape[0], :] = TRFfreq
+        #         TRFsTimeTrig[i, : TRFtime.shape[0], :] = TRFtime
 
     if doPresentation:
 
-        print(
-            f"Shape of frequency-domain Presentation TRF matrix is now {TRFsFreqPres.shape}"
-        )
-        print("\n")
+        # print(
+        #     f"Shape of frequency-domain Presentation TRF matrix is now {TRFsFreqPres.shape}"
+        # )
+        # print("\n")
         print(
             f"Shape of time-domain Presentation TRF matrix is now {TRFsTimePres.shape}"
         )
@@ -1087,10 +1185,10 @@ def computeTrfs(
 
     if doTriggy:
 
-        print(
-            f"Shape of frequency-domain Triggy TRF matrix is now {TRFsFreqTrig.shape}"
-        )
-        print("\n")
+        # print(
+        #     f"Shape of frequency-domain Triggy TRF matrix is now {TRFsFreqTrig.shape}"
+        # )
+        # print("\n")
         print(f"Shape of time-domain Triggy TRF matrix is now {TRFsTimeTrig.shape}")
         print("\n")
 
@@ -1124,24 +1222,23 @@ def computeTrfs(
     # trialsToAnalyze=[2,3,6,7,10,11,14,15,18,19,22,23,26,27,30,31]  # Female target trials
     # trialsToAnalyze=[2,3,10,11,14,15,18,19,22,23,26,27]  # Female only trials
 
-    if trialsToAnalyze is None:
-        trialsToAnalyze = np.arange(32)  # Zero indexed
-
     if doPresentation:
 
-        TRFsFreqPresMean = np.nanmean(TRFsFreqPres[trialsToAnalyze, :, :], axis=0)
-        TRFsTimePresMean = np.nanmean(TRFsTimePres[trialsToAnalyze, :, :], axis=0)
+        # TRFsFreqPresMean = np.nanmean(TRFsFreqPres[trialsToAnalyze, :, :], axis=0)
+        # TRFsTimePresMean = np.nanmean(TRFsTimePres[trialsToAnalyze, :, :], axis=0)
 
-        freqPres_portion = TRFsFreqPresMean[sampleStart:sampleEnd, :] * unitCoefficient
-        timePres_portion = TRFsTimePresMean * unitCoefficient
+        # freqPres_portion = TRFsFreqPresMean[sampleStart:sampleEnd, :] * unitCoefficient
+        # timePres_portion = TRFsTimePresMean * unitCoefficient
+        timePres_portion = TRFsTimePres * unitCoefficient
 
     if doTriggy:
 
-        TRFsFreqTrigMean = np.nanmean(TRFsFreqTrig[trialsToAnalyze, :, :], axis=0)
-        TRFsTimeTrigMean = np.nanmean(TRFsTimeTrig[trialsToAnalyze, :, :], axis=0)
+        # TRFsFreqTrigMean = np.nanmean(TRFsFreqTrig[trialsToAnalyze, :, :], axis=0)
+        # TRFsTimeTrigMean = np.nanmean(TRFsTimeTrig[trialsToAnalyze, :, :], axis=0)
 
-        freqTrig_portion = TRFsFreqTrigMean[sampleStart:sampleEnd, :] * unitCoefficient
-        timeTrig_portion = TRFsTimeTrigMean * unitCoefficient
+        # freqTrig_portion = TRFsFreqTrigMean[sampleStart:sampleEnd, :] * unitCoefficient
+        # timeTrig_portion = TRFsTimeTrigMean * unitCoefficient
+        timeTrig_portion = TRFsTimeTrig * unitCoefficient
 
     # %%
 
@@ -1230,30 +1327,40 @@ def computeTrfs(
     # %%
     if doPresentation:
 
-        evokedFreqPres = mne.EvokedArray(
-            freqPres_portion.T, epoch.info, tmin=windowStart
-        )
+        # evokedFreqPres = mne.EvokedArray(
+        #     freqPres_portion.T, epoch.info, tmin=windowStart
+        # )
         evokedTimePres = mne.EvokedArray(
             timePres_portion.T, epoch.info, tmin=windowStart
         )
 
         evokedTimePres.save(
-            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
             overwrite=True,
+        )
+
+        eb.save.pickle(
+            rfPres,
+            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
         )
 
     if doTriggy:
 
-        evokedFreqTrig = mne.EvokedArray(
-            freqTrig_portion.T, epoch.info, tmin=windowStart
-        )
+        # evokedFreqTrig = mne.EvokedArray(
+        #     freqTrig_portion.T, epoch.info, tmin=windowStart
+        # )
         evokedTimeTrig = mne.EvokedArray(
             timeTrig_portion.T, epoch.info, tmin=windowStart
         )
 
         evokedTimeTrig.save(
-            f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
             overwrite=True,
+        )
+
+        eb.save.pickle(
+            rfTrig,
+            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
         )
 
     # %%
@@ -1434,7 +1541,7 @@ def computeSources(
     labels_vol = ["Left-Thalamus-Proper", "Right-Thalamus-Proper", "Brain-Stem"]
 
     evoked = mne.read_evokeds(
-        f"{eegLocation}evoked{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
+        f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif"
     )
     evoked = evoked[0]
     evoked.set_eeg_reference(projection=True)
@@ -1551,7 +1658,7 @@ def computeSources(
     src_vol = mne.setup_volume_source_space(
         mriSubject,
         mri=mriAseg,
-        pos=10.0,
+        pos=5.0,
         bem=bem,
         volume_label=labels_vol,
         subjects_dir=subjects_dir,
@@ -1642,9 +1749,10 @@ def computeSources(
 
     # del fwd
 
-    stc = mne.minimum_norm.apply_inverse(
-        evoked, inverse_operator_surf, lambda2, inv_method, pick_ori="normal"
-    )
+    # stc = mne.minimum_norm.apply_inverse(
+    #     evoked, inverse_operator_surf, lambda2, inv_method, pick_ori="normal"
+    # )
+
     # stc = mne.minimum_norm.apply_inverse(
     #     evoked, inverse_operator, lambda2, inv_method, pick_ori=None
     # )
@@ -1709,10 +1817,6 @@ def computeSources(
             fwd_surf,
             fwd_vol,
             fwd_mix,
-            inverse_operator_surf,
-            inverse_operator_vol,
-            inverse_operator_mix,
-            stc,
             stc_vec,
         ),
         f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
