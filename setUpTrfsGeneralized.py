@@ -30,7 +30,9 @@ import gc
 
 from neuroAndSignalTools.freqAnalysis import *
 from neuroAndSignalTools.deconvGeneralized import *
-from computeTrfsGeneralized import computeTrfs
+
+# from computeTrfsEEG import computeTrfs
+from computeTrfsMEEG import computeTrfs
 
 matplotlib.use("QtAgg")
 plt.ion()
@@ -215,7 +217,9 @@ subjects = [
     "R3172",
     "R3193",
     "R3184",
+    "R3214",
 ]
+
 presStopCorrections = [
     0,
     0,
@@ -231,7 +235,9 @@ presStopCorrections = [
     None,
     None,
     None,
+    None,
 ]
+
 badChanLists = [
     None,
     ["P7", "CP6", "C4", "T7", "CP5", "P3", "P4", "O2", "Oz", "PO4"],
@@ -264,8 +270,10 @@ badChanLists = [
     None,
     None,
     None,
+    None,
 ]
-conditions = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D", "A", "B"]
+
+conditions = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C"]
 
 
 # typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
@@ -385,28 +393,47 @@ filenameSuffixes = [
     "_hard",
 ]
 
-
+# nameOfRegressors = ["_ANmodel_maxFs"]
 # nameOfRegressors = ["_ANmodel_correctedLevels", "~gammatone-1", "~gammatone-on-1"]
 # nameOfRegressors = ["~wordOnsets", "~phoneOnsets"]
 # nameOfRegressors = ["~wordOnsets_gaussian", "~phoneOnsets_gaussian"]
 # nameOfRegressors = ["~wordOnsets_gaussian20SD", "~phoneOnsets_gaussian20SD"]
 # nameOfRegressors = ["~wordOnsets_gaussian40SD", "~phoneOnsets_gaussian40SD"]
+
+# nameOfRegressors = [
+#     "_ANmodel_maxFs",
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]
+
 nameOfRegressors = [
-    "_ANmodel_correctedLevels",
     "~gammatone-1",
     "~gammatone-on-1",
-    "~wordOnsets",
-    "~phoneOnsets",
-    "~wordOnsets_gaussian",
-    "~phoneOnsets_gaussian",
-    "~wordOnsets_gaussian20SD",
-    "~phoneOnsets_gaussian20SD",
-    "~wordOnsets_gaussian40SD",
-    "~phoneOnsets_gaussian40SD",
+    "~wordOnsets_gaussian15msSD",
+    "~phoneOnsets_gaussian15msSD",
+    "~phsurp",
+    "~cohtent",
+    "~wordprob",
+    "~wordsurp",
 ]
 
-newestSubjectsToDo = 2  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
-# newestSubjectsToDo = len(subjects)  # Use this to do all subjects, so we can keep the first line of the loop the way it is
+# nameOfRegressors = [
+#    "~phsurp",
+#    "~cohtent",
+#    "~wordprob",
+#    "~wordsurp",
+# ]
+
+# newestSubjectsToDo = 1  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
+newestSubjectsToDo = len(
+    subjects
+)  # Use this to do all subjects, so we can keep the first line of the loop the way it is
 
 # %%
 for iSubject, subject in enumerate(

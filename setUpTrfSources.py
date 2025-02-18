@@ -25,7 +25,9 @@ from nilearn import plotting
 
 from neuroAndSignalTools.freqAnalysis import *
 from neuroAndSignalTools.deconvGeneralized import *
-from computeTrfsGeneralized import computeTrfs, computeSources
+
+# from computeTrfsMEEG import computeTrfs, computeSources
+from computeTrfsEEG import computeTrfs, computeSources
 
 matplotlib.use("QtAgg")
 plt.ion()
@@ -34,8 +36,6 @@ plt.ion()
 # %autoreload 2
 
 # %%
-
-
 subjects = [
     "R3045",
     "R3089",
@@ -47,8 +47,29 @@ subjects = [
     "R2877",
     "R3157",
     "R2783",
+    "R3170",
+    "R3172",
+    "R3193",
+    "R3184",
+    "R3214",
 ]
-useAvgBrains = [False, False, False, False, True, False, False, True, False, False]
+useAvgBrains = [
+    False,
+    False,
+    False,
+    False,
+    True,
+    False,
+    False,
+    True,
+    False,
+    False,
+    False,
+    True,
+    True,
+    False,
+    False,
+]
 badChanLists = [
     None,
     ["P7", "CP6", "C4", "T7", "CP5", "P3", "P4", "O2", "Oz", "PO4"],
@@ -77,31 +98,57 @@ badChanLists = [
     ["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"],
     None,
     None,
+    None,
+    None,
+    None,
+    None,
+    None,
 ]
 
 # parentDir = "/Users/karl/map/"
 parentDir = "/Volumes/Seagate/map/"
 
-# subjects = ["R2877"]
+# subjects = ["R3172"]
 # useAvgBrains = [True]
 # badChanLists = [None]
 
 
-typeOfRegressors = ["mix", "mix", "target", "distractor", "target", "distractor"]
+typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
 filenameSuffixes = [
-    "_quiet_male",
-    "_quiet_female",
-    "_male",
-    "_male",
-    "_female",
-    "_female",
+    "_quiet",
+    "_easy",
+    "_hard",
+    "_easy",
+    "_hard",
 ]
 
-nameOfRegressors = ["_ANmodel_correctedLevels", "~gammatone-1", "~gammatone-on-1"]
-bandpassFreqsList = [[20, 1000], [2, None], [2, None]]
+
+nameOfRegressors = ["_ANmodel_maxFs"]
+
+# nameOfRegressors = [
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]
+
+# bandpassFreqsList = [[2, None], [2, None], [2, None], [2, None], [2, None], [2, None], [2, None], [2, None]]
+bandpassFreqsList = [[20, 1000]]
 
 
-for iSubject, subject in enumerate(subjects):
+# newestSubjectsToDo = 2  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
+newestSubjectsToDo = len(
+    subjects
+)  # Use this to do all subjects, so we can keep the first line of the loop the way it is
+
+# for iSubject, subject in enumerate(subjects):
+for iSubject, subject in enumerate(
+    subjects[-newestSubjectsToDo:], start=len(subjects) - newestSubjectsToDo
+):
     for iType, typeOfRegressor in enumerate(typeOfRegressors):
         for iName, nameOfRegressor in enumerate(nameOfRegressors):
 
