@@ -77,6 +77,7 @@ def computeTrfs(
     # # subject='R2783';badChanList=None;condition='B'
 
     doPlotting = False
+    doSaving = True
 
     doParallel = True
     n_jobs = 16
@@ -1334,15 +1335,17 @@ def computeTrfs(
             timePres_portion.T, epoch.info, tmin=windowStart
         )
 
-        evokedTimePres.save(
-            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
-            overwrite=True,
-        )
+        if doSaving:
 
-        eb.save.pickle(
-            rfPres,
-            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
-        )
+            evokedTimePres.save(
+                f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+                overwrite=True,
+            )
+
+            eb.save.pickle(
+                rfPres,
+                f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
+            )
 
     if doTriggy:
 
@@ -1353,15 +1356,17 @@ def computeTrfs(
             timeTrig_portion.T, epoch.info, tmin=windowStart
         )
 
-        evokedTimeTrig.save(
-            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
-            overwrite=True,
-        )
+        if doSaving:
 
-        eb.save.pickle(
-            rfTrig,
-            f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
-        )
+            evokedTimeTrig.save(
+                f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+                overwrite=True,
+            )
+
+            eb.save.pickle(
+                rfTrig,
+                f"{eegLocation}recField{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
+            )
 
     # %%
 
