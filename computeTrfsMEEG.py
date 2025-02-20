@@ -54,28 +54,6 @@ def computeTrfs(
     # %%
     t0overall = time.time()
 
-    # presStopCorrection = None
-
-    # # subject='R2881';badChanList=['P3','Fp1','CP6']
-
-    # # subject = "R3045";badChanList=None;condition="A";presStopCorrection=0
-    # # subject='R3089';badChanList=['P7','CP6','C4','T7','CP5','P3','P4','O2','Oz','PO4'];condition='B';presStopCorrection=0
-    # # subject='R3093';badChanList=['Oz','P8','CP6','Fp2'];condition='C';presStopCorrection=0
-    # # subject='R3095';badChanList=['P7','T8','O2','PO4'];condition='D';presStopCorrection=0  # and possibly O2 and PO4
-
-    # # subject='R3151';badChanList=['C3','FC5','P4'];condition='A'
-    # # subject='R2774';badChanList=['Fp1','AF3','F7','F3','Fz','F4','FC6','C3','CP5','Pz','CP6','P8','FC1','FC5','T7','AF4'];condition='B'
-    # # subject='R3152';badChanList=['T7','C3','P7','Pz','O1','P8','CP6'];condition='C'
-    # subject = "R2877"
-    # # badChanList = ["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"]
-    # badChanList = None
-    # condition = "D"
-
-    # # subject='R3157';badChanList=['CP6'];condition='A'  # Keep an eye on CP2 and possibly others
-    # # subject='R3157';badChanList=None;condition='A'  # Keep an eye on CP2 and possibly others
-    # # subject='R2783';badChanList=['T7','P7','CP5'];condition='B'
-    # # subject='R2783';badChanList=None;condition='B'
-
     doPlotting = False
     doSaving = True
 
@@ -97,18 +75,8 @@ def computeTrfs(
 
     subDirs = "/eegAndMeg/eeg/"
     subDirsMeg = "/eegAndMeg/meg/"
-    # subDirs='/ffrTests/'
-
-    # runName='tones'
-    # runName='stacks'
+    
     runName = "maintask"
-    # runName='triggytest-erp'
-    # runName='triggytest-trf'
-
-    # eventIDpres=130  # the usual
-    # eventIDtrig=256  # the usual
-    # eventID=32898  # R3089
-    # eventID=49282  # R3093
 
     presStartCodes = np.array([142])
     presStopCodes = np.array([148, 404, 660, 916])
@@ -120,46 +88,15 @@ def computeTrfs(
             1 / 600
         )  # This is the extra time in seconds that the Presentation durations will end up having, because of the triggering click added to the actual wav files
 
-    # eegLocation='/Users/karl/Dropbox/UMD/multilevel0/230908/'
-    # eegLocation='/Users/karl/Dropbox/UMD/R2881/eegAndMeg/eeg/'
-    # eegLocation='/Users/karl/map/R3045/eegAndMeg/eeg/'
     eegLocation = parentDir + subject + subDirs
     megLocation = parentDir + subject + subDirsMeg
 
-    # bdfFilename='multilevel0_tones.bdf'
-    # bdfFilename='R3045_tones.bdf'
-    # bdfFilename='R3045_stacks.bdf'
-
-    # bdfFilename=subject+'_'+runName+'.bdf'
     fifFilename = subject + "_" + runName + ".fif"
     fifFilenameMeg = subject + "_" + runName + "-raw.fif"
 
     MEG_bad_channels = ["MEG 056", "MEG 086"]
-
-    # matFilename='tonesSnsTspcaOutput.mat'
-    # matFilename='stacksSnsTspcaOutput.mat'
+    
     matFilename = runName + "SnsTspcaOutput.mat"
-
-    # regressorDir='/Users/karl/map/stimAndPredictors/mixes/predictors/'
-    # regressorDir = "/Users/karl/map/stimAndPredictors/targets/predictors/"
-    # regressorDir='/Users/karl/map/stimAndPredictors/distractors/predictors/'
-
-    # typeOfRegressor='mix'
-    # typeOfRegressor = "target"
-    # typeOfRegressor='distractor'
-
-    # nameOfRegressor = "_ANmodel_correctedLevels"
-    # nameOfRegressor='~gammatone-1'
-    # nameOfRegressor='~gammatone-on-1'
-
-    # ANmodelNames=['longTrialNoTrigger_forReg_1.pickle','longTrialNoTrigger_forReg_2.pickle','longTrialNoTrigger_forReg_3.pickle',
-    #              'longTrialNoTrigger_forReg_4.pickle','longTrialNoTrigger_forReg_5.pickle']
-
-    # regressorNames=['A_mix1_ANmodel.pickle','A_mix1_ANmodel.pickle','A_mix2_ANmodel.pickle','A_mix2_ANmodel.pickle','A_mix3_ANmodel.pickle','A_mix3_ANmodel.pickle','A_mix4_ANmodel.pickle','A_mix4_ANmodel.pickle',
-    #              'A_mix5_ANmodel.pickle','A_mix5_ANmodel.pickle','A_mix6_ANmodel.pickle','A_mix6_ANmodel.pickle','A_mix7_ANmodel.pickle','A_mix7_ANmodel.pickle','A_mix8_ANmodel.pickle','A_mix8_ANmodel.pickle',
-    #              'A_mix9_ANmodel.pickle','A_mix9_ANmodel.pickle','A_mix10_ANmodel.pickle','A_mix10_ANmodel.pickle','A_mix11_ANmodel.pickle','A_mix11_ANmodel.pickle','A_mix12_ANmodel.pickle','A_mix12_ANmodel.pickle',
-    #              'A_mix13_ANmodel.pickle','A_mix13_ANmodel.pickle','A_mix14_ANmodel.pickle','A_mix14_ANmodel.pickle','A_mix15_ANmodel.pickle','A_mix15_ANmodel.pickle','A_mix16_ANmodel.pickle','A_mix16_ANmodel.pickle'
-    #              ]
 
     regressorNames = [
         f"{condition}_{typeOfRegressor}1{nameOfRegressor}.pickle",
@@ -204,12 +141,7 @@ def computeTrfs(
 
     edgePad = 0.001  # Edge padding in seconds; compute the TRFs with this padding included, but don't plot/save/analyze those edges, because of (mostly time-domain) edge artifacts
 
-    ##################
-    # Make sure to change the regressor below between AN model and impulses if needed!
-    ##################
-
     # Low and high cutoff frequencies for main MNE bandpass filter
-    # These are ok for looking for the FFR
 
     if nameOfRegressor[0] == "_":
         l_freq = 20
@@ -217,9 +149,6 @@ def computeTrfs(
     else:
         l_freq = 2
         h_freq = None
-
-    # l_freq=1
-    # h_freq=40
 
     exgLabels = ["EXG1", "EXG2", "EXG3", "EXG4", "EXG5", "EXG6", "EXG7", "EXG8"]
 
@@ -241,9 +170,7 @@ def computeTrfs(
             -0.01
         )  # Time to analyze previous to event onset, in seconds. Will be converted to sample time for deconvolution below
         windowEnd = 0.075
-
-    # windowStart=-.01  # Time to analyze previous to event onset, in seconds. Will be converted to sample time for deconvolution below
-    # windowEnd=.35
+        
     else:
         windowStart = (
             -0.1
@@ -254,7 +181,6 @@ def computeTrfs(
 
     lenToAnalyze = 60  # Length of time of regressors and responses to extract and analyze through deconvolution, in seconds
 
-    # soundDelay=.006  # Speed of sound delay in ear tubes, in seconds. Convert this to samples below and add it to all trigger times
     soundDelay = (
         3.1 / 343 - 0.00275
     )  # Speed of sound delay in ear tubes, in seconds, minus the AN model delay compensation (2.75 ms according to Shan et al.). Convert this to samples below and add it to all trigger times
@@ -312,9 +238,6 @@ def computeTrfs(
             t1 = time.time()
             print(f"Took {t1-t0} seconds to load")
             print("\n")
-            # print(preprocMat.shape)
-            # print(preprocMat[32,1000000])
-            # plt.plot(preprocMat[31,0:7300])
             print("Copying just EXG channels to new, temporary matrix")
             exgs = raw.copy().pick_channels(exgLabels)[:][
                 0
@@ -568,11 +491,6 @@ def computeTrfs(
     # For these event tables to make sense, there needs to be exactly one stop code for every previous start code, and they need to be in the
     # same order. Don't know why they ever wouldn't be.
 
-    # presStartEvents=events[events[:,2]==presStartCode,:]
-    # presStopEvents =events[events[:,2]==presStopCode,:]
-    # trigStartEvents=events[events[:,2]==trigStartCode,:]
-    # trigStopEvents =events[events[:,2]==trigStopCode,:]
-
     presStartEvents = np.zeros(len(regressorNames))
     presStopEvents = np.zeros(len(regressorNames))
     trigStartEvents = np.zeros(len(regressorNames))
@@ -588,27 +506,27 @@ def computeTrfs(
     trigStartEventsMat = np.zeros((len(regressorNames), 3))
     trigStopEventsMat = np.zeros((len(regressorNames), 3))
 
-    # Get the start of the experiment for both EEG and MEG as the first event time. The first event marker has to be the actual first event start time for both datasets
-    startSampleEEG = events[0, 0]
-    startTimeEEG = startSampleEEG / fs
-    stopTimeEEG = events[-1, 0] / fs
-    startTimeMEG = eventsMeg[0, 0] / fs
-    # Get the experiment duration from the EEG as the last minus the first event, and add 1 second just so we know we're not exactly on the ending sample
-    totalExpDuration = stopTimeEEG - startTimeEEG + 1
-    # And crop them both the same way. This should work because we have already established that there is next to no drift between the EEG and MEG recording computers
-    # print(startTimeEEG)
-    # print(stopTimeEEG)
-    # print(startTimeMEG)
-    # print(eventsMeg[-1, 0] / fs)
-    # print(totalExpDuration)
-    # print(events.shape)
-    # print(np.diff(events, axis=0))
-    # print(eventsMeg.shape)
-    # print(np.diff(eventsMeg, axis=0))
-    # denoised.crop(tmin=startTimeEEG, tmax=startTimeEEG + totalExpDuration)
-    # denoisedMeg.crop(tmin=startTimeMEG, tmax=startTimeMEG + totalExpDuration)
-    # # Subtract the first event sample time from all event sample times to start at 0 for the EEG events matrix, but don't bother with the MEG events matrix because we won't use it anymore now
-    # events[:, 0] = events[:, 0] - startSampleEEG
+    # # Get the start of the experiment for both EEG and MEG as the first event time. The first event marker has to be the actual first event start time for both datasets
+    # startSampleEEG = events[0, 0]
+    # startTimeEEG = startSampleEEG / fs
+    # stopTimeEEG = events[-1, 0] / fs
+    # startTimeMEG = eventsMeg[0, 0] / fs
+    # # Get the experiment duration from the EEG as the last minus the first event, and add 1 second just so we know we're not exactly on the ending sample
+    # totalExpDuration = stopTimeEEG - startTimeEEG + 1
+    # # And crop them both the same way. This should work because we have already established that there is next to no drift between the EEG and MEG recording computers
+    # # print(startTimeEEG)
+    # # print(stopTimeEEG)
+    # # print(startTimeMEG)
+    # # print(eventsMeg[-1, 0] / fs)
+    # # print(totalExpDuration)
+    # # print(events.shape)
+    # # print(np.diff(events, axis=0))
+    # # print(eventsMeg.shape)
+    # # print(np.diff(eventsMeg, axis=0))
+    # # denoised.crop(tmin=startTimeEEG, tmax=startTimeEEG + totalExpDuration)
+    # # denoisedMeg.crop(tmin=startTimeMEG, tmax=startTimeMEG + totalExpDuration)
+    # # # Subtract the first event sample time from all event sample times to start at 0 for the EEG events matrix, but don't bother with the MEG events matrix because we won't use it anymore now
+    # # events[:, 0] = events[:, 0] - startSampleEEG
 
     count = 0
     for i in range(events.shape[0]):
@@ -712,18 +630,12 @@ def computeTrfs(
     # denoised.compute_psd(fmax=8192).plot(picks="data", exclude="bads")
 
     # %%
-
-    # %%
     if l_freq is not None or h_freq is not None:
-        # denoised.filter(l_freq=.1,h_freq=20)
-        # denoised.filter(l_freq=10,h_freq=50)
         denoised.filter(l_freq=l_freq, h_freq=h_freq)
         denoisedMeg.filter(l_freq=l_freq, h_freq=h_freq)
         print("\n")
     print(denoised.info)
     print(denoisedMeg.info)
-
-    # %%
 
     # %%
     elp_ch_names = [
@@ -804,26 +716,9 @@ def computeTrfs(
         denoisedMeg.info["bads"].append(MEG_bad_channel)
 
     # %%
-    # event_dict = {"Presentation": eventIDpres, "Triggy": eventIDtrig}
-
-    # %%
-    # epochs = mne.Epochs(
-    #    denoised,
-    #    events,
-    #    event_id=event_dict,
-
-    #    tmin=-0.1,  # Try these for FFRish ERP?
-    #    tmax=.45,
-
-    #    preload=True
-    # )
-
-    # fs=denoised.info['sfreq']
-
     allPresEpochs = []
     allTrigEpochs = []
     allRegressors = []
-    # epochLengths=np.array([10,300,300,300,300])  # This is in general NOT to be used, just to experiment with
     # invVarProps=[]
 
     force_update_info = True
@@ -832,7 +727,6 @@ def computeTrfs(
 
         for i in range(presStartEvents.shape[0]):
             tmax = presStopEvents[i] / fs - presStartEvents[i] / fs
-            # tmax=epochLengths[i]
             epoch = mne.Epochs(
                 denoised,
                 presStartEventsMat[i : i + 1, :].astype(int),
@@ -842,11 +736,9 @@ def computeTrfs(
                 baseline=None,
                 picks="eeg",
                 preload=True,
-            )
+            )            
             print("\n")
 
-            # tmax = eventsMeg[i * 2 + 1, 0] / fs - eventsMeg[i * 2, 0] / fs
-            # tmax=epochLengths[i]
             epochMEG = mne.Epochs(
                 denoisedMeg,
                 eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
@@ -858,7 +750,7 @@ def computeTrfs(
                 preload=True,
             )
             print("\n")
-            # epoch.info["dev_head_t"] = epochMEG.info["dev_head_t"]
+            
             epochMEG.add_channels([epoch], force_update_info=force_update_info)
             epoch = epochMEG
 
@@ -870,7 +762,6 @@ def computeTrfs(
 
         for i in range(trigStartEvents.shape[0]):
             tmax = trigStopEvents[i] / fs - trigStartEvents[i] / fs
-            # tmax=epochLengths[i]
             epoch = mne.Epochs(
                 denoised,
                 trigStartEventsMat[i : i + 1, :].astype(int),
@@ -883,8 +774,6 @@ def computeTrfs(
             )
             print("\n")
 
-            # tmax = eventsMeg[i * 2 + 1, 0] / fs - eventsMeg[i * 2, 0] / fs
-            # tmax=epochLengths[i]
             epochMEG = mne.Epochs(
                 denoisedMeg,
                 eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
@@ -896,7 +785,7 @@ def computeTrfs(
                 preload=True,
             )
             print("\n")
-            # epoch.info["dev_head_t"] = epochMEG.info["dev_head_t"]
+            
             epochMEG.add_channels([epoch], force_update_info=force_update_info)
             epoch = epochMEG
 
@@ -946,7 +835,6 @@ def computeTrfs(
 
             # invVarProps.append(invVarProp)
             allRegressors.append(regressor)
-            # allANRegressors.append(ANregressor)
 
     else:
         for i in range(trigStartEvents.shape[0]):
@@ -1025,14 +913,6 @@ def computeTrfs(
     print(allRegressors[5].shape)
 
     # %%
-    # epochsPres=epochs["Presentation"]
-    # epochsTrig=epochs["Triggy"]
-
-    # %%
-    # print(allRegressors[1].shape)
-    # plt.plot(allRegressors[1])
-
-    # %%
     tDeconv = time.time()
 
     if trialsToAnalyze is None:
@@ -1041,41 +921,12 @@ def computeTrfs(
     regressorsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze)))
 
     if doPresentation:
-
-        # TRFsFreqPres = np.zeros(
-        #     [
-        #         len(allPresEpochs),
-        #         int(2 * (lenToAnalyze * fs - windowStart * fs)),
-        #         nChannels,
-        #     ]
-        # )
-        # TRFsTimePres = np.zeros(
-        #     [len(allPresEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
-        # )
-
-        # def doAllPresentationEpochs(
-        #     i,
-        #     allPresEpochs,
-        #     allRegressors,
-        #     regressorNames,
-        #     fs,
-        #     lenToAnalyze,
-        #     eps,
-        #     windowStart,
-        #     windowEnd,
-        #     edgePad,
-        # ):
-
+        
         presEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
 
             epoch = allPresEpochs[i]
-
-            # if allRegressors[i] is not None:
-            #     regressor = allRegressors[i]
-            # else:
-            #     regressor = allRegressors[i - 2]
 
             regressor = allRegressors[i]
 
@@ -1096,32 +947,9 @@ def computeTrfs(
             response = sp.signal.resample(currentEpochMat, regressor.shape[0], axis=0)
             print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
             print("\n")
-            # response=epoch.get_data().squeeze().T
 
             regressorsToDo[:, count] = regressor[: lenToAnalyze * fs]
             presEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
-
-            # TRFfreq, TRFtime = deconvMain(
-            #     regressor[: lenToAnalyze * fs],
-            #     response[: lenToAnalyze * fs, :],
-            #     eps,
-            #     windowStart=(windowStart - edgePad) * fs,
-            #     windowEnd=(windowEnd + edgePad) * fs,
-            # )
-
-            # if regressor.shape[0]>response.shape[0]:
-            #    TRF=deconvMain(regressor[:response.shape[0]], response, eps, windowStart=windowStart*fs)
-            # else:
-            #    TRF=deconvMain(regressor, response[:regressor.shape[0]], eps, windowStart=windowStart*fs)
-            # TRFsFreqTrig[i,:TRFfreq.shape[0],:]=TRFfreq
-            # TRFsTimeTrig[i,:TRFtime.shape[0],:]=TRFtime
-
-            # TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
-            # TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
-            # if allRegressors[i] is not None:
-            #     return TRFfreq, TRFtime
-            # else:
-            #     return TRFfreq * np.nan, TRFtime * np.nan
 
         print("Now z-scoring regressor matrix...")
         regressorsToDo = sp.stats.zscore(regressorsToDo)
@@ -1142,85 +970,13 @@ def computeTrfs(
             rfPres.coef_[:, 0, int(edgePad * fs) : int(-edgePad * fs - 1)].squeeze().T
         )
 
-        # if doParallel:
-
-        #     results = joblib.Parallel(
-        #         n_jobs=n_jobs, backend=parallelBackend, verbose=49
-        #     )(
-        #         joblib.delayed(doAllPresentationEpochs)(
-        #             i,
-        #             allPresEpochs,
-        #             allRegressors,
-        #             regressorNames,
-        #             fs,
-        #             lenToAnalyze,
-        #             eps,
-        #             windowStart,
-        #             windowEnd,
-        #             edgePad,
-        #         )
-        #         for i in range(len(allPresEpochs))
-        #     )
-
-        #     for i in range(len(results)):
-        #         TRFsFreqPres[i, : results[i][0].shape[0], :] = results[i][0]
-        #         TRFsTimePres[i, : results[i][1].shape[0], :] = results[i][1]
-
-        #     del results
-
-        # else:
-
-        #     for i in range(len(allPresEpochs)):
-        #         TRFfreq, TRFtime = doAllPresentationEpochs(
-        #             i,
-        #             allPresEpochs,
-        #             allRegressors,
-        #             regressorNames,
-        #             fs,
-        #             lenToAnalyze,
-        #             eps,
-        #             windowStart,
-        #             windowEnd,
-        #             edgePad,
-        #         )
-        #         TRFsFreqPres[i, : TRFfreq.shape[0], :] = TRFfreq
-        #         TRFsTimePres[i, : TRFtime.shape[0], :] = TRFtime
-
     if doTriggy:
-
-        # TRFsFreqTrig = np.zeros(
-        #     [
-        #         len(allTrigEpochs),
-        #         int(2 * (lenToAnalyze * fs - windowStart * fs)),
-        #         nChannels,
-        #     ]
-        # )
-        # TRFsTimeTrig = np.zeros(
-        #     [len(allTrigEpochs), int(windowEnd * fs - windowStart * fs), nChannels]
-        # )
-
-        # def doAllTriggyEpochs(
-        #     i,
-        #     allTrigEpochs,
-        #     allRegressors,
-        #     regressorNames,
-        #     fs,
-        #     lenToAnalyze,
-        #     eps,
-        #     windowStart,
-        #     windowEnd,
-        #     edgePad,
-        # ):
+        
         trigEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
 
             epoch = allTrigEpochs[i]
-
-            # if allRegressors[i] is not None:
-            #     regressor = allRegressors[i]
-            # else:
-            #     regressor = allRegressors[i - 2]
 
             regressor = allRegressors[i]
 
@@ -1238,30 +994,9 @@ def computeTrfs(
             response = sp.signal.resample(currentEpochMat, regressor.shape[0], axis=0)
             print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
             print("\n")
-            # response=epoch.get_data().squeeze().T
 
             regressorsToDo[:, count] = regressor[: lenToAnalyze * fs]
             trigEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
-
-            # TRFfreq, TRFtime = deconvMain(
-            #     regressor[: lenToAnalyze * fs],
-            #     response[: lenToAnalyze * fs, :],
-            #     eps,
-            #     windowStart=(windowStart - edgePad) * fs,
-            #     windowEnd=(windowEnd + edgePad) * fs,
-            # )
-            # if regressor.shape[0]>response.shape[0]:
-            #    TRF=deconvMain(regressor[:response.shape[0]], response, eps, windowStart=windowStart*fs)
-            # else:
-            #    TRF=deconvMain(regressor, response[:regressor.shape[0]], eps, windowStart=windowStart*fs)
-            # TRFsFreqTrig[i,:TRFfreq.shape[0],:]=TRFfreq
-            # TRFsTimeTrig[i,:TRFtime.shape[0],:]=TRFtime
-            # TRFfreq = TRFfreq[int(2 * edgePad * fs) :, :]
-            # TRFtime = TRFtime[int(edgePad * fs) : int(-edgePad * fs - 1), :]
-            # if allRegressors[i] is not None:
-            #     return TRFfreq, TRFtime
-            # else:
-            #     return TRFfreq * np.nan, TRFtime * np.nan
 
         print("Now z-scoring regressor matrix...")
         regressorsToDo = sp.stats.zscore(regressorsToDo)
@@ -1282,56 +1017,8 @@ def computeTrfs(
             rfTrig.coef_[:, 0, int(edgePad * fs) : int(-edgePad * fs - 1)].squeeze().T
         )
 
-        # if doParallel:
-
-        #     results = joblib.Parallel(
-        #         n_jobs=n_jobs, backend=parallelBackend, verbose=49
-        #     )(
-        #         joblib.delayed(doAllTriggyEpochs)(
-        #             i,
-        #             allTrigEpochs,
-        #             allRegressors,
-        #             regressorNames,
-        #             fs,
-        #             lenToAnalyze,
-        #             eps,
-        #             windowStart,
-        #             windowEnd,
-        #             edgePad,
-        #         )
-        #         for i in range(len(allTrigEpochs))
-        #     )
-
-        #     for i in range(len(results)):
-        #         TRFsFreqTrig[i, : results[i][0].shape[0], :] = results[i][0]
-        #         TRFsTimeTrig[i, : results[i][1].shape[0], :] = results[i][1]
-
-        #     del results
-
-        # else:
-
-        #     for i in range(len(allTrigEpochs)):
-        #         TRFfreq, TRFtime = doAllTriggyEpochs(
-        #             i,
-        #             allTrigEpochs,
-        #             allRegressors,
-        #             regressorNames,
-        #             fs,
-        #             lenToAnalyze,
-        #             eps,
-        #             windowStart,
-        #             windowEnd,
-        #             edgePad,
-        #         )
-        #         TRFsFreqTrig[i, : TRFfreq.shape[0], :] = TRFfreq
-        #         TRFsTimeTrig[i, : TRFtime.shape[0], :] = TRFtime
-
     if doPresentation:
 
-        # print(
-        #     f"Shape of frequency-domain Presentation TRF matrix is now {TRFsFreqPres.shape}"
-        # )
-        # print("\n")
         print(
             f"Shape of time-domain Presentation TRF matrix is now {TRFsTimePres.shape}"
         )
@@ -1339,10 +1026,6 @@ def computeTrfs(
 
     if doTriggy:
 
-        # print(
-        #     f"Shape of frequency-domain Triggy TRF matrix is now {TRFsFreqTrig.shape}"
-        # )
-        # print("\n")
         print(f"Shape of time-domain Triggy TRF matrix is now {TRFsTimeTrig.shape}")
         print("\n")
 
@@ -1364,38 +1047,15 @@ def computeTrfs(
 
     figsize = [15, 9]
 
-    # This is C
-    # trialsToAnalyze=[2,3,6,7,10,11,14,15,18,19,22,23,26,27,30,31]  # Male target trials
-    # trialsToAnalyze=[2,3,10,11,14,15,18,19,22,23,26,27]  # Male only trials
-    # trialsToAnalyze=[0,1,4,5,8,9,12,13,16,17,20,21,24,25,28,29]  # Female target trials
-    # trialsToAnalyze=[4,5,8,9,12,13,20,21,24,25,28,29]  # Female only trials
-
-    # This is D
-    # trialsToAnalyze=[0,1,4,5,8,9,12,13,16,17,20,21,24,25,28,29]  # Male target trials
-    # trialsToAnalyze=[4,5,8,9,12,13,16,17,24,25,28,29]  # Male only trials
-    # trialsToAnalyze=[2,3,6,7,10,11,14,15,18,19,22,23,26,27,30,31]  # Female target trials
-    # trialsToAnalyze=[2,3,10,11,14,15,18,19,22,23,26,27]  # Female only trials
-
     if doPresentation:
-
-        # TRFsFreqPresMean = np.nanmean(TRFsFreqPres[trialsToAnalyze, :, :], axis=0)
-        # TRFsTimePresMean = np.nanmean(TRFsTimePres[trialsToAnalyze, :, :], axis=0)
-
-        # freqPres_portion = TRFsFreqPresMean[sampleStart:sampleEnd, :] * unitCoefficient
-        # timePres_portion = TRFsTimePresMean * unitCoefficient
+        
         timePres_portion = TRFsTimePres * unitCoefficient
 
     if doTriggy:
-
-        # TRFsFreqTrigMean = np.nanmean(TRFsFreqTrig[trialsToAnalyze, :, :], axis=0)
-        # TRFsTimeTrigMean = np.nanmean(TRFsTimeTrig[trialsToAnalyze, :, :], axis=0)
-
-        # freqTrig_portion = TRFsFreqTrigMean[sampleStart:sampleEnd, :] * unitCoefficient
-        # timeTrig_portion = TRFsTimeTrigMean * unitCoefficient
+        
         timeTrig_portion = TRFsTimeTrig * unitCoefficient
 
     # %%
-
     if doPlotting:
 
         if doPresentation:
@@ -1403,7 +1063,6 @@ def computeTrfs(
             plt.figure(figsize=figsize)
 
             plt.gca().set_prop_cycle(plt.cycler("color", colors))
-            # ws_portion = filtered_ws[int(args.fs_resamp*delay):int(args.fs_resamp*duration)]
             plt.plot(
                 np.linspace(windowStart, windowEnd, freqPres_portion.shape[0]),
                 freqPres_portion,
@@ -1422,7 +1081,6 @@ def computeTrfs(
             plt.figure(figsize=figsize)
 
             plt.gca().set_prop_cycle(plt.cycler("color", colors))
-            # ws_portion = filtered_ws[int(args.fs_resamp*delay):int(args.fs_resamp*duration)]
             plt.plot(
                 np.linspace(windowStart, windowEnd, timePres_portion.shape[0]),
                 timePres_portion,
@@ -1444,7 +1102,6 @@ def computeTrfs(
             plt.figure(figsize=figsize)
 
             plt.gca().set_prop_cycle(plt.cycler("color", colors))
-            # ws_portion = filtered_ws[int(args.fs_resamp*delay):int(args.fs_resamp*duration)]
             plt.plot(
                 np.linspace(windowStart, windowEnd, freqTrig_portion.shape[0]),
                 freqTrig_portion,
@@ -1463,7 +1120,6 @@ def computeTrfs(
             plt.figure(figsize=figsize)
 
             plt.gca().set_prop_cycle(plt.cycler("color", colors))
-            # ws_portion = filtered_ws[int(args.fs_resamp*delay):int(args.fs_resamp*duration)]
             plt.plot(
                 np.linspace(windowStart, windowEnd, timeTrig_portion.shape[0]),
                 timeTrig_portion,
@@ -1481,9 +1137,6 @@ def computeTrfs(
     # %%
     if doPresentation:
 
-        # evokedFreqPres = mne.EvokedArray(
-        #     freqPres_portion.T, epoch.info, tmin=windowStart
-        # )
         evokedTimePres = mne.EvokedArray(
             timePres_portion.T, epoch.info, tmin=windowStart
         )
@@ -1502,9 +1155,6 @@ def computeTrfs(
 
     if doTriggy:
 
-        # evokedFreqTrig = mne.EvokedArray(
-        #     freqTrig_portion.T, epoch.info, tmin=windowStart
-        # )
         evokedTimeTrig = mne.EvokedArray(
             timeTrig_portion.T, epoch.info, tmin=windowStart
         )
@@ -1522,7 +1172,6 @@ def computeTrfs(
             )
 
     # %%
-
     if doPlotting:
 
         if doPresentation:
@@ -1547,89 +1196,7 @@ def computeTrfs(
         f"Everything took {time.time()-t0overall} seconds; deconvolution itself took {time.time()-tDeconv} seconds"
     )
 
-    # gc.collect()
-
-    # %%
-    # subjectsToAverage=['R3089','R3095','R3151','R2774','R3152','R2877']
-    # avgMat=np.zeros((426,nChannels,len(subjectsToAverage)))
-    # for i, subject in enumerate(subjectsToAverage):
-    #     avgMat[:,:,i]=eb.load.unpickle(f'/Users/karl/map/{subject}/eegAndMeg/eeg/abrMat.pickle')
-
-    # evokedAvg=mne.EvokedArray(avgMat.mean(axis=2).T, epoch.info, tmin=windowStart)
-
-    # evokedAvg.pick_types(eeg=True).plot_topo(color="r", legend=False)
-
-    # %%
-    # channelToAnalyze=31
-
-    # #from localCode.freqAnalysis import *
-    # #reload(specAndAutocorr)
-
-    # #signalToView=stim[24000*5:24000*10]
-    # #signalToView=wsMean[:10000,27]
-    # #signalToView=wsMean[:10000,30]
-    # #signalToView=wsMean[:10000,16]
-    # #signalToView=stim[:24000]
-    # #signalToView=audio[:6000]
-    # signalToView=erpMatrixPres[channelToAnalyze,:]
-
-    # lowestFreq=25
-    # #lowestFreq=10
-
-    # meanTimeBounds=[0,.3]
-
-    # #fsForSpec=fs
-    # fsForSpec=evokedPres.info['sfreq']
-
-    # tLim=[evokedPres.times[0],evokedPres.times[-1]]
-
-    # specAndAutocorr(signalToView, fs=fsForSpec, NFFT=8192, specFreqPortion=[0,50], autoFreqPortion=[0,100],
-    #                 specWindowLength=500, windowStep=3, dynRangePortion=[50,100], autoWindowLength=int(fsForSpec/lowestFreq),
-    #                 meanTimeBounds=meanTimeBounds, tLim=tLim)
-
-    # plt.title('Presentation triggers')
-
-    # #from localCode.freqAnalysis import *
-    # #reload(specAndAutocorr)
-
-    # #signalToView=stim[24000*5:24000*10]
-    # #signalToView=wsMean[:10000,27]
-    # #signalToView=wsMean[:10000,30]
-    # #signalToView=wsMean[:10000,16]
-    # #signalToView=stim[:24000]
-    # #signalToView=audio[:6000]
-    # signalToView=erpMatrixTrig[channelToAnalyze,:]
-
-    # #fsForSpec=fs
-    # fsForSpec=evokedTrig.info['sfreq']
-
-    # tLim=[evokedTrig.times[0],evokedTrig.times[-1]]
-
-    # specAndAutocorr(signalToView, fs=fsForSpec, NFFT=8192, specFreqPortion=[0,50], autoFreqPortion=[0,100],
-    #                 specWindowLength=500, windowStep=3, dynRangePortion=[50,100], autoWindowLength=int(fsForSpec/lowestFreq),
-    #                 meanTimeBounds=meanTimeBounds, tLim=tLim)
-
-    # plt.title('Triggy triggers')
-
-    # %%
-    # plt.plot(invVars)
-
-    # %%
-    # plt.figure()
-    # plt.plot(invVarProps[1])
-    # plt.figure()
-    # plt.plot(invVarProps[2])
-    # plt.figure()
-    # plt.plot(invVarProps[3])
-    # plt.figure()
-    # plt.plot(invVarProps[4])
-
-    # %%
-    # plt.plot(regressor)
-
-    # %%
-
-
+# %%
 def computeSources(
     parentDir,
     subject,
@@ -1640,26 +1207,6 @@ def computeSources(
     bandpassFreqs,
     filenameSuffix,
 ):
-    # # %%
-    # useAvgBrain = False
-
-    # # subject = "R3045";badChanList=None;condition="A";presStopCorrection=0
-    # # subject='R3089';badChanList=['P7','CP6','C4','T7','CP5','P3','P4','O2','Oz','PO4'];condition='B';presStopCorrection=0
-    # # subject='R3093';badChanList=['Oz','P8','CP6','Fp2'];condition='C';presStopCorrection=0
-    # # subject='R3095';badChanList=['P7','T8','O2','PO4'];condition='D';presStopCorrection=0  # and possibly O2 and PO4
-
-    # # subject='R3151';badChanList=['C3','FC5','P4'];condition='A';useAvgBrain=True
-    # # subject='R2774';badChanList=['Fp1','AF3','F7','F3','Fz','F4','FC6','C3','CP5','Pz','CP6','P8','FC1','FC5','T7','AF4'];condition='B'
-    # # subject='R3152';badChanList=['T7','C3','P7','Pz','O1','P8','CP6'];condition='C'
-    # subject = "R2877"
-    # # badChanList = ["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"]
-    # badChanList = None
-    # condition = "D";useAvgBrain=True
-
-    # # subject='R3157';badChanList=['CP6'];condition='A'  # Keep an eye on CP2 and possibly others
-    # # subject='R3157';badChanList=None;condition='A'  # Keep an eye on CP2 and possibly others
-    # # subject='R2783';badChanList=['T7','P7','CP5'];condition='B'
-    # # subject='R2783';badChanList=None;condition='B'
 
     badChanListMEG = ["MEG 056", "MEG 086"]  # Hard code this here for now
 
@@ -1678,14 +1225,6 @@ def computeSources(
 
     doPlotting = False
 
-    # nameOfRegressor = "_ANmodel_correctedLevels";initial_time = 0.0085
-    # # nameOfRegressor='~gammatone-1';initial_time = 0.05
-    # # nameOfRegressor='~gammatone-on-1';initial_time = 0.05
-
-    # typeOfRegressor='mix'
-    # # typeOfRegressor = "target"
-    # # typeOfRegressor='distractor'
-
     temp = sorted(glob.glob(f"{eegLocation}*baseline*bdf"))
     eegBaselineFile = temp[-1]
     temp = sorted(
@@ -1693,11 +1232,6 @@ def computeSources(
     )  # Read both of these the same way, even though there really should never be more than one of either named this way
     megBaselineFile = temp[-1]
 
-    # These are bandpasses for the noise covariance matrix, and they matter! Probably should be the same as the bandpasses on the TRFs
-    # # l_freq = 2
-    # # h_freq = None
-    # l_freq = 20
-    # h_freq = 1000
     l_freq = bandpassFreqs[0]
     h_freq = bandpassFreqs[1]
 
@@ -1819,8 +1353,6 @@ def computeSources(
 
     # %%
     if l_freq is not None or h_freq is not None:
-        # denoised.filter(l_freq=.1,h_freq=20)
-        # denoised.filter(l_freq=10,h_freq=50)
         baselineRaw.filter(l_freq=l_freq, h_freq=h_freq)
         print("\n")
 
@@ -1842,10 +1374,6 @@ def computeSources(
     trans = eegLocation + "eeg-trans.fif"
     mriVol = subjects_dir + "/" + mriSubject + "/mri/aparc+aseg.mgz"
 
-    # src_surf = mne.setup_source_space(
-    #     mriSubject, spacing="oct5", add_dist=False, subjects_dir=subjects_dir
-    # )
-
     src_vol = mne.setup_volume_source_space(
         mriSubject,
         mri=mriVol,
@@ -1856,35 +1384,7 @@ def computeSources(
         add_interpolator=True,  # just for speed, usually this should be True
         verbose=True,
     )
-
-    # # Generate the mixed source space
-    # src_mix = src_surf + src_vol
-    # print(
-    #     f"The mixed source space contains {len(src_mix)} spaces and "
-    #     f"{sum(s['nuse'] for s in src_mix)} vertices"
-    # )
-
-    # src.plot(subjects_dir=subjects_dir)
-
-    # Setup volumn source space (This is the part how to create volSourceEstimate)
-    # vol_src = mne.setup_volume_source_space(
-    #     subject, mri=mri, pos=10.0, bem=bem,
-    #     subjects_dir=subjects_dir,
-    #     add_interpolator=True,
-    #     verbose=True)
-
-    # %%
-
-    # fwd_surf = mne.make_forward_solution(
-    #     evoked.info,
-    #     trans,
-    #     src_surf,
-    #     bem,
-    #     mindist=5.0,  # ignore sources<=5mm from innerskull
-    #     meg=True,
-    #     eeg=True,
-    #     n_jobs=None,
-    # )
+    
     fwd_vol = mne.make_forward_solution(
         evoked.info,
         trans,
@@ -1895,20 +1395,7 @@ def computeSources(
         eeg=True,
         n_jobs=None,
     )
-    # fwd_mix = mne.make_forward_solution(
-    #     evoked.info,
-    #     trans,
-    #     src_mix,
-    #     bem,
-    #     mindist=5.0,  # ignore sources<=5mm from innerskull
-    #     meg=True,
-    #     eeg=True,
-    #     n_jobs=None,
-    # )
 
-    # del src  # save memory
-
-    # leadfield = fwd_mix["sol"]["data"]
     leadfield = fwd_vol["sol"]["data"]
     print("Leadfield size : %d sensors x %d dipoles" % leadfield.shape)
     print(
@@ -1920,54 +1407,22 @@ def computeSources(
     snr = 3.0  # use smaller SNR for raw data
     inv_method = "dSPM"  # sLORETA, MNE, dSPM
     parc = "aparc"  # the parcellation to use, e.g., 'aparc' 'aparc.a2009s'
-    # loose_surf = dict(surface=0.2)
     loose_vol = dict(volume=1.0)
-    # loose_mix = dict(surface=0.2, volume=1.0)
     depth = 0.8
     # depth = 10.0
 
     lambda2 = 1.0 / snr**2
 
-    # inverse_operator_surf = mne.minimum_norm.make_inverse_operator(
-    #     evoked.info, fwd_surf, baselineCov, depth=depth, loose=loose_surf, verbose=True
-    # )
-
     inverse_operator_vol = mne.minimum_norm.make_inverse_operator(
         evoked.info, fwd_vol, baselineCov, depth=depth, loose=loose_vol, verbose=True
     )
-
-    # inverse_operator_mix = mne.minimum_norm.make_inverse_operator(
-    #     evoked.info, fwd_mix, baselineCov, depth=depth, loose=loose_mix, verbose=True
-    # )
-
-    # del fwd
-
-    # stc = mne.minimum_norm.apply_inverse(
-    #     evoked, inverse_operator_surf, lambda2, inv_method, pick_ori="normal"
-    # )
-    # stc = mne.minimum_norm.apply_inverse(
-    #     evoked, inverse_operator, lambda2, inv_method, pick_ori=None
-    # )
-
-    # src = inverse_operator["src"]
-
+    
     # %%
     stc_vec = mne.minimum_norm.apply_inverse(
         evoked, inverse_operator_vol, lambda2, inv_method, pick_ori="vector"
     )
 
     if doPlotting:
-
-        # brain = stc_vec.plot(
-        #     hemi="both",
-        #     src=inverse_operator_mix["src"],
-        #     views="coronal",
-        #     initial_time=initial_time,
-        #     subjects_dir=subjects_dir,
-        #     brain_kwargs=dict(silhouette=True),
-        #     smoothing_steps=7,
-        #     show_traces=True,
-        # )
 
         brain = stc_vec.plot(
             hemi="both",
@@ -1980,17 +1435,17 @@ def computeSources(
             show_traces=True,
         )
 
-    # %%
-    # brain2 = stc.surface().plot(
-    #     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
-    # )
-
-    # %%
-    # fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
-
-    # %%
-
-    # Plot electrode locations on scalp
+        # %%
+        # brain2 = stc.surface().plot(
+        #     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
+        # )
+    
+        # %%
+        # fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
+    
+        # %%
+    
+        # Plot electrode locations on scalp
 
     if doPlotting:
 
@@ -2008,26 +1463,6 @@ def computeSources(
 
         # Set viewing angle
         mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
-
-    # eb.save.pickle(
-    #     (
-    #         subject,
-    #         mriSubject,
-    #         labels_vol,
-    #         src_surf,
-    #         src_vol,
-    #         src_mix,
-    #         fwd_surf,
-    #         fwd_vol,
-    #         fwd_mix,
-    #         inverse_operator_surf,
-    #         inverse_operator_vol,
-    #         inverse_operator_mix,
-    #         stc,
-    #         stc_vec,
-    #     ),
-    #     f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
-    # )
 
     eb.save.pickle(
         (

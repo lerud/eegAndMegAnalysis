@@ -27,46 +27,6 @@ from nilearn import plotting
 matplotlib.use("QtAgg")
 plt.ion()
 
-
-# %%
-# brain = stc_vec.plot(
-#     hemi="both",
-#     src=inverse_operator_mix["src"],
-#     views="coronal",
-#     initial_time=initial_time,
-#     subjects_dir=subjects_dir,
-#     brain_kwargs=dict(silhouette=True),
-#     smoothing_steps=7,
-#     show_traces=True
-# )
-
-# %%
-# brain2 = stc.surface().plot(
-#     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
-# )
-
-# %%
-# fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
-
-# %%
-
-# # Plot electrode locations on scalp
-# fig = mne.viz.plot_alignment(
-#     evoked.info,
-#     trans,
-#     subject=mriSubject,
-#     dig=True,
-#     eeg=["original", "projected"],
-#     meg=[],
-#     coord_frame="head",
-#     subjects_dir=subjects_dir,
-#     surfaces=dict(brain=0.4, outer_skull=0.6,inner_skull=0.4, head=None)
-# )
-
-# # Set viewing angle
-# mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
-
-
 # %%
 def calcPC(mat, doPC):
     if doPC:
@@ -85,10 +45,6 @@ def calcPC(mat, doPC):
 
 
 # %%
-
-# %%
-
-
 def extractSourcesSingleCondition(
     subjectsToAverage,
     subDirs,
@@ -249,16 +205,6 @@ def extractSourcesSingleCondition(
 
             allSourceTimeCourses = np.array(allSourceTimeCourses)
 
-            # audTimeCoursesAllSubjs.append(audTimeCourses)
-            # tempTimeCoursesAllSubjs.append(tempTimeCourses)
-            # supParTimeCoursesAllSubjs.append(supParTimeCourses)
-            # infParTimeCoursesAllSubjs.append(infParTimeCourses)
-            # frontTimeCoursesAllSubjs.append(frontTimeCourses)
-            # postcTimeCoursesAllSubjs.append(postcTimeCourses)
-            # occTimeCoursesAllSubjs.append(occTimeCourses)
-            # subcortTimeCoursesAllSubjs.append(subcortTimeCourses)
-            # allSourceTimeCoursesAllSubjs.append(allSourceTimeCourses)
-
             transvGyrusTimeCoursesAllSubjs.append(transvGyrusTimeCourses)
             transvSulcusTimeCoursesAllSubjs.append(transvSulcusTimeCourses)
             planTempTimeCoursesAllSubjs.append(planTempTimeCourses)
@@ -354,56 +300,6 @@ def extractSourcesSingleCondition(
             subcortTimeCoursesAllSubjs.append(subcortTimeCourses)
             allSourceTimeCoursesAllSubjs.append(allSourceTimeCourses)
 
-    #         ymax = np.max([subcortTimeCourses.mean(axis=1).T.max(), np.array(allSourceTimeCourses).max()])
-    #         ymin = np.min([subcortTimeCourses.mean(axis=1).T.min(), np.array(allSourceTimeCourses).min()])
-
-    #         figsize = [20,11]
-    #         fig1, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(
-    #                 nrows=2, ncols=4, figsize=figsize)
-
-    #         ax1.plot(stc._times,audTimeCourses[0:2,:].T)
-    #         ax1.set_ylim([ymin, ymax])
-    #         ax1.legend([audLabels[0].name, audLabels[1].name])
-
-    #         ax2.plot(stc._times,tempTimeCourses[0:2,:].T)
-    #         ax2.set_ylim([ymin, ymax])
-    #         ax2.legend([tempLabels[0].name, tempLabels[1].name])
-
-    #         ax3.plot(stc._times,supParTimeCourses[0:2,:].T)
-    #         ax3.set_ylim([ymin, ymax])
-    #         ax3.legend([supParLabels[0].name, supParLabels[1].name])
-
-    #         ax4.plot(stc._times,infParTimeCourses[0:2,:].T)
-    #         ax4.set_ylim([ymin, ymax])
-    #         ax4.legend([infParLabels[0].name, infParLabels[1].name])
-
-    #         ax5.plot(stc._times,frontTimeCourses[0:2,:].T)
-    #         ax5.set_ylim([ymin, ymax])
-    #         ax5.legend([frontLabels[0].name, frontLabels[1].name])
-
-    #         ax6.plot(stc._times,postcTimeCourses[0:2,:].T)
-    #         ax6.set_ylim([ymin, ymax])
-    #         ax6.legend([postcLabels[0].name, postcLabels[1].name])
-
-    #         ax7.plot(stc._times,occTimeCourses[0:2,:].T)
-    #         ax7.set_ylim([ymin, ymax])
-    #         ax7.legend([occLabels[0].name, occLabels[1].name])
-
-    #         ax8.plot(stc._times,subcortTimeCourses.mean(axis=1).T)
-    #         # ax8.plot(stc._times,subcortTimeCourses[:,2,:].T)
-    #         # ax8.set_ylim([ymin, ymax])
-    #         ax8.legend(labels_vol)
-
-    # audTimeCoursesAllSubjs = np.array(audTimeCoursesAllSubjs)
-    # tempTimeCoursesAllSubjs = np.array(tempTimeCoursesAllSubjs)
-    # supParTimeCoursesAllSubjs = np.array(supParTimeCoursesAllSubjs)
-    # infParTimeCoursesAllSubjs = np.array(infParTimeCoursesAllSubjs)
-    # frontTimeCoursesAllSubjs = np.array(frontTimeCoursesAllSubjs)
-    # postcTimeCoursesAllSubjs = np.array(postcTimeCoursesAllSubjs)
-    # occTimeCoursesAllSubjs = np.array(occTimeCoursesAllSubjs)
-    # subcortTimeCoursesAllSubjs = np.array(subcortTimeCoursesAllSubjs)
-    # allSourceTimeCoursesAllSubjs = np.array(allSourceTimeCoursesAllSubjs)
-
     transvGyrusTimeCoursesAllSubjs = np.array(transvGyrusTimeCoursesAllSubjs)
     transvSulcusTimeCoursesAllSubjs = np.array(transvSulcusTimeCoursesAllSubjs)
     planTempTimeCoursesAllSubjs = np.array(planTempTimeCoursesAllSubjs)
@@ -416,16 +312,6 @@ def extractSourcesSingleCondition(
     parahipTimeCoursesAllSubjs = np.array(parahipTimeCoursesAllSubjs)
     subcortTimeCoursesAllSubjs = np.array(subcortTimeCoursesAllSubjs)
     allSourceTimeCoursesAllSubjs = np.array(allSourceTimeCoursesAllSubjs)
-
-    # audTimeCoursesAvg = np.mean(audTimeCoursesAllSubjs, axis=0)
-    # tempTimeCoursesAvg = np.mean(tempTimeCoursesAllSubjs, axis=0)
-    # supParTimeCoursesAvg = np.mean(supParTimeCoursesAllSubjs, axis=0)
-    # infParTimeCoursesAvg = np.mean(infParTimeCoursesAllSubjs, axis=0)
-    # frontTimeCoursesAvg = np.mean(frontTimeCoursesAllSubjs, axis=0)
-    # postcTimeCoursesAvg = np.mean(postcTimeCoursesAllSubjs, axis=0)
-    # occTimeCoursesAvg = np.mean(occTimeCoursesAllSubjs, axis=0)
-    # subcortTimeCoursesAvg = np.mean(subcortTimeCoursesAllSubjs, axis=0)
-    # allSourceTimeCoursesAvg = np.mean(allSourceTimeCoursesAllSubjs, axis=0)
 
     transvGyrusTimeCoursesAvg = np.mean(transvGyrusTimeCoursesAllSubjs, axis=0)
     transvSulcusTimeCoursesAvg = np.mean(transvSulcusTimeCoursesAllSubjs, axis=0)
@@ -461,8 +347,6 @@ def extractSourcesSingleCondition(
         stc_vec._times,
     )
 
-
-# %%
 
 # %%
 # nameOfRegressor = "_ANmodel_correctedLevels"
@@ -533,14 +417,6 @@ subjectsToAverage = [
 #     "R3157",
 #     "R2783",
 # ]
-
-# subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877", "R3157"]
-# subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
-# subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
-# subjectsToAverage=["R2877", "R3151", "R3152"]
-# subjectsToAverage=["R2877", "R3151"]
-# subjectsToAverage=["R3151"]
-# subjectsToAverage=["R2877"]
 # subjectsToAverage=["R3045"]
 
 
@@ -561,18 +437,6 @@ condLabels = []
 for iType, typeOfRegressor in enumerate(typeOfRegressors):
 
     filenameSuffix = filenameSuffixes[iType]
-
-    # (
-    #     audTimeCoursesAvg,
-    #     tempTimeCoursesAvg,
-    #     supParTimeCoursesAvg,
-    #     infParTimeCoursesAvg,
-    #     frontTimeCoursesAvg,
-    #     postcTimeCoursesAvg,
-    #     occTimeCoursesAvg,
-    #     subcortTimeCoursesAvg,
-    #     allSourceTimeCoursesAvg
-    # ) = extractSourcesSingleCondition(subjectsToAverage, subDirs, nameOfRegressor, typeOfRegressor, filenameSuffix)
 
     condLabels.append(typeOfRegressor + filenameSuffix)
 
@@ -631,9 +495,6 @@ rampFunction = rampFunction[:, None]
 
 
 ax0.set_prop_cycle(custom_cycler)
-# ax0.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2]), axis=1))
 ax0.plot(
     times,
     rampFunction
@@ -642,16 +503,12 @@ ax0.plot(
         axis=1,
     ),
 )
-# ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax0.set_ylim([ymin, ymax])
 ax0.set_title("Brainstem")
 ax0.set_facecolor(facecolor)
 # ax0.legend(condLabels)
 
 ax1.set_prop_cycle(custom_cycler)
-# ax1.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,0], allSourcesAllConds[condLabels[1]][7][:,0],
-#                                      allSourcesAllConds[condLabels[2]][7][:,0], allSourcesAllConds[condLabels[3]][7][:,0],
-#                                      allSourcesAllConds[condLabels[4]][7][:,0]), axis=1))
 ax1.plot(
     times,
     rampFunction
@@ -660,16 +517,12 @@ ax1.plot(
         axis=1,
     ),
 )
-# ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax1.set_ylim([ymin, ymax])
 ax1.set_title("Left - Thalamus")
 ax1.set_facecolor(facecolor)
 # ax1.legend([audLabels[0].name, audLabels[1].name])
 
 ax2.set_prop_cycle(custom_cycler)
-# ax2.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,0], allSourcesAllConds[condLabels[1]][0][:,0],
-#                                      allSourcesAllConds[condLabels[2]][0][:,0], allSourcesAllConds[condLabels[3]][0][:,0],
-#                                      allSourcesAllConds[condLabels[4]][0][:,0]), axis=1))
 ax2.plot(
     times,
     rampFunction
@@ -717,9 +570,6 @@ axLeft.grid()
 
 
 ax3.set_prop_cycle(custom_cycler)
-# ax3.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,0], allSourcesAllConds[condLabels[1]][1][:,0],
-#                                      allSourcesAllConds[condLabels[2]][1][:,0], allSourcesAllConds[condLabels[3]][1][:,0],
-#                                      allSourcesAllConds[condLabels[4]][1][:,0]), axis=1))
 ax3.plot(
     times,
     rampFunction
@@ -734,9 +584,6 @@ ax3.set_facecolor(facecolor)
 # ax3.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax4.set_prop_cycle(custom_cycler)
-# ax4.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,0], allSourcesAllConds[condLabels[1]][4][:,0],
-#                                      allSourcesAllConds[condLabels[2]][4][:,0], allSourcesAllConds[condLabels[3]][4][:,0],
-#                                      allSourcesAllConds[condLabels[4]][4][:,0]), axis=1))
 ax4.plot(
     times,
     rampFunction
@@ -751,9 +598,6 @@ ax4.set_facecolor(facecolor)
 
 
 ax5.set_prop_cycle(custom_cycler)
-# ax5.plot(stc._times, np.concatenate((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2])))
 ax5.plot(
     times,
     rampFunction
@@ -769,9 +613,6 @@ ax5.set_facecolor(facecolor)
 ax5.legend(condLabels)
 
 ax6.set_prop_cycle(custom_cycler)
-# ax6.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,1], allSourcesAllConds[condLabels[1]][7][:,1],
-#                                      allSourcesAllConds[condLabels[2]][7][:,1], allSourcesAllConds[condLabels[3]][7][:,1],
-#                                      allSourcesAllConds[condLabels[4]][7][:,1]), axis=1))
 ax6.plot(
     times,
     rampFunction
@@ -783,16 +624,12 @@ ax6.plot(
         axis=1,
     ),
 )
-# ax6.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax6.set_ylim([ymin, ymax])
 ax6.set_title("Average thalamus")
 ax6.set_facecolor(facecolor)
 # ax6.legend([audLabels[0].name, audLabels[1].name])
 
 ax7.set_prop_cycle(custom_cycler)
-# ax7.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,1], allSourcesAllConds[condLabels[1]][0][:,1],
-#                                      allSourcesAllConds[condLabels[2]][0][:,1], allSourcesAllConds[condLabels[3]][0][:,1],
-#                                      allSourcesAllConds[condLabels[4]][0][:,1]), axis=1))
 ax7.plot(
     times,
     rampFunction
@@ -808,9 +645,6 @@ ax7.set_facecolor(facecolor)
 
 
 ax8.set_prop_cycle(custom_cycler)
-# ax8.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,1], allSourcesAllConds[condLabels[1]][1][:,1],
-#                                      allSourcesAllConds[condLabels[2]][1][:,1], allSourcesAllConds[condLabels[3]][1][:,1],
-#                                      allSourcesAllConds[condLabels[4]][1][:,1]), axis=1))
 ax8.plot(
     times,
     rampFunction
@@ -853,9 +687,6 @@ axRight.grid()
 
 
 ax9.set_prop_cycle(custom_cycler)
-# ax9.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,1], allSourcesAllConds[condLabels[1]][4][:,1],
-#                                      allSourcesAllConds[condLabels[2]][4][:,1], allSourcesAllConds[condLabels[3]][4][:,1],
-#                                      allSourcesAllConds[condLabels[4]][4][:,1]), axis=1))
 ax9.plot(
     times,
     rampFunction
@@ -870,9 +701,6 @@ ax9.set_facecolor(facecolor)
 # ax9.legend(condLabels)
 
 ax10.set_prop_cycle(custom_cycler)
-# ax10.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,1], allSourcesAllConds[condLabels[1]][1][:,1],
-#                                      allSourcesAllConds[condLabels[2]][1][:,1], allSourcesAllConds[condLabels[3]][1][:,1],
-#                                      allSourcesAllConds[condLabels[4]][1][:,1]), axis=1))
 ax10.plot(
     times,
     rampFunction
@@ -887,9 +715,6 @@ ax10.set_facecolor(facecolor)
 # ax10.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax11.set_prop_cycle(custom_cycler)
-# ax11.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,1], allSourcesAllConds[condLabels[1]][4][:,1],
-#                                      allSourcesAllConds[condLabels[2]][4][:,1], allSourcesAllConds[condLabels[3]][4][:,1],
-#                                      allSourcesAllConds[condLabels[4]][4][:,1]), axis=1))
 ax11.plot(
     times,
     rampFunction
@@ -905,9 +730,6 @@ ax11.set_facecolor(facecolor)
 
 
 ax12.set_prop_cycle(custom_cycler)
-# ax12.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2]), axis=1))
 ax12.plot(
     times,
     rampFunction
@@ -916,16 +738,12 @@ ax12.plot(
         axis=1,
     ),
 )
-# ax12.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax12.set_ylim([ymin, ymax])
 ax12.set_title("Left - Planum polare")
 ax12.set_facecolor(facecolor)
 # ax12.legend(condLabels)
 
 ax13.set_prop_cycle(custom_cycler)
-# ax13.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,0], allSourcesAllConds[condLabels[1]][7][:,0],
-#                                      allSourcesAllConds[condLabels[2]][7][:,0], allSourcesAllConds[condLabels[3]][7][:,0],
-#                                      allSourcesAllConds[condLabels[4]][7][:,0]), axis=1))
 ax13.plot(
     times,
     rampFunction
@@ -934,16 +752,12 @@ ax13.plot(
         axis=1,
     ),
 )
-# ax13.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax13.set_ylim([ymin, ymax])
 ax13.set_title("Left - Sup. temp. gyrus")
 ax13.set_facecolor(facecolor)
 # ax13.legend([audLabels[0].name, audLabels[1].name])
 
 ax14.set_prop_cycle(custom_cycler)
-# ax14.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,0], allSourcesAllConds[condLabels[1]][0][:,0],
-#                                      allSourcesAllConds[condLabels[2]][0][:,0], allSourcesAllConds[condLabels[3]][0][:,0],
-#                                      allSourcesAllConds[condLabels[4]][0][:,0]), axis=1))
 ax14.plot(
     times,
     rampFunction
@@ -958,9 +772,6 @@ ax14.set_facecolor(facecolor)
 # ax14.legend([tempLabels[0].name, tempLabels[1].name])
 
 ax15.set_prop_cycle(custom_cycler)
-# ax15.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,0], allSourcesAllConds[condLabels[1]][1][:,0],
-#                                      allSourcesAllConds[condLabels[2]][1][:,0], allSourcesAllConds[condLabels[3]][1][:,0],
-#                                      allSourcesAllConds[condLabels[4]][1][:,0]), axis=1))
 ax15.plot(
     times,
     rampFunction
@@ -975,9 +786,6 @@ ax15.set_facecolor(facecolor)
 # ax15.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax16.set_prop_cycle(custom_cycler)
-# ax16.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,0], allSourcesAllConds[condLabels[1]][4][:,0],
-#                                      allSourcesAllConds[condLabels[2]][4][:,0], allSourcesAllConds[condLabels[3]][4][:,0],
-#                                      allSourcesAllConds[condLabels[4]][4][:,0]), axis=1))
 ax16.plot(
     times,
     rampFunction
@@ -992,9 +800,6 @@ ax16.set_facecolor(facecolor)
 
 
 ax17.set_prop_cycle(custom_cycler)
-# ax17.plot(stc._times, np.concatenate((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2])))
 ax17.plot(
     times,
     rampFunction
@@ -1003,16 +808,12 @@ ax17.plot(
         axis=1,
     ),
 )
-# # ax17.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax17.set_ylim([ymin, ymax])
 ax17.set_title("Left - Parahip. gyrus")
 ax17.set_facecolor(facecolor)
 # ax17.legend([audLabels[0].name, audLabels[1].name])
 
 ax18.set_prop_cycle(custom_cycler)
-# ax18.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,1], allSourcesAllConds[condLabels[1]][7][:,1],
-#                                      allSourcesAllConds[condLabels[2]][7][:,1], allSourcesAllConds[condLabels[3]][7][:,1],
-#                                      allSourcesAllConds[condLabels[4]][7][:,1]), axis=1))
 ax18.plot(
     times,
     rampFunction
@@ -1021,16 +822,12 @@ ax18.plot(
         axis=1,
     ),
 )
-# ax18.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax18.set_ylim([ymin, ymax])
 ax18.set_title("Right")
 ax18.set_facecolor(facecolor)
 # ax18.legend([audLabels[0].name, audLabels[1].name])
 
 ax19.set_prop_cycle(custom_cycler)
-# ax19.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,1], allSourcesAllConds[condLabels[1]][0][:,1],
-#                                      allSourcesAllConds[condLabels[2]][0][:,1], allSourcesAllConds[condLabels[3]][0][:,1],
-#                                      allSourcesAllConds[condLabels[4]][0][:,1]), axis=1))
 ax19.plot(
     times,
     rampFunction
@@ -1046,9 +843,6 @@ ax19.set_facecolor(facecolor)
 
 
 ax20.set_prop_cycle(custom_cycler)
-# ax20.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,1], allSourcesAllConds[condLabels[1]][1][:,1],
-#                                      allSourcesAllConds[condLabels[2]][1][:,1], allSourcesAllConds[condLabels[3]][1][:,1],
-#                                      allSourcesAllConds[condLabels[4]][1][:,1]), axis=1))
 ax20.plot(
     times,
     rampFunction
@@ -1063,9 +857,6 @@ ax20.set_facecolor(facecolor)
 # ax20.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax21.set_prop_cycle(custom_cycler)
-# ax21.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,1], allSourcesAllConds[condLabels[1]][4][:,1],
-#                                      allSourcesAllConds[condLabels[2]][4][:,1], allSourcesAllConds[condLabels[3]][4][:,1],
-#                                      allSourcesAllConds[condLabels[4]][4][:,1]), axis=1))
 ax21.plot(
     times,
     rampFunction
@@ -1080,9 +871,6 @@ ax21.set_facecolor(facecolor)
 # ax21.legend(condLabels)
 
 ax22.set_prop_cycle(custom_cycler)
-# ax22.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,1], allSourcesAllConds[condLabels[1]][1][:,1],
-#                                      allSourcesAllConds[condLabels[2]][1][:,1], allSourcesAllConds[condLabels[3]][1][:,1],
-#                                      allSourcesAllConds[condLabels[4]][1][:,1]), axis=1))
 ax22.plot(
     times,
     rampFunction
@@ -1097,9 +885,6 @@ ax22.set_facecolor(facecolor)
 # ax22.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax23.set_prop_cycle(custom_cycler)
-# ax23.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,1], allSourcesAllConds[condLabels[1]][4][:,1],
-#                                      allSourcesAllConds[condLabels[2]][4][:,1], allSourcesAllConds[condLabels[3]][4][:,1],
-#                                      allSourcesAllConds[condLabels[4]][4][:,1]), axis=1))
 ax23.plot(
     times,
     rampFunction
@@ -1116,78 +901,3 @@ ax23.set_facecolor(facecolor)
 
 fig1.set_facecolor(facecolor)
 
-
-# colors2 = ["green", "cyan", "blue"]
-# custom_cycler2 = cycler(color=colors2)
-# plt.figure()
-# plt.gca().set_prop_cycle(custom_cycler2)
-# plt.plot(times, rampFunction * np.stack((allSourcesAllConds[condLabels[i]][7][:,:2].mean(axis=1) for i in [2,1,0]), axis=1), linewidth=3)
-
-# %%
-# # colors2 = ["red", "green", "blue"]
-# # colors2 = ["blue", "green", "red"]
-# colors2 = ["green", "red", "blue"]
-# # colors2 = ["cyan", "green", "red", "brown", "blue"]
-# custom_cycler2 = cycler(color=colors2)
-# plt.figure()
-# plt.gca().set_prop_cycle(custom_cycler2)
-# # plt.gca().set_facecolor(facecolor)
-# plt.plot(
-#     times,
-#     rampFunction
-#     * np.stack(
-#         (allSourcesAllConds[condLabels[i]][7][:, :2].mean(axis=1) for i in [1, 4, 0]),
-#         axis=1,
-#     ),
-#     linewidth=3,
-#     alpha=0.75,
-# )
-# plt.gca().autoscale(enable=True, axis="both", tight=True)
-# # plt.grid()
-
-
-# ymax = np.max([subcortTimeCoursesAvg.max(), allSourceTimeCoursesAvg.max()])
-# ymin = np.min([subcortTimeCoursesAvg.min(), allSourceTimeCoursesAvg.min()])
-
-# figsize = [20, 11]
-
-# fig1, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(
-#     nrows=2, ncols=4, figsize=figsize
-# )
-
-
-# ax1.plot(stc._times, audTimeCoursesAvg)
-# # ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
-# ax1.set_ylim([ymin, ymax])
-# ax1.legend([audLabels[0].name, audLabels[1].name])
-
-# ax2.plot(stc._times, tempTimeCoursesAvg)
-# ax2.set_ylim([ymin, ymax])
-# ax2.legend([tempLabels[0].name, tempLabels[1].name])
-
-# ax3.plot(stc._times, supParTimeCoursesAvg)
-# ax3.set_ylim([ymin, ymax])
-# ax3.legend([supParLabels[0].name, supParLabels[1].name])
-
-# ax4.plot(stc._times, infParTimeCoursesAvg)
-# ax4.set_ylim([ymin, ymax])
-# ax4.legend([infParLabels[0].name, infParLabels[1].name])
-
-# ax5.plot(stc._times, frontTimeCoursesAvg)
-# ax5.set_ylim([ymin, ymax])
-# ax5.legend([frontLabels[0].name, frontLabels[1].name])
-
-# ax6.plot(stc._times, postcTimeCoursesAvg)
-# ax6.set_ylim([ymin, ymax])
-# ax6.legend([postcLabels[0].name, postcLabels[1].name])
-
-# ax7.plot(stc._times, occTimeCoursesAvg)
-# ax7.set_ylim([ymin, ymax])
-# ax7.legend([occLabels[0].name, occLabels[1].name])
-
-# ax8.plot(stc._times, subcortTimeCoursesAvg)
-# # ax8.plot(stc._times,subcortTimeCourses[:,1,:].T)
-# # ax8.set_ylim([ymin, ymax])
-# ax8.legend(labels_vol)
-
-# %%

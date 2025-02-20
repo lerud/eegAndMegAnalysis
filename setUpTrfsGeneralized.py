@@ -41,26 +41,8 @@ plt.ion()
 # %autoreload 2
 
 # %%
-# presStopCorrection = None
-
 # parentDir = "/Users/karl/map/"
 parentDir = "/Volumes/Seagate/map/"
-
-# subject = "R3045";badChanList=None;condition="A";presStopCorrection=0
-# subject='R3089';badChanList=['P7','CP6','C4','T7','CP5','P3','P4','O2','Oz','PO4'];condition='B';presStopCorrection=0
-# subject='R3093';badChanList=['Oz','P8','CP6','Fp2'];condition='C';presStopCorrection=0
-# subject='R3095';badChanList=['P7','T8','O2','PO4'];condition='D';presStopCorrection=0  # and possibly O2 and PO4
-
-# subject='R3151';badChanList=['C3','FC5','P4'];condition='A'
-# subject='R2774';badChanList=['Fp1','AF3','F7','F3','Fz','F4','FC6','C3','CP5','Pz','CP6','P8','FC1','FC5','T7','AF4'];condition='B'
-# subject='R3152';badChanList=['T7','C3','P7','Pz','O1','P8','CP6'];condition='C'
-# subject = "R2877"
-# # badChanList = ["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"]
-# badChanList = None
-# condition = "D"
-
-# subject='R3157';badChanList=None;condition='A'  # Keep an eye on CP2 and possibly others
-# subject='R2783';badChanList=None;condition='B'
 
 conditionNames = dict(
     A=[

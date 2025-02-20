@@ -65,34 +65,6 @@ def process_initial_raw_eeg(readpath, writepath, refs=None, freqsToNotch=None):
         print("Either bdf or fif")
         return
 
-    # print("please inspect the raw channels to select those to be used as a reference")
-    # plot raw response so we can choose references
-    # raw.plot(n_channels=40)
-    # plt.show()
-
-    # print("please select the reference channels")
-    # print("enter these in list form, e.g., [\"A1\", \"A2\"] or [\"EXG3\", \"EXG4\"] (with quotes)")
-    # refs = eval(input())
-    # print(f"you have selected {refs} to be the reference channels. are you sure? (y/n)")
-    # yn = input().lower()
-    # if yn == "y" or yn == "yes":
-    #     raw.set_eeg_reference(ref_channels=refs)
-    # else:
-    #     print("aborting. please try again")
-    #     return
-
-    # print("apply a notch filter? (y/n)")
-    # yn = input().lower()
-    # if yn == "y" or yn == "yes":
-    #     freqsToNotch=np.arange(60, 8192, 60)
-    #     #freqsToNotch=np.arange(60, 361, 60)
-    #     #freqsToNotch=np.arange(60, 241, 60)  # This is what was originally in the code, probably copied from MNE examples
-    #     #freqsToNotch=np.arange(60, 8192, 120)  # This is based on what we see in the PSD with no notch filtering, looks like odd harmonics of 60 all the way up to the Nyquist
-    #     print(f'Applying MNE notch filters at {freqsToNotch} Hz')
-    #     raw.notch_filter(freqsToNotch, 'eeg')
-    # else:
-    #     print("no notch filter applied")
-
     if refs is not None:
         print(f"Referencing to channels {refs}")
         raw.set_eeg_reference(ref_channels=refs)
@@ -102,10 +74,6 @@ def process_initial_raw_eeg(readpath, writepath, refs=None, freqsToNotch=None):
         print(f"Applying MNE notch filters at {freqsToNotch} Hz")
         raw.notch_filter(freqsToNotch, "eeg")
         print("\n")
-
-    # print("displaying re-referenced raw data")
-    # raw.plot(n_channels=40)
-    # plt.show()
 
     # get stim channel
     print("getting stim channel")
@@ -210,16 +178,3 @@ except:  # if it doesn't exist, we'll make it first, and then load it
         )
     else:
         print("something is wrong")
-
-
-# %%
-# dataloader.process_initial_raw_eeg('/Users/karl/Dropbox/UMD/multilevel0/230908/multilevel0_maintask_correct-003.bdf','/Users/karl/Dropbox/UMD/multilevel0/230908')
-# dataloader.process_initial_raw_eeg('/Users/karl/Dropbox/UMD/multilevel0/230908/multilevel0_tones.bdf','/Users/karl/Dropbox/UMD/multilevel0/230908')
-# dataloader.process_initial_raw_eeg('/Users/karl/Dropbox/UMD/R2881/eegAndMeg/eeg/R2881_tones.bdf','/Users/karl/Dropbox/UMD/R2881/eegAndMeg/eeg')
-
-# %%
-# dataloader.apply_ica_to_raw('/Users/karl/Dropbox/UMD/multilevel0/230908/snsTspcaOutput.mat','/Users/karl/Schlaug_Lab Dropbox/Karl Lerud/UMD/multilevel0/230908/
-
-# %%
-
-# %%

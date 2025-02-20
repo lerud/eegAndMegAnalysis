@@ -27,46 +27,6 @@ from nilearn import plotting
 matplotlib.use("QtAgg")
 plt.ion()
 
-
-# %%
-# brain = stc_vec.plot(
-#     hemi="both",
-#     src=inverse_operator_mix["src"],
-#     views="coronal",
-#     initial_time=initial_time,
-#     subjects_dir=subjects_dir,
-#     brain_kwargs=dict(silhouette=True),
-#     smoothing_steps=7,
-#     show_traces=True
-# )
-
-# %%
-# brain2 = stc.surface().plot(
-#     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
-# )
-
-# %%
-# fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
-
-# %%
-
-# # Plot electrode locations on scalp
-# fig = mne.viz.plot_alignment(
-#     evoked.info,
-#     trans,
-#     subject=mriSubject,
-#     dig=True,
-#     eeg=["original", "projected"],
-#     meg=[],
-#     coord_frame="head",
-#     subjects_dir=subjects_dir,
-#     surfaces=dict(brain=0.4, outer_skull=0.6,inner_skull=0.4, head=None)
-# )
-
-# # Set viewing angle
-# mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
-
-
 # %%
 def calcPC(mat, doPC):
     if doPC:
@@ -85,9 +45,6 @@ def calcPC(mat, doPC):
 
 
 # %%
-
-# %%
-
 
 def extractSourcesSingleCondition(
     subjectsToAverage,
@@ -114,25 +71,6 @@ def extractSourcesSingleCondition(
 
         # eegLocation = "/Users/karl/map/" + subject + subDirs
         eegLocation = "/Volumes/Seagate/map/" + subject + subDirs
-
-        # (
-        #     subject,
-        #     mriSubject,
-        #     labels_vol,
-        #     src_surf,
-        #     src_vol,
-        #     src_mix,
-        #     fwd_surf,
-        #     fwd_vol,
-        #     fwd_mix,
-        #     inverse_operator_surf,
-        #     inverse_operator_vol,
-        #     inverse_operator_mix,
-        #     stc,
-        #     stc_vec,
-        # ) = eb.load.unpickle(
-        #     f"{eegLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
-        # )
 
         (
             subject,
@@ -460,24 +398,6 @@ subjectsToAverage = [
 #     "R3214",
 # ]
 
-
-# subjectsToAverage = [
-#     "R3093",
-#     "R3095",
-#     "R3151",
-#     "R3152",
-#     "R2877",
-#     "R3157",
-#     "R2783",
-# ]
-
-# subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877", "R3157"]
-# subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
-# subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
-# subjectsToAverage=["R2877", "R3151", "R3152"]
-# subjectsToAverage=["R2877", "R3151"]
-# subjectsToAverage=["R3151"]
-# subjectsToAverage=["R2877"]
 # subjectsToAverage=["R3152"]
 
 
@@ -498,18 +418,6 @@ condLabels = []
 for iType, typeOfRegressor in enumerate(typeOfRegressors):
 
     filenameSuffix = filenameSuffixes[iType]
-
-    # (
-    #     audTimeCoursesAvg,
-    #     tempTimeCoursesAvg,
-    #     supParTimeCoursesAvg,
-    #     infParTimeCoursesAvg,
-    #     frontTimeCoursesAvg,
-    #     postcTimeCoursesAvg,
-    #     occTimeCoursesAvg,
-    #     subcortTimeCoursesAvg,
-    #     allSourceTimeCoursesAvg
-    # ) = extractSourcesSingleCondition(subjectsToAverage, subDirs, nameOfRegressor, typeOfRegressor, filenameSuffix)
 
     condLabels.append(typeOfRegressor + filenameSuffix)
 
@@ -562,9 +470,6 @@ rampFunction = rampFunction[:, None]
 
 
 ax0.set_prop_cycle(custom_cycler)
-# ax0.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2]), axis=1))
 ax0.plot(
     times,
     rampFunction
@@ -573,16 +478,12 @@ ax0.plot(
         axis=1,
     ),
 )
-# ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax0.set_ylim([ymin, ymax])
 ax0.set_title("Brainstem")
 ax0.set_facecolor(facecolor)
 # ax0.legend(condLabels)
 
 ax1.set_prop_cycle(custom_cycler)
-# ax1.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,0], allSourcesAllConds[condLabels[1]][7][:,0],
-#                                      allSourcesAllConds[condLabels[2]][7][:,0], allSourcesAllConds[condLabels[3]][7][:,0],
-#                                      allSourcesAllConds[condLabels[4]][7][:,0]), axis=1))
 ax1.plot(
     times,
     rampFunction
@@ -591,16 +492,12 @@ ax1.plot(
         axis=1,
     ),
 )
-# ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax1.set_ylim([ymin, ymax])
 ax1.set_title("Left - Thalamus")
 ax1.set_facecolor(facecolor)
 # ax1.legend([audLabels[0].name, audLabels[1].name])
 
 ax2.set_prop_cycle(custom_cycler)
-# ax2.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,0], allSourcesAllConds[condLabels[1]][0][:,0],
-#                                      allSourcesAllConds[condLabels[2]][0][:,0], allSourcesAllConds[condLabels[3]][0][:,0],
-#                                      allSourcesAllConds[condLabels[4]][0][:,0]), axis=1))
 ax2.plot(
     times,
     rampFunction
@@ -615,9 +512,6 @@ ax2.set_facecolor(facecolor)
 # ax2.legend([tempLabels[0].name, tempLabels[1].name])
 
 ax3.set_prop_cycle(custom_cycler)
-# ax3.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,0], allSourcesAllConds[condLabels[1]][1][:,0],
-#                                      allSourcesAllConds[condLabels[2]][1][:,0], allSourcesAllConds[condLabels[3]][1][:,0],
-#                                      allSourcesAllConds[condLabels[4]][1][:,0]), axis=1))
 ax3.plot(
     times,
     rampFunction
@@ -632,9 +526,6 @@ ax3.set_facecolor(facecolor)
 # ax3.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax4.set_prop_cycle(custom_cycler)
-# ax4.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,0], allSourcesAllConds[condLabels[1]][4][:,0],
-#                                      allSourcesAllConds[condLabels[2]][4][:,0], allSourcesAllConds[condLabels[3]][4][:,0],
-#                                      allSourcesAllConds[condLabels[4]][4][:,0]), axis=1))
 ax4.plot(
     times,
     rampFunction
@@ -649,9 +540,6 @@ ax4.set_facecolor(facecolor)
 
 
 ax5.set_prop_cycle(custom_cycler)
-# ax5.plot(stc._times, np.concatenate((allSourcesAllConds[condLabels[0]][7][:,2], allSourcesAllConds[condLabels[1]][7][:,2],
-#                                      allSourcesAllConds[condLabels[2]][7][:,2], allSourcesAllConds[condLabels[3]][7][:,2],
-#                                      allSourcesAllConds[condLabels[4]][7][:,2])))
 ax5.plot(
     times,
     rampFunction
@@ -663,16 +551,12 @@ ax5.plot(
         axis=1,
     ),
 )
-# # ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax5.set_ylim([ymin, ymax])
 ax5.set_title("Average Thalamus")
 ax5.set_facecolor(facecolor)
 # ax5.legend([audLabels[0].name, audLabels[1].name])
 
 ax6.set_prop_cycle(custom_cycler)
-# ax6.plot(times, np.stack((allSourcesAllConds[condLabels[0]][7][:,1], allSourcesAllConds[condLabels[1]][7][:,1],
-#                                      allSourcesAllConds[condLabels[2]][7][:,1], allSourcesAllConds[condLabels[3]][7][:,1],
-#                                      allSourcesAllConds[condLabels[4]][7][:,1]), axis=1))
 ax6.plot(
     times,
     rampFunction
@@ -681,16 +565,12 @@ ax6.plot(
         axis=1,
     ),
 )
-# ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
 ax6.set_ylim([ymin, ymax])
 ax6.set_title("Right")
 ax6.set_facecolor(facecolor)
 # ax6.legend([audLabels[0].name, audLabels[1].name])
 
 ax7.set_prop_cycle(custom_cycler)
-# ax7.plot(times, np.stack((allSourcesAllConds[condLabels[0]][0][:,1], allSourcesAllConds[condLabels[1]][0][:,1],
-#                                      allSourcesAllConds[condLabels[2]][0][:,1], allSourcesAllConds[condLabels[3]][0][:,1],
-#                                      allSourcesAllConds[condLabels[4]][0][:,1]), axis=1))
 ax7.plot(
     times,
     rampFunction
@@ -706,9 +586,6 @@ ax7.set_facecolor(facecolor)
 
 
 ax8.set_prop_cycle(custom_cycler)
-# ax8.plot(times, np.stack((allSourcesAllConds[condLabels[0]][1][:,1], allSourcesAllConds[condLabels[1]][1][:,1],
-#                                      allSourcesAllConds[condLabels[2]][1][:,1], allSourcesAllConds[condLabels[3]][1][:,1],
-#                                      allSourcesAllConds[condLabels[4]][1][:,1]), axis=1))
 ax8.plot(
     times,
     rampFunction
@@ -723,9 +600,6 @@ ax8.set_facecolor(facecolor)
 # ax8.legend([supParLabels[0].name, supParLabels[1].name])
 
 ax9.set_prop_cycle(custom_cycler)
-# ax9.plot(times, np.stack((allSourcesAllConds[condLabels[0]][4][:,1], allSourcesAllConds[condLabels[1]][4][:,1],
-#                                      allSourcesAllConds[condLabels[2]][4][:,1], allSourcesAllConds[condLabels[3]][4][:,1],
-#                                      allSourcesAllConds[condLabels[4]][4][:,1]), axis=1))
 ax9.plot(
     times,
     rampFunction
@@ -785,51 +659,3 @@ plt.tick_params("y", labelsize=16)
 axAbr.autoscale(enable=True, axis="x", tight=True)
 axAbr.grid()
 
-
-# ymax = np.max([subcortTimeCoursesAvg.max(), allSourceTimeCoursesAvg.max()])
-# ymin = np.min([subcortTimeCoursesAvg.min(), allSourceTimeCoursesAvg.min()])
-
-# figsize = [20, 11]
-
-# fig1, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(
-#     nrows=2, ncols=4, figsize=figsize
-# )
-
-
-# ax1.plot(stc._times, audTimeCoursesAvg)
-# # ax1.plot(stc._times,audTimeCourses[0:2,2,:].T)
-# ax1.set_ylim([ymin, ymax])
-# ax1.legend([audLabels[0].name, audLabels[1].name])
-
-# ax2.plot(stc._times, tempTimeCoursesAvg)
-# ax2.set_ylim([ymin, ymax])
-# ax2.legend([tempLabels[0].name, tempLabels[1].name])
-
-# ax3.plot(stc._times, supParTimeCoursesAvg)
-# ax3.set_ylim([ymin, ymax])
-# ax3.legend([supParLabels[0].name, supParLabels[1].name])
-
-# ax4.plot(stc._times, infParTimeCoursesAvg)
-# ax4.set_ylim([ymin, ymax])
-# ax4.legend([infParLabels[0].name, infParLabels[1].name])
-
-# ax5.plot(stc._times, frontTimeCoursesAvg)
-# ax5.set_ylim([ymin, ymax])
-# ax5.legend([frontLabels[0].name, frontLabels[1].name])
-
-# ax6.plot(stc._times, postcTimeCoursesAvg)
-# ax6.set_ylim([ymin, ymax])
-# ax6.legend([postcLabels[0].name, postcLabels[1].name])
-
-# ax7.plot(stc._times, occTimeCoursesAvg)
-# ax7.set_ylim([ymin, ymax])
-# ax7.legend([occLabels[0].name, occLabels[1].name])
-
-# ax8.plot(stc._times, subcortTimeCoursesAvg)
-# # ax8.plot(stc._times,subcortTimeCourses[:,1,:].T)
-# # ax8.set_ylim([ymin, ymax])
-# ax8.legend(labels_vol)
-
-# %%
-
-# %%
