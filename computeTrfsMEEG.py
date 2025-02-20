@@ -1224,6 +1224,7 @@ def computeSources(
     megLocation = parentDir + subject + subDirsMEG
 
     doPlotting = False
+    doSaving = True
 
     temp = sorted(glob.glob(f"{eegLocation}*baseline*bdf"))
     eegBaselineFile = temp[-1]
@@ -1464,15 +1465,17 @@ def computeSources(
         # Set viewing angle
         mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
 
-    eb.save.pickle(
-        (
-            subject,
-            mriSubject,
-            labels_vol,
-            src_vol,
-            fwd_vol,
-            inverse_operator_vol,
-            stc_vec,
-        ),
-        f"{megLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
-    )
+    if doSaving:
+    
+        eb.save.pickle(
+            (
+                subject,
+                mriSubject,
+                labels_vol,
+                src_vol,
+                fwd_vol,
+                inverse_operator_vol,
+                stc_vec,
+            ),
+            f"{megLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle",
+        )
