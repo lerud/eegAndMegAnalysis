@@ -55,7 +55,7 @@ def computeTrfs(
     t0overall = time.time()
 
     doPlotting = False
-    doSaving = True
+    doSaving = False
 
     doParallel = True
     n_jobs = 16
@@ -1072,7 +1072,7 @@ def computeSources(
     eegLocation = parentDir + subject + subDirs
 
     doPlotting = False
-    doSaving = True
+    doSaving = False
 
     baselineFiles = sorted(glob.glob(f"{eegLocation}*baseline*bdf"))
     bdfFile = baselineFiles[0]

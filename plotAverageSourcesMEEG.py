@@ -58,6 +58,9 @@ def extractSourcesSingleCondition(
     subjects_dir,
 ):
 
+    # filenamePrefix = "sources"
+    filenamePrefix = "concurSources"
+    
     transvGyrusTimeCoursesAllSubjs = []
     transvSulcusTimeCoursesAllSubjs = []
     planTempTimeCoursesAllSubjs = []
@@ -85,7 +88,7 @@ def extractSourcesSingleCondition(
             inverse_operator_vol,
             stc_vec,
         ) = eb.load.unpickle(
-            f"{megLocation}sources{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
+            f"{megLocation}{filenamePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
         )
 
         volLocation = f"{subjects_dir}/{mriSubject}/mri/aparc.a2009s+aseg.mgz"
@@ -901,3 +904,5 @@ ax23.set_facecolor(facecolor)
 
 fig1.set_facecolor(facecolor)
 
+
+# %%

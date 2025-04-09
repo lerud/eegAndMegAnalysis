@@ -54,8 +54,8 @@ filePrefix = "recField"
 
 nameOfRegressor = "_ANmodel_maxFs"
 lenResponse = 1393
-lenToRamp = 0.008
-# lenToRamp = 0
+# lenToRamp = 0.008
+lenToRamp = 0
 expToRamp = 2
 
 # nameOfRegressor = "~gammatone-1"
@@ -143,7 +143,7 @@ ci = 0.95  # confidence interval for shading
 # subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
 # subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
 # subjectsToAverage=["R2877", "R3151", "R3152"]
-subjectsToAverage = ["R3151"]
+subjectsToAverage = ["R3157"]
 
 
 # %%
@@ -896,14 +896,14 @@ avgOrAll = 0  # 0 for pre-averaged TRFs, 1 for lists of evoked objects for each 
 
 complexSubtype = 0
 
-condsToPlot = [
-    evokedAvgQuiet,
-    evokedAvgDistHard,
-    evokedAvgTargetEasy,
-    evokedAvgDistEasy,
-    evokedAvgTargetHard,
-]
-colors = ["blue", "brown", "cyan", "red", "green"]
+# condsToPlot = [
+#     evokedAvgQuiet,
+#     evokedAvgDistHard,
+#     evokedAvgTargetEasy,
+#     evokedAvgDistEasy,
+#     evokedAvgTargetHard,
+# ]
+# colors = ["blue", "brown", "cyan", "red", "green"]
 
 # condsToPlot = [evokedAvgDistHard, evokedAvgTargetEasy, evokedAvgDistEasy, evokedAvgTargetHard]
 # colors = ["brown", "cyan", "red", "green"]
@@ -920,8 +920,8 @@ colors = ["blue", "brown", "cyan", "red", "green"]
 # condsToPlot = [evokedAvgMix4dB, evokedAvgMix0dB, evokedAvgMixNeg4dB]
 # colors = ["cyan", "xkcd:light green", "green"]
 
-# condsToPlot = [evokedAvgMixEasy, evokedAvgMixHard]
-# colors = ["cyan", "red"]
+condsToPlot = [evokedAvgMixEasy, evokedAvgMixHard]
+colors = ["cyan", "red"]
 
 
 # condsToPlot = [evokedAvgTarget4dB, evokedAvgTargetNeg4dB, evokedAvgDist4dB, evokedAvgDistNeg4dB]

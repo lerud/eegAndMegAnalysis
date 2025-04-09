@@ -44,6 +44,13 @@ plt.ion()
 # parentDir = "/Users/karl/map/"
 parentDir = "/Volumes/Seagate/map/"
 
+doParallel = True
+n_jobs = 4
+backend = "loky"
+verbose = 49
+
+lambdas = np.logspace(-1, 9, 15)
+
 conditionNames = dict(
     A=[
         "FemaleBrit_over_FemaleAmer_Easy",
@@ -183,7 +190,6 @@ conditionNames = dict(
     ],
 )
 
-
 subjects = [
     "R3045",
     "R3089",
@@ -202,6 +208,11 @@ subjects = [
     "R3214",
 ]
 
+subset = [i for i in range(len(subjects))]
+# subset = [6,7,8,9,10,11,12,13,14]
+# subset = np.arange(1, len(subjects))
+subjects = [subjects[i] for i in subset]
+
 presStopCorrections = [
     0,
     0,
@@ -219,6 +230,7 @@ presStopCorrections = [
     None,
     None,
 ]
+presStopCorrections = [presStopCorrections[i] for i in subset]
 
 badChanLists = [
     None,
@@ -254,8 +266,10 @@ badChanLists = [
     None,
     None,
 ]
+badChanLists = [badChanLists[i] for i in subset]
 
 conditions = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C"]
+conditions = [conditions[i] for i in subset]
 
 
 # typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
@@ -394,33 +408,96 @@ filenameSuffixes = [
 #     "~wordsurp",
 # ]
 
-nameOfRegressors = [
+# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element, 
+# which is a list of strings:
+# nameOfRegressors = [[
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]]
+
+# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element, 
+# which is a list of strings:
+nameOfRegressors = [[
     "~gammatone-1",
     "~gammatone-on-1",
     "~wordOnsets_gaussian15msSD",
     "~phoneOnsets_gaussian15msSD",
     "~phsurp",
     "~cohtent",
-    "~wordprob",
     "~wordsurp",
-]
+]]
 
+# Acoustic only for acoustic rf
+# nameOfRegressors = [[
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+# ]]
+
+
+# Linguistic only 
+# nameOfRegressors = [[
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]]
+
+
+# Taking word probability out of the linguistic ones for now because we're not using it or interpreting it
+# nameOfRegressors = [[
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordsurp",
+# ]]
+
+# Alternatively, to run each regressor separately, make it a list of lists again, but where each element is a list 
+# itself with only one string:
 # nameOfRegressors = [
-#    "~phsurp",
-#    "~cohtent",
-#    "~wordprob",
-#    "~wordsurp",
+#     ["~gammatone-1"],
+#     ["~gammatone-on-1"],
+#     ["~wordOnsets_gaussian15msSD"],
+#     ["~phoneOnsets_gaussian15msSD"],
+#     ["~phsurp"],
+#     ["~cohtent"],
+#     ["~wordprob"],
+#     ["~wordsurp"],
 # ]
 
+# nameOfRegressors = [[
+#     "~gammatone-1",
+# ]]
+
+# filenamePrefix = "concurRecField"
+# filenamePrefix = "acousticConcurRecField"
+# filenamePrefix = "acousticRecFieldAllFolds"
+# filenamePrefix = "linguisticConcurRecField"
+# filenamePrefix = "linguisticRecFieldAllFolds"
+filenamePrefix = "combinedRecFieldAllFolds"
+
 # newestSubjectsToDo = 1  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
-newestSubjectsToDo = len(
-    subjects
-)  # Use this to do all subjects, so we can keep the first line of the loop the way it is
+# newestSubjectsToDo = len(
+#     subjects
+# )  # Use this to do all subjects, so we can keep the first line of the loop the way it is
 
 # %%
-for iSubject, subject in enumerate(
-    subjects[-newestSubjectsToDo:], start=len(subjects) - newestSubjectsToDo
-):
+# for iSubject, subject in enumerate(
+#     subjects[-newestSubjectsToDo:], start=len(subjects) - newestSubjectsToDo
+# ):
+
+def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, regressorDirs, conditions, filenamePrefix, filenameSuffixes, conditionNames, parentDir, presStopCorrections, badChanLists, lambdaInd, thisLambda):
+
+    subject = subjects[iSubject]
+    
     for iType, typeOfRegressor in enumerate(typeOfRegressors):
         for nameOfRegressor in nameOfRegressors:
 
@@ -552,7 +629,10 @@ for iSubject, subject in enumerate(
                     nameOfRegressor,
                     regressorDir,
                     trialsToAnalyze,
+                    filenamePrefix,
                     filenameSuffix,
+                    lambdaInd, 
+                    thisLambda,
                 ]
             )
             print("\n")
@@ -567,5 +647,58 @@ for iSubject, subject in enumerate(
                 nameOfRegressor,
                 regressorDir,
                 trialsToAnalyze=trialsToAnalyze,
+                filenamePrefix=filenamePrefix,
                 filenameSuffix=filenameSuffix,
+                lambdaInd=lambdaInd, 
+                thisLambda=thisLambda,
             )
+
+
+# %%
+for lambdaInd, thisLambda in enumerate(lambdas):
+# for lambdaInd, thisLambda in enumerate(lambdas[-4:], start=len(lambdas) - 4):
+
+    if doParallel:
+    
+        joblib.Parallel(n_jobs=n_jobs, backend=backend, verbose=verbose)(joblib.delayed(doOneSubject)(
+                iSubject, 
+                subjects, 
+                typeOfRegressors, 
+                nameOfRegressors, 
+                regressorDirs, 
+                conditions, 
+                filenamePrefix, 
+                filenameSuffixes, 
+                conditionNames, 
+                parentDir, 
+                presStopCorrections, 
+                badChanLists, 
+                lambdaInd, 
+                thisLambda,
+            )
+            for iSubject in range(len(subjects))
+        )
+        
+    else:
+        
+        for iSubject in range(len(subjects)):
+            doOneSubject(
+                iSubject, 
+                subjects, 
+                typeOfRegressors, 
+                nameOfRegressors, 
+                regressorDirs, 
+                conditions, 
+                filenamePrefix, 
+                filenameSuffixes, 
+                conditionNames, 
+                parentDir, 
+                presStopCorrections, 
+                badChanLists, 
+                lambdaInd, 
+                thisLambda,
+            )
+
+
+
+
