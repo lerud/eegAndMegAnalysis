@@ -27,6 +27,7 @@ from nilearn import plotting
 matplotlib.use("QtAgg")
 plt.ion()
 
+
 # %%
 def calcPC(mat, doPC):
     if doPC:
@@ -45,6 +46,7 @@ def calcPC(mat, doPC):
 
 
 # %%
+
 
 def extractSourcesSingleCondition(
     subjectsToAverage,
@@ -658,4 +660,3 @@ plt.tick_params("x", labelsize=16)
 plt.tick_params("y", labelsize=16)
 axAbr.autoscale(enable=True, axis="x", tight=True)
 axAbr.grid()
-

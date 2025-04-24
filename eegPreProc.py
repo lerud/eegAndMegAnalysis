@@ -23,12 +23,13 @@ import scipy as sp
 # mainDir = "/Users/karl/map/"
 mainDir = "/Volumes/Seagate/map/"
 
-subject = "R3214"
+subject = "R3265"
 
 subDirs = "/eegAndMeg/eeg/"
 # subDirs='/ffrTests/'
 
-# runName='tones'
+# runName="tones"
+# runName="trftrial"
 # runName='stacks'
 runName = "maintask"
 # runName='triggytest-erp'
@@ -37,8 +38,8 @@ runName = "maintask"
 refs = ["EXG3", "EXG4"]
 freqsToNotch = np.arange(60, 8192, 60)
 
-# cropStart = None  # Do this usually
-cropStart = 100  # In units of seconds; for the R3214 dataset because we started with the Presentation audio settings incorrect. Then we started over, but didn't restart the EEG recording
+cropStart = None  # Do this usually
+# cropStart = 100  # In units of seconds; for the R3214 dataset for maintask because we started with the Presentation audio settings incorrect. Then we started over, but didn't restart the EEG recording
 
 
 # %%

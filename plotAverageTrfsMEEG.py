@@ -38,8 +38,6 @@ plt.ion()
 # parentDir = "/Users/karl/map/"
 parentDir = "/Volumes/Seagate/map/"
 
-subDirs = "/eegAndMeg/meg/"
-nChannels = 32 + 157
 
 # filePrefix = "evoked"
 # filePrefix = "recField"
@@ -48,9 +46,22 @@ nChannels = 32 + 157
 # filePrefix = "acousticRecFieldAllFolds"
 # filePrefix = "linguisticConcurRecField"
 # filePrefix = "linguisticRecFieldAllFolds"
-filePrefix = "combinedRecFieldAllFolds"
+# filePrefix = "combinedRecFieldAllFolds"
 
-edgePad = .001
+filePrefix = "anRecFieldAllFolds"
+
+
+edgePad = 0.001
+
+
+if filePrefix == "anRecFieldAllFolds":
+    subDirs = "/eegAndMeg/eeg/"
+    nChannels = 32
+    eegOnly = True
+else:
+    subDirs = "/eegAndMeg/meg/"
+    nChannels = 32 + 157
+    eegOnly = False
 
 
 # %%
@@ -71,10 +82,10 @@ edgePad = .001
 # lenToRamp = 0
 # expToRamp = 2
 
-nameOfRegressor = "~gammatone-on-1"
-lenResponse = 426
-lenToRamp = 0
-expToRamp = 2
+# nameOfRegressor = "~gammatone-on-1"
+# lenResponse = 426
+# lenToRamp = 0
+# expToRamp = 2
 
 # nameOfRegressor = "~wordOnsets_gaussian15msSD"
 # lenResponse = 426
@@ -107,6 +118,12 @@ expToRamp = 2
 # expToRamp = 2
 
 
+nameOfRegressor = "_ANmodel_maxFs"
+lenResponse = 1393
+lenToRamp = 0
+expToRamp = 2
+
+
 # nameOfRegressors = [
 #     "~gammatone-1",
 #     "~gammatone-on-1",
@@ -117,41 +134,50 @@ expToRamp = 2
 #     "~wordprob",
 #     "~wordsurp",
 # ]
+
+# nameOfRegressors = [
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordsurp",
+# ]
+
+# nameOfRegressors = [
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+# ]
+
+# nameOfRegressors = [
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordsurp",
+# ]
+
+# nameOfRegressors = [
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]
+
 
 nameOfRegressors = [
-    "~gammatone-1",
-    "~gammatone-on-1",
-    "~wordOnsets_gaussian15msSD",
-    "~phoneOnsets_gaussian15msSD",
-    "~phsurp",
-    "~cohtent",
-    "~wordsurp",
+    "_ANmodel_maxFs",
 ]
 
-# nameOfRegressors = [
-#     "~gammatone-1",
-#     "~gammatone-on-1",
-# ]
 
-# nameOfRegressors = [
-#     "~wordOnsets_gaussian15msSD",
-#     "~phoneOnsets_gaussian15msSD",
-#     "~phsurp",
-#     "~cohtent",
-#     "~wordsurp",
-# ]
+# lambdas = np.logspace(-1, 9, 15)
+# lambdaInd = 12  # This indexes the lambdas that have been run, defined above
 
-# nameOfRegressors = [
-#     "~wordOnsets_gaussian15msSD",
-#     "~phoneOnsets_gaussian15msSD",
-#     "~phsurp",
-#     "~cohtent",
-#     "~wordprob",
-#     "~wordsurp",
-# ]
-
-lambdas = np.logspace(-1, 9, 15)
-lambdaInd = 14  # This indexes the lambdas that have been run, defined above
+lambdas = np.array([0, 1e3, 1e6, 1e9])
+lambdaInd = 2  # This indexes the lambdas that have been run, defined above
 
 timeToAddToStart = 0
 # timeToAddToStart = 0.008
@@ -161,23 +187,24 @@ complexSubtypeNames = [" (real)", " (imag)", " (abs)", " (phase)"]
 ci = 0.95  # confidence interval for shading
 
 
-subjectsToAverage = [
-    "R3045",
-    "R3089",
-    "R3093",
-    "R3095",
-    "R3151",
-    "R2774",
-    "R3152",
-    "R2877",
-    "R3157",
-    "R2783",
-    "R3170",
-    "R3172",
-    "R3193",
-    "R3184",
-    "R3214",
-]
+# subjectsToAverage = [
+#     "R3045",
+#     "R3089",
+#     "R3093",
+#     "R3095",
+#     "R3151",
+#     "R2774",
+#     "R3152",
+#     "R2877",
+#     "R3157",
+#     "R2783",
+#     "R3170",
+#     "R3172",
+#     "R3193",
+#     "R3184",
+#     "R3214",
+#     "R3265",
+# ]
 
 ## List not including the 4 lab members as subjects
 # subjectsToAverage = [
@@ -198,15 +225,27 @@ subjectsToAverage = [
 # subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
 # subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
 # subjectsToAverage=["R2877", "R3151", "R3152"]
-# subjectsToAverage = ["R3151"]
+subjectsToAverage = ["R3265"]
 
 
 # %%
-def readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors):
+def readRecField(
+    parentDir,
+    subject,
+    subDirs,
+    filePrefix,
+    typeOfRegressor,
+    filenameSuffix,
+    lambdaInd,
+    nameOfRegressor,
+    nameOfRegressors,
+):
     megLocation = parentDir + subject + subDirs
     regressorInd = nameOfRegressors.index(nameOfRegressor)
-    
-    recField, evokedAll, score, eps = eb.load.unpickle(f"{megLocation}{filePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle")
+
+    recField, evokedAll, score, eps = eb.load.unpickle(
+        f"{megLocation}{filePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle"
+    )
     evoked = evokedAll[regressorInd]
 
     # # Temp version
@@ -220,17 +259,17 @@ def readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filen
 
     # evoked = mne.EvokedArray(tempMat, tempEvoked.info, tmin=tempEvoked.times[0])
 
-
-    
     return evoked, score
-    
+
 
 def makeAnalytic(mat):
     analyticMat = sp.signal.hilbert(mat, axis=0)
     return analyticMat
 
 
-def constructComplexList(rampFunction, avgMat, evoked, scores, comment, complexSubtypeNames):
+def constructComplexList(
+    rampFunction, avgMat, evoked, scores, comment, complexSubtypeNames
+):
 
     evokedAvgList = []
     evokedAvgList.append(
@@ -321,12 +360,22 @@ scores = np.zeros(nChannels)
 
 for i, subject in enumerate(subjectsToAverage):
     megLocation = parentDir + subject + subDirs
-    evoked, score = readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors)
+    evoked, score = readRecField(
+        parentDir,
+        subject,
+        subDirs,
+        filePrefix,
+        typeOfRegressor,
+        filenameSuffix,
+        lambdaInd,
+        nameOfRegressor,
+        nameOfRegressors,
+    )
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
     avgMat[int(timeToAddToStart * evoked.info["sfreq"]) :, :, i] = evokedMat
     scores += score
 
-scores /= i+1
+scores /= i + 1
 
 fs = evoked.info["sfreq"]
 lenResponse = avgMat.shape[0]
@@ -378,12 +427,22 @@ scores = np.zeros(nChannels)
 
 for i, subject in enumerate(subjectsToAverage):
     megLocation = parentDir + subject + subDirs
-    evoked, score = readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors)
+    evoked, score = readRecField(
+        parentDir,
+        subject,
+        subDirs,
+        filePrefix,
+        typeOfRegressor,
+        filenameSuffix,
+        lambdaInd,
+        nameOfRegressor,
+        nameOfRegressors,
+    )
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
     avgMat[int(timeToAddToStart * evoked.info["sfreq"]) :, :, i] = evokedMat
     scores += score
 
-scores /= i+1
+scores /= i + 1
 
 evokedAvgTargetEasy = constructComplexList(
     rampFunction,
@@ -405,12 +464,22 @@ scores = np.zeros(nChannels)
 
 for i, subject in enumerate(subjectsToAverage):
     megLocation = parentDir + subject + subDirs
-    evoked, score = readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors)
+    evoked, score = readRecField(
+        parentDir,
+        subject,
+        subDirs,
+        filePrefix,
+        typeOfRegressor,
+        filenameSuffix,
+        lambdaInd,
+        nameOfRegressor,
+        nameOfRegressors,
+    )
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
     avgMat[int(timeToAddToStart * evoked.info["sfreq"]) :, :, i] = evokedMat
     scores += score
 
-scores /= i+1
+scores /= i + 1
 
 evokedAvgTargetHard = constructComplexList(
     rampFunction,
@@ -432,12 +501,22 @@ scores = np.zeros(nChannels)
 
 for i, subject in enumerate(subjectsToAverage):
     megLocation = parentDir + subject + subDirs
-    evoked, score = readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors)
+    evoked, score = readRecField(
+        parentDir,
+        subject,
+        subDirs,
+        filePrefix,
+        typeOfRegressor,
+        filenameSuffix,
+        lambdaInd,
+        nameOfRegressor,
+        nameOfRegressors,
+    )
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
     avgMat[int(timeToAddToStart * evoked.info["sfreq"]) :, :, i] = evokedMat
     scores += score
 
-scores /= i+1
+scores /= i + 1
 
 evokedAvgDistEasy = constructComplexList(
     rampFunction,
@@ -459,12 +538,22 @@ scores = np.zeros(nChannels)
 
 for i, subject in enumerate(subjectsToAverage):
     megLocation = parentDir + subject + subDirs
-    evoked, score = readRecField(parentDir, subject, subDirs, filePrefix, typeOfRegressor, filenameSuffix, lambdaInd, nameOfRegressor, nameOfRegressors)
+    evoked, score = readRecField(
+        parentDir,
+        subject,
+        subDirs,
+        filePrefix,
+        typeOfRegressor,
+        filenameSuffix,
+        lambdaInd,
+        nameOfRegressor,
+        nameOfRegressors,
+    )
     evokedMat = evoked.get_data().T[int(timeToAddToStart * evoked.info["sfreq"]) :, :]
     avgMat[int(timeToAddToStart * evoked.info["sfreq"]) :, :, i] = evokedMat
     scores += score
 
-scores /= i+1
+scores /= i + 1
 
 evokedAvgDistHard = constructComplexList(
     rampFunction,
@@ -989,7 +1078,7 @@ evokedAvgDistHard = constructComplexList(
 
 
 # %%
-linewidth = 3
+linewidth = 2
 alpha = 0.75
 avgOrAll = 0  # 0 for pre-averaged TRFs, 1 for lists of evoked objects for each subject
 
@@ -997,12 +1086,17 @@ complexSubtype = 0
 
 condsToPlot = [
     evokedAvgQuiet,
-    evokedAvgDistHard,
-    evokedAvgTargetEasy,
-    evokedAvgDistEasy,
-    evokedAvgTargetHard,
 ]
-colors = ["blue", "brown", "cyan", "red", "green"]
+colors = ["blue"]
+
+# condsToPlot = [
+#     evokedAvgQuiet,
+#     evokedAvgDistHard,
+#     evokedAvgTargetEasy,
+#     evokedAvgDistEasy,
+#     evokedAvgTargetHard,
+# ]
+# colors = ["blue", "brown", "cyan", "red", "green"]
 
 # condsToPlot = [evokedAvgDistHard, evokedAvgTargetEasy, evokedAvgDistEasy, evokedAvgTargetHard]
 # colors = ["brown", "cyan", "red", "green"]
@@ -1062,130 +1156,272 @@ mne.viz.plot_compare_evokeds(
 
 
 # %%
-mne.viz.plot_compare_evokeds(
-    evokeds=evokeds, legend=True, axes="topo", styles=styles, ci=ci, picks="meg"
-)
+if not eegOnly:
+    mne.viz.plot_compare_evokeds(
+        evokeds=evokeds, legend=True, axes="topo", styles=styles, ci=ci, picks="meg"
+    )
 
 # %%
-for i in range(len(evokedValues)):
-    evokedValues[i].plot_joint(picks="meg", title=evokedValues[i].comment)
+if not eegOnly:
+    for i in range(len(evokedValues)):
+        evokedValues[i].plot_joint(picks="meg", title=evokedValues[i].comment)
 
 # %%
-# fig1 = plt.figure(figsize=[18,5])
+if not eegOnly:
 
-cmap="RdBu_r"
-# cmap="Reds"
+    # fig1 = plt.figure(figsize=[18,5])
 
-# for i in range(1, 1+len(condsToPlot)):
+    cmap = "RdBu_r"
+    # cmap="Reds"
 
-#     ax = fig1.add_subplot(1, len(condsToPlot), i)
-    
-#     im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax)
-#     ax.colorbar(im)
+    # for i in range(1, 1+len(condsToPlot)):
 
-maxAllEEG = 0
-minAllEEG = 0
-for i in range(len(condsToPlot)):
-    maxAllEEG = np.array([maxAllEEG, condsToPlot[i][2][157:189].max()]).max()
-    minAllEEG = np.array([minAllEEG, condsToPlot[i][2][157:189].min()]).min()
-    
+    #     ax = fig1.add_subplot(1, len(condsToPlot), i)
 
-fig2, (ax5, ax6, ax7, ax8, ax9) = plt.subplots(ncols=5, figsize=[21, 6])
+    #     im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax)
+    #     ax.colorbar(im)
 
-im, cn = mne.viz.plot_topomap(condsToPlot[0][2][157:189], mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)), cmap=cmap, axes=ax5, vlim=(minAllEEG, maxAllEEG))
-ax5.set_title(condsToPlot[0][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[2][2][157:189], mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)), cmap=cmap, axes=ax6, vlim=(minAllEEG, maxAllEEG))
-ax6.set_title(condsToPlot[2][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[4][2][157:189], mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)), cmap=cmap, axes=ax7, vlim=(minAllEEG, maxAllEEG))
-ax7.set_title(condsToPlot[4][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[1][2][157:189], mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)), cmap=cmap, axes=ax8, vlim=(minAllEEG, maxAllEEG))
-ax8.set_title(condsToPlot[1][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[3][2][157:189], mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)), cmap=cmap, axes=ax9, vlim=(minAllEEG, maxAllEEG))
-ax9.set_title(condsToPlot[3][0][0].comment)
-# im,cm   = mne.viz.plot_topomap(x2, info, axes=ax2,show=False,vmin=vmin,vmax=vmax)   
-# manually fiddle the position of colorbar
-# ax_x_start = 0.95
-# ax_x_width = 0.04
-# ax_y_start = 0.1
-# ax_y_height = 0.9
-# cbar_ax = fig.add_axes([ax_x_start, ax_y_start, ax_x_width, ax_y_height])
-# clb = fig.colorbar(im, cax=cbar_ax)
-# clb2 = fig2.colorbar(im)
+    maxAllEEG = 0
+    minAllEEG = 0
+    for i in range(len(condsToPlot)):
+        maxAllEEG = np.array([maxAllEEG, condsToPlot[i][2][157:189].max()]).max()
+        minAllEEG = np.array([minAllEEG, condsToPlot[i][2][157:189].min()]).min()
 
-# Create a new axes for the colorbar
-cax2 = fig2.add_axes([0.92, 0.1, 0.03, 0.8]) # [left, bottom, width, height]
+    fig2, (ax5, ax6, ax7, ax8, ax9) = plt.subplots(ncols=5, figsize=[21, 6])
+
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[0][2][157:189],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)),
+        cmap=cmap,
+        axes=ax5,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax5.set_title(condsToPlot[0][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[2][2][157:189],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)),
+        cmap=cmap,
+        axes=ax6,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax6.set_title(condsToPlot[2][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[4][2][157:189],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)),
+        cmap=cmap,
+        axes=ax7,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax7.set_title(condsToPlot[4][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[1][2][157:189],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)),
+        cmap=cmap,
+        axes=ax8,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax8.set_title(condsToPlot[1][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[3][2][157:189],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157, 189)),
+        cmap=cmap,
+        axes=ax9,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax9.set_title(condsToPlot[3][0][0].comment)
+    # im,cm   = mne.viz.plot_topomap(x2, info, axes=ax2,show=False,vmin=vmin,vmax=vmax)
+    # manually fiddle the position of colorbar
+    # ax_x_start = 0.95
+    # ax_x_width = 0.04
+    # ax_y_start = 0.1
+    # ax_y_height = 0.9
+    # cbar_ax = fig.add_axes([ax_x_start, ax_y_start, ax_x_width, ax_y_height])
+    # clb = fig.colorbar(im, cax=cbar_ax)
+    # clb2 = fig2.colorbar(im)
+
+    # Create a new axes for the colorbar
+    cax2 = fig2.add_axes([0.92, 0.1, 0.03, 0.8])  # [left, bottom, width, height]
+
+    # Add the colorbar to the new axes
+    fig2.colorbar(im, cax=cax2)
+
+    fig2.suptitle(f"Lambda of {lambdas[lambdaInd]}, max Pearson r of {maxAllEEG}")
+
+    print(f"Max for EEG is {maxAllEEG}")
+
+    # clb.ax.set_title(unit_label,fontsize=fontsize) # title on top of colorbar = plt.figure(figsize=[18,5])
 
 
-# Add the colorbar to the new axes
-fig2.colorbar(im, cax=cax2)
+else:
 
+    cmap = "RdBu_r"
+    # cmap="Reds"
 
-fig2.suptitle(f"Lambda of {lambdas[lambdaInd]}, max Pearson r of {maxAllEEG}")
+    # for i in range(1, 1+len(condsToPlot)):
 
-print(f"Max for EEG is {maxAllEEG}")
+    #     ax = fig1.add_subplot(1, len(condsToPlot), i)
 
-# clb.ax.set_title(unit_label,fontsize=fontsize) # title on top of colorbar
+    #     im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax)
+    #     ax.colorbar(im)
+
+    maxAllEEG = 0
+    minAllEEG = 0
+    for i in range(len(condsToPlot)):
+        maxAllEEG = np.array([maxAllEEG, condsToPlot[i][2].max()]).max()
+        minAllEEG = np.array([minAllEEG, condsToPlot[i][2].min()]).min()
+
+    fig2, (ax5, ax6, ax7, ax8, ax9) = plt.subplots(ncols=5, figsize=[21, 6])
+
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[0][2],
+        mne.pick_info(evokedValues[0].info, sel=None),
+        cmap=cmap,
+        axes=ax5,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax5.set_title(condsToPlot[0][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[2][2],
+        mne.pick_info(evokedValues[0].info, sel=None),
+        cmap=cmap,
+        axes=ax6,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax6.set_title(condsToPlot[2][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[4][2],
+        mne.pick_info(evokedValues[0].info, sel=None),
+        cmap=cmap,
+        axes=ax7,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax7.set_title(condsToPlot[4][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[1][2],
+        mne.pick_info(evokedValues[0].info, sel=None),
+        cmap=cmap,
+        axes=ax8,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax8.set_title(condsToPlot[1][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[3][2],
+        mne.pick_info(evokedValues[0].info, sel=None),
+        cmap=cmap,
+        axes=ax9,
+        vlim=(minAllEEG, maxAllEEG),
+    )
+    ax9.set_title(condsToPlot[3][0][0].comment)
+    # im,cm   = mne.viz.plot_topomap(x2, info, axes=ax2,show=False,vmin=vmin,vmax=vmax)
+    # manually fiddle the position of colorbar
+    # ax_x_start = 0.95
+    # ax_x_width = 0.04
+    # ax_y_start = 0.1
+    # ax_y_height = 0.9
+    # cbar_ax = fig.add_axes([ax_x_start, ax_y_start, ax_x_width, ax_y_height])
+    # clb = fig.colorbar(im, cax=cbar_ax)
+    # clb2 = fig2.colorbar(im)
+
+    # Create a new axes for the colorbar
+    cax2 = fig2.add_axes([0.92, 0.1, 0.03, 0.8])  # [left, bottom, width, height]
+
+    # Add the colorbar to the new axes
+    fig2.colorbar(im, cax=cax2)
+
+    fig2.suptitle(f"Lambda of {lambdas[lambdaInd]}, max Pearson r of {maxAllEEG}")
+
+    print(f"Max for EEG is {maxAllEEG}")
+
+    # clb.ax.set_title(unit_label,fontsize=fontsize) # title on top of colorbar
 
 # %%
-# fig1 = plt.figure(figsize=[18,5])
+if not eegOnly:
 
-cmap="RdBu_r"
-# cmap="Reds"
+    # fig1 = plt.figure(figsize=[18,5])
 
-# for i in range(1, 1+len(condsToPlot)):
+    cmap = "RdBu_r"
+    # cmap="Reds"
 
-#     ax = fig1.add_subplot(1, len(condsToPlot), i)
-    
-#     im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax)
-#     ax.colorbar(im)
+    # for i in range(1, 1+len(condsToPlot)):
 
-maxAllMEG = 0
-minAllMEG = 0
-for i in range(len(condsToPlot)):
-    maxAllMEG = np.array([maxAllMEG, condsToPlot[i][2][0:157].max()]).max()
-    minAllMEG = np.array([minAllMEG, condsToPlot[i][2][0:157].min()]).min()
-    
+    #     ax = fig1.add_subplot(1, len(condsToPlot), i)
 
-fig1, (ax0, ax1, ax2, ax3, ax4) = plt.subplots(ncols=5, figsize=[21, 6])
+    #     im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax)
+    #     ax.colorbar(im)
 
-im, cn = mne.viz.plot_topomap(condsToPlot[0][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax0, vlim=(minAllMEG, maxAllMEG))
-ax0.set_title(condsToPlot[0][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[2][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax1, vlim=(minAllMEG, maxAllMEG))
-ax1.set_title(condsToPlot[2][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[4][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax2, vlim=(minAllMEG, maxAllMEG))
-ax2.set_title(condsToPlot[4][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[1][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax3, vlim=(minAllMEG, maxAllMEG))
-ax3.set_title(condsToPlot[1][0][0].comment)
-im, cn = mne.viz.plot_topomap(condsToPlot[3][2][0:157], mne.pick_info(evokedValues[0].info, sel=np.arange(157)), cmap=cmap, axes=ax4, vlim=(minAllMEG, maxAllMEG))
-ax4.set_title(condsToPlot[3][0][0].comment)
-# im,cm   = mne.viz.plot_topomap(x2, info, axes=ax2,show=False,vmin=vmin,vmax=vmax)   
-# manually fiddle the position of colorbar
-# ax_x_start = 0.95
-# ax_x_width = 0.04
-# ax_y_start = 0.1
-# ax_y_height = 0.9
-# cbar_ax = fig.add_axes([ax_x_start, ax_y_start, ax_x_width, ax_y_height])
-# clb = fig.colorbar(im, cax=cbar_ax)
+    maxAllMEG = 0
+    minAllMEG = 0
+    for i in range(len(condsToPlot)):
+        maxAllMEG = np.array([maxAllMEG, condsToPlot[i][2][0:157].max()]).max()
+        minAllMEG = np.array([minAllMEG, condsToPlot[i][2][0:157].min()]).min()
 
+    fig1, (ax0, ax1, ax2, ax3, ax4) = plt.subplots(ncols=5, figsize=[21, 6])
 
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[0][2][0:157],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157)),
+        cmap=cmap,
+        axes=ax0,
+        vlim=(minAllMEG, maxAllMEG),
+    )
+    ax0.set_title(condsToPlot[0][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[2][2][0:157],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157)),
+        cmap=cmap,
+        axes=ax1,
+        vlim=(minAllMEG, maxAllMEG),
+    )
+    ax1.set_title(condsToPlot[2][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[4][2][0:157],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157)),
+        cmap=cmap,
+        axes=ax2,
+        vlim=(minAllMEG, maxAllMEG),
+    )
+    ax2.set_title(condsToPlot[4][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[1][2][0:157],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157)),
+        cmap=cmap,
+        axes=ax3,
+        vlim=(minAllMEG, maxAllMEG),
+    )
+    ax3.set_title(condsToPlot[1][0][0].comment)
+    im, cn = mne.viz.plot_topomap(
+        condsToPlot[3][2][0:157],
+        mne.pick_info(evokedValues[0].info, sel=np.arange(157)),
+        cmap=cmap,
+        axes=ax4,
+        vlim=(minAllMEG, maxAllMEG),
+    )
+    ax4.set_title(condsToPlot[3][0][0].comment)
+    # im,cm   = mne.viz.plot_topomap(x2, info, axes=ax2,show=False,vmin=vmin,vmax=vmax)
+    # manually fiddle the position of colorbar
+    # ax_x_start = 0.95
+    # ax_x_width = 0.04
+    # ax_y_start = 0.1
+    # ax_y_height = 0.9
+    # cbar_ax = fig.add_axes([ax_x_start, ax_y_start, ax_x_width, ax_y_height])
+    # clb = fig.colorbar(im, cax=cbar_ax)
 
-# clb1 = fig1.colorbar(im)
+    # clb1 = fig1.colorbar(im)
 
-# Create a new axes for the colorbar
-cax1 = fig1.add_axes([0.92, 0.1, 0.03, 0.8]) # [left, bottom, width, height]
+    # Create a new axes for the colorbar
+    cax1 = fig1.add_axes([0.92, 0.1, 0.03, 0.8])  # [left, bottom, width, height]
 
-# Add the colorbar to the new axes
-fig1.colorbar(im, cax=cax1)
+    # Add the colorbar to the new axes
+    fig1.colorbar(im, cax=cax1)
 
-fig1.suptitle(f"Lambda of {lambdas[lambdaInd]}, max Pearson r of {maxAllMEG}")
+    fig1.suptitle(f"Lambda of {lambdas[lambdaInd]}, max Pearson r of {maxAllMEG}")
 
-print(f"Max for MEG is {maxAllMEG}")
+    print(f"Max for MEG is {maxAllMEG}")
 
-# clb.ax.set_title(unit_label,fontsize=fontsize) # title on top of colorbar
+    # clb.ax.set_title(unit_label,fontsize=fontsize) # title on top of colorbar
 
 # %%
 # mne.viz.plot_evoked_topo([evokedValues[i].copy().pick("mag") for i in range(len(evokedValues))])
-
 
 
 # %%

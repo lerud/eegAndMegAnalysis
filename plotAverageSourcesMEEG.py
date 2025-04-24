@@ -27,6 +27,7 @@ from nilearn import plotting
 matplotlib.use("QtAgg")
 plt.ion()
 
+
 # %%
 def calcPC(mat, doPC):
     if doPC:
@@ -60,7 +61,7 @@ def extractSourcesSingleCondition(
 
     # filenamePrefix = "sources"
     filenamePrefix = "concurSources"
-    
+
     transvGyrusTimeCoursesAllSubjs = []
     transvSulcusTimeCoursesAllSubjs = []
     planTempTimeCoursesAllSubjs = []

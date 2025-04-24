@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 import pickle
 import glob
 
+from neuroAndSignalTools.freqAnalysis import *
+
 matplotlib.use("QtAgg")
 plt.ion()
 
@@ -51,8 +53,14 @@ plt.ion()
 
 # subject='R3152';badChanList=['T7','C3','P7','Pz','O1','P8','CP6']
 # subject='R2877';badChanList=['CP5','P7','F3','FC5','C3','P4','FC6','FC1','P8']
-subject = "R3157"
-badChanList = ["CP6"]  # Keep an eye on CP2 and possibly others
+
+# subject = "R3214"
+# badChanList = ["T8"]
+
+subject = "R3265"
+badChanList = None
+
+# badChanList = ["CP6"]  # Keep an eye on CP2 and possibly others
 # subject='R2783';badChanList=['T7','P7','CP5']
 
 runName = "tones"
@@ -62,10 +70,13 @@ eventID = 130  # the usual
 # eventID=32898  # R3089
 # eventID=49282  # R3093
 
+parentDir = "/Volumes/Seagate/map/"
+
 # eegLocation='/Users/karl/Dropbox/UMD/multilevel0/230908/'
 # eegLocation='/Users/karl/Dropbox/UMD/R2881/eegAndMeg/eeg/'
 # eegLocation='/Users/karl/map/R3045/eegAndMeg/eeg/'
-eegLocation = "/Users/karl/map/" + subject + "/eegAndMeg/eeg/"
+# eegLocation = "/Users/karl/map/" + subject + "/eegAndMeg/eeg/"
+eegLocation = parentDir + subject + "/eegAndMeg/eeg/"
 
 # bdfFilename='multilevel0_tones.bdf'
 # bdfFilename='R3045_tones.bdf'
@@ -78,33 +89,36 @@ bdfFilename = subject + "_" + runName + ".fif"
 matFilename = runName + "SnsTspcaOutput.mat"
 
 exgLabels = ["EXG1", "EXG2", "EXG3", "EXG4", "EXG5", "EXG6", "EXG7", "EXG8"]
-denoiseMatlab = True
+denoiseMatlab = False
 refs = ["EXG3", "EXG4"]
 # refs=["Fp1"]
+
+edgePad = 0.01
 
 # %%
 tones = mne.io.read_raw_fif(f"{eegLocation}{bdfFilename}", preload=True)
 
 # %%
-preprocMat = mat73.loadmat(f"{eegLocation}{matFilename}")["full_output"]
-
-# %%
-# print(preprocMat.shape)
-# print(preprocMat[32,1000000])
-# plt.plot(preprocMat[31,0:7300])
-exgs = tones.copy().pick_channels(exgLabels)[:][0]
-# [eeg channels, 8 exgs, trigger] -- this should match the raw info
-# don't use the 8 exgs anywhere; shape just needs to match the raw info
-data = np.concatenate([preprocMat[:32], exgs, preprocMat[32:33]], axis=0)
-tonesDenoised = mne.io.RawArray(data, tones.info, tones.first_samp)
-
-# %%
 if not denoiseMatlab:
     tonesDenoised = tones
+    notchFreqs = np.arange(60, 8192, 60)
+    tonesDenoised.notch_filter(notchFreqs)
     tonesDenoised.set_eeg_reference(ref_channels=refs)
+else:
+    preprocMat = mat73.loadmat(f"{eegLocation}{matFilename}")["full_output"]
+    # print(preprocMat.shape)
+    # print(preprocMat[32,1000000])
+    # plt.plot(preprocMat[31,0:7300])
+    exgs = tones.copy().pick_channels(exgLabels)[:][0]
+    # [eeg channels, 8 exgs, trigger] -- this should match the raw info
+    # don't use the 8 exgs anywhere; shape just needs to match the raw info
+    data = np.concatenate([preprocMat[:32], exgs, preprocMat[32:33]], axis=0)
+    tonesDenoised = mne.io.RawArray(data, tones.info, tones.first_samp)
 
 # %%
 events = mne.find_events(tonesDenoised, shortest_event=0)
+tonesDenoised, events = tonesDenoised.resample(sfreq=500, events=events, verbose=True)
+# events = mne.find_events(tonesDenoised)
 # print(tonesDenoised.ch_names)
 print(events[:30, :])
 print(events[-30:, :])
@@ -130,9 +144,6 @@ changeChTypes = {
 }
 tonesDenoised.set_channel_types(changeChTypes)
 tonesDenoised.set_montage(easycap_montage)
-notchFreqs = np.arange(60, 8192, 60)
-if not denoiseMatlab:
-    tonesDenoised.notch_filter(notchFreqs)
 
 # tonesDenoised.compute_psd(fmax=8192).plot(picks="data", exclude="bads")
 
@@ -140,7 +151,8 @@ if not denoiseMatlab:
 # tonesDenoised.set_eeg_reference(ref_channels='average')
 
 # %%
-tonesDenoised.filter(l_freq=0.1, h_freq=20)
+# tonesDenoised.filter(l_freq=0.1, h_freq=20)
+tonesDenoised.filter(l_freq=3, h_freq=20)
 # tonesDenoised.filter(l_freq=80,h_freq=630)
 print(tonesDenoised.info)
 
@@ -185,9 +197,9 @@ elp_ch_names = [
     "Cz",
 ]
 
-channelFile = glob.glob("/Users/karl/map/" + subject + "/digitization/*eeg*.elp")
+channelFile = glob.glob(parentDir + subject + "/digitization/*eeg*.elp")
 if len(channelFile) == 0:
-    channelFile = glob.glob("/Users/karl/map/" + subject + "/digitization/*EEG*.elp")
+    channelFile = glob.glob(parentDir + subject + "/digitization/*EEG*.elp")
 
 print(f"Using the channel file {channelFile[0]}")
 
@@ -267,7 +279,42 @@ toneEpochs = epochs["Tones"]
 # %%
 tonesEvoked = toneEpochs.average()
 
+# %%
+toneTimes = events[events[:, 2] == 130, 0] / tonesDenoised.info["sfreq"]
+tonesRegressor = createPredictorTimeseries(
+    toneTimes, tonesDenoised.info["sfreq"], tonesDenoised.get_data().shape[1]
+)
+tonesResponse = tonesDenoised.get_data(picks="eeg").T
+
+tonesRegressor = sp.stats.zscore(tonesRegressor)
+tonesRegressor = sp.ndimage.gaussian_filter1d(
+    tonesRegressor, 0.007 * tonesDenoised.info["sfreq"]
+)
+tonesResponse = sp.stats.zscore(tonesResponse)
+
+rfTones = mne.decoding.ReceptiveField(
+    -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], estimator=1e1
+)
+rfTones.fit(tonesRegressor[:, np.newaxis], tonesResponse)
+TRFsTones = np.moveaxis(
+    rfTones.coef_[
+        :,
+        :,
+        int(edgePad * tonesDenoised.info["sfreq"]) : int(
+            -edgePad * tonesDenoised.info["sfreq"] - 1
+        ),
+    ],
+    -1,
+    0,
+).squeeze()
+tonesTrfsEvoked = mne.EvokedArray(
+    TRFsTones.T, tonesDenoised.pick("eeg").info, tmin=-0.2
+)
+
+# %%
 tonesEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False)
+tonesTrfsEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False)
+
 
 # %%
 # tonesEvokedSpec=tonesEvoked.compute_psd(method="welch", tmin=0, tmax=.25, fmin=50, fmax=550, n_per_seg=16384, n_fft=16384)

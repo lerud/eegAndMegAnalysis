@@ -644,7 +644,7 @@ def computeTrfs(
 
     if doPresentation and not doTriggy:
         for i in range(presStartEvents.shape[0]):
-            
+
             # stimTimes=sp.io.loadmat(f'{regressorDir}longTrialStimTimes_{i+1}.mat')['currentStimTimes'].squeeze()
             # invVars=np.zeros(len(stimTimes))
 
@@ -690,7 +690,7 @@ def computeTrfs(
 
     else:
         for i in range(trigStartEvents.shape[0]):
-            
+
             # stimTimes=sp.io.loadmat(f'{regressorDir}longTrialStimTimes_{i+1}.mat')['currentStimTimes'].squeeze()
             # invVars=np.zeros(len(stimTimes))
 
@@ -823,7 +823,7 @@ def computeTrfs(
         )
 
     if doTriggy:
-        
+
         trigEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
@@ -870,7 +870,7 @@ def computeTrfs(
         )
 
     if doPresentation:
-        
+
         print(
             f"Shape of time-domain Presentation TRF matrix is now {TRFsTimePres.shape}"
         )
@@ -988,7 +988,7 @@ def computeTrfs(
 
     # %%
     if doPresentation:
-        
+
         evokedTimePres = mne.EvokedArray(
             timePres_portion.T, epoch.info, tmin=windowStart
         )
@@ -1006,7 +1006,7 @@ def computeTrfs(
             )
 
     if doTriggy:
-        
+
         evokedTimeTrig = mne.EvokedArray(
             timeTrig_portion.T, epoch.info, tmin=windowStart
         )
@@ -1047,6 +1047,7 @@ def computeTrfs(
     print(
         f"Everything took {time.time()-t0overall} seconds; deconvolution itself took {time.time()-tDeconv} seconds"
     )
+
 
 # %%
 def computeSources(
@@ -1300,12 +1301,12 @@ def computeSources(
         # brain2 = stc.surface().plot(
         #     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
         # )
-    
+
         # %%
         # fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
-    
+
         # %%
-    
+
         # Plot electrode locations on scalp
 
     if doPlotting:
@@ -1326,7 +1327,7 @@ def computeSources(
         mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
 
     if doSaving:
-    
+
         eb.save.pickle(
             (
                 subject,

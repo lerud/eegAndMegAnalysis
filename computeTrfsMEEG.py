@@ -52,7 +52,7 @@ def computeTrfs(
     filenamePrefix="concurRecField",
     filenameSuffix="",
     lambdaInd=0,
-    thisLambda=0,    
+    thisLambda=0,
 ):
 
     # %%
@@ -75,9 +75,9 @@ def computeTrfs(
     # parallelBackend = "threading"
     # parallelBackend = "multiprocessing"
     verbose = 49
-    
+
     scoring = "corrcoef"
-    
+
     if presStopCorrection is None:
         doPresentation = False
         doTriggy = True
@@ -85,9 +85,15 @@ def computeTrfs(
         doPresentation = True
         doTriggy = False
 
+    eegTriggerRepair = None
+    if subject == "R3265":
+        doPresentation = True
+        doTriggy = False
+        eegTriggerRepair = np.array([5, 21, 22])
+
     subDirs = "/eegAndMeg/eeg/"
     subDirsMeg = "/eegAndMeg/meg/"
-    
+
     runName = "maintask"
 
     presStartCodes = np.array([142])
@@ -107,7 +113,7 @@ def computeTrfs(
     fifFilenameMeg = subject + "_" + runName + "-raw.fif"
 
     MEG_bad_channels = ["MEG 056", "MEG 086"]
-    
+
     matFilename = runName + "SnsTspcaOutput.mat"
 
     # regressorNames = [
@@ -146,14 +152,23 @@ def computeTrfs(
     # ]
 
     regressorNames = []
-    for i in range(1,17):  # These filenames are 1-indexed and there are 16 of them
+    for i in range(1, 17):  # These filenames are 1-indexed and there are 16 of them
         # This way of organizing the variable assumes that nameOfRegressor is a list of regressor name strings, even if only one regressor name
         # Thus regressorNames will be a list of lists, even if each element of the regressorNames list is a list of just one string
-        regressorNames.append([f"{condition}_{typeOfRegressor}{i}{nameOfRegressor[j]}.pickle" for j in range(len(nameOfRegressor))])
+        regressorNames.append(
+            [
+                f"{condition}_{typeOfRegressor}{i}{nameOfRegressor[j]}.pickle"
+                for j in range(len(nameOfRegressor))
+            ]
+        )
         # and do this twice because all our conditions are doubled up consecutively
-        regressorNames.append([f"{condition}_{typeOfRegressor}{i}{nameOfRegressor[j]}.pickle" for j in range(len(nameOfRegressor))])
-        
-    
+        regressorNames.append(
+            [
+                f"{condition}_{typeOfRegressor}{i}{nameOfRegressor[j]}.pickle"
+                for j in range(len(nameOfRegressor))
+            ]
+        )
+
     debugCorrection = (
         0  # Positive or negative time duration in seconds to add to all epoch lengths
     )
@@ -178,23 +193,27 @@ def computeTrfs(
     if nameOfRegressor[0][0] == "_":
         # fs = 5000  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
         fs = 16384  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
+        eegOnly = True
     else:
         fs = 500  # This is the fs to actually be used in analysis below. This should be the same fs as the predictors/regressors that are being read in
+        eegOnly = False
 
-    if nameOfRegressor[0][0] == "~":
-        # eps = 1e7
-        eps = thisLambda
-        # eps = 1e3
-        # eps = 1e0
-    else:
-        eps = 0
+    # if nameOfRegressor[0][0] == "~":
+    #     # eps = 1e7
+    #     eps = thisLambda
+    #     # eps = 1e3
+    #     # eps = 1e0
+    # else:
+    #     eps = 0
+
+    eps = thisLambda
 
     if nameOfRegressor[0][0] == "_":
         windowStart = (
             -0.01
         )  # Time to analyze previous to event onset, in seconds. Will be converted to sample time for deconvolution below
         windowEnd = 0.075
-        
+
     else:
         windowStart = (
             -0.1
@@ -208,7 +227,7 @@ def computeTrfs(
     print(windowStart)
     print(windowEnd)
     print("\n")
-        
+
     printAllEvents = False
 
     lenToAnalyze = 60  # Length of time of regressors and responses to extract and analyze through deconvolution, in seconds
@@ -218,7 +237,10 @@ def computeTrfs(
     )  # Speed of sound delay in ear tubes, in seconds, minus the AN model delay compensation (2.75 ms according to Shan et al.). Convert this to samples below and add it to all trigger times
     presentationDelay = 0.0017  # Length of time that Presentation triggers are early, relative to Triggy triggers, on average
 
-    nChannels = 32 + 157
+    if eegOnly:
+        nChannels = 32
+    else:
+        nChannels = 32 + 157
 
     # unitCoefficient=1e9  # MNE stores EEG in units of volts, so convert to nanovolts for clarity and also for use in faster predictors
     unitCoefficient = 1
@@ -332,7 +354,9 @@ def computeTrfs(
 
             justDidIt = True
 
-        if not os.path.exists(megLocation + "noDenoiseMatlab-raw.fif"):
+        if (not eegOnly or eegTriggerRepair is not None) and not os.path.exists(
+            megLocation + "noDenoiseMatlab-raw.fif"
+        ):
             # For now, just going to do the comparable same thing for the MEG
             denoisedMeg = mne.io.read_raw_fif(
                 megLocation + fifFilenameMeg, preload=True
@@ -388,12 +412,10 @@ def computeTrfs(
                 tempLocation = doRsync(eegLocation + f"noDenoiseMatlab-fs{fs}.pickle")
                 denoised, events = eb.load.unpickle(tempLocation)
             else:
-                denoised = mne.io.read_raw_fif(
-                    eegLocation + "noDenoiseMatlab-raw.fif", preload=True
-                )
-                events = eb.load.unpickle(
-                    eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
-                )
+                tempLocation = doRsync(eegLocation + "noDenoiseMatlab-raw*.fif")
+                denoised = mne.io.read_raw_fif(tempLocation[:-5] + ".fif", preload=True)
+                tempLocation = doRsync(eegLocation + f"noDenoiseMatlab-fs{fs}.pickle")
+                events = eb.load.unpickle(tempLocation)
             print("\n")
             t1 = time.time()
             print(f"Took {t1-t0} seconds")
@@ -436,63 +458,65 @@ def computeTrfs(
             print(f"Took {t2-t1} seconds")
             print("\n")
 
-        if os.path.exists(megLocation + f"noDenoiseMatlab-fs{fs}.pickle"):
-            print(f"Unpickling saved resampled raw file and events matrix for fs {fs}")
-            t0 = time.time()
-            if fs != 16384:
+        if not eegOnly or eegTriggerRepair is not None:
+
+            if os.path.exists(megLocation + f"noDenoiseMatlab-fs{fs}.pickle"):
+                print(
+                    f"Unpickling saved resampled raw file and events matrix for fs {fs}"
+                )
+                t0 = time.time()
                 tempLocation = doRsync(megLocation + f"noDenoiseMatlab-fs{fs}.pickle")
                 denoisedMeg, eventsMeg = eb.load.unpickle(tempLocation)
+                print("\n")
+                t1 = time.time()
+                print(f"Took {t1-t0} seconds")
+                print("\n")
             else:
-                denoised = mne.io.read_raw_fif(
-                    eegLocation + "noDenoiseMatlab-raw.fif", preload=True
+                print(
+                    f"Loading raw file if necessary, and resampling raw data and events matrix for fs {fs}"
                 )
-                events = eb.load.unpickle(
-                    eegLocation + f"noDenoiseMatlab-fs{fs}.pickle"
+                t0 = time.time()
+                if not justDidItMeg:
+                    tempLocation = doRsync(megLocation + "noDenoiseMatlab-raw*.fif")
+                    denoisedMeg = mne.io.read_raw_fif(
+                        tempLocation[:-5] + ".fif", preload=True
+                    )
+                eventsMeg = mne.find_events(denoisedMeg, shortest_event=0)
+
+                t1 = time.time()
+                print("\n")
+                print(
+                    f"Took {t1-t0} seconds to load raw fif files (if not already loaded) and calculate events matrix"
                 )
-            print("\n")
-            t1 = time.time()
-            print(f"Took {t1-t0} seconds")
-            print("\n")
-        else:
-            print(
-                f"Loading raw file if necessary, and resampling raw data and events matrix for fs {fs}"
-            )
-            t0 = time.time()
-            if not justDidItMeg:
-                denoisedMeg = mne.io.read_raw_fif(
-                    megLocation + "noDenoiseMatlab-raw.fif", preload=True
-                )
-            eventsMeg = mne.find_events(denoisedMeg, shortest_event=0)
-            t1 = time.time()
-            print("\n")
-            print(
-                f"Took {t1-t0} seconds to load raw fif files (if not already loaded) and calculate events matrix"
-            )
-            print("\n")
-            print("Now resampling raw data and events matrix")
-            if fs == denoisedMeg.info["sfreq"]:
-                denoisedMeg = denoisedMeg.resample(
-                    sfreq=fs, events=eventsMeg, verbose=True
-                )
-            else:
-                denoisedMeg, eventsMeg = denoisedMeg.resample(
-                    sfreq=fs, events=eventsMeg, verbose=True
-                )
-            t2 = time.time()
-            print("\n")
-            print(f"Took {t2-t1} seconds to calculate")
-            print("\n")
-            print("Now pickling and saving resampled raw file and events matrix")
-            if fs != 16384:
-                eb.save.pickle(
-                    (denoisedMeg, eventsMeg),
-                    megLocation + f"noDenoiseMatlab-fs{fs}.pickle",
-                )
-            else:
-                eb.save.pickle(events, eegLocation + f"noDenoiseMatlab-fs{fs}.pickle")
-            t2 = time.time()
-            print(f"Took {t2-t1} seconds")
-            print("\n")
+                print("\n")
+
+                if fs != 16384:
+                    print("Now resampling raw data and events matrix")
+                    if fs == denoisedMeg.info["sfreq"]:
+                        denoisedMeg = denoisedMeg.resample(
+                            sfreq=fs, events=eventsMeg, verbose=True
+                        )
+                    else:
+                        denoisedMeg, eventsMeg = denoisedMeg.resample(
+                            sfreq=fs, events=eventsMeg, verbose=True
+                        )
+                    t2 = time.time()
+                    print("\n")
+                    print(f"Took {t2-t1} seconds to calculate")
+                    print("\n")
+                    print(
+                        "Now pickling and saving resampled raw file and events matrix"
+                    )
+                    eb.save.pickle(
+                        (denoisedMeg, eventsMeg),
+                        megLocation + f"noDenoiseMatlab-fs{fs}.pickle",
+                    )
+                    t2 = time.time()
+                    print(f"Took {t2-t1} seconds")
+                    print("\n")
+                else:
+                    denoisedMegSfreq = denoisedMeg.info["sfreq"]
+                    del denoisedMeg
 
     # %%
     if printAllEvents:
@@ -503,6 +527,19 @@ def computeTrfs(
     events[:, 0] = events[:, 0] + int(
         round(soundDelay * fs)
     )  # Add speed of sound delay to all events at the very beginning
+
+    if not eegOnly or eegTriggerRepair is not None:
+        eventsMeg[:, 0] = (
+            eventsMeg[:, 0]
+            + int(round(soundDelay * fs))
+            + int(round(presentationDelay * fs))
+        )  # Add speed of sound delay and Presentation delay to all MEG events at the very beginning
+
+        eventsMeg[eventsMeg[:, 2] == 180, 0] = eventsMeg[
+            eventsMeg[:, 2] == 180, 0
+        ] - int(
+            round(presStopCorrection * fs)
+        )  # Subtract triggering click duration from end of wav audio file for all MEG Presentation stop triggers
 
     if printAllEvents:
         print(events)
@@ -557,6 +594,61 @@ def computeTrfs(
     # # denoisedMeg.crop(tmin=startTimeMEG, tmax=startTimeMEG + totalExpDuration)
     # # # Subtract the first event sample time from all event sample times to start at 0 for the EEG events matrix, but don't bother with the MEG events matrix because we won't use it anymore now
     # # events[:, 0] = events[:, 0] - startSampleEEG
+
+    if (
+        eegTriggerRepair is not None
+    ):  # Have to do something custom here that would not work generally
+        eventsEeg = events
+        numStarts = sum(eventsEeg[:, 2] == 142)
+        numStops = sum(eventsEeg[:, 2] == 148)
+
+        newEventsEeg = np.zeros((numStarts + numStops, 3)).astype(int)
+        count = 0
+        for i in range(eventsEeg.shape[0]):
+            if eventsEeg[i, 2] == 142:
+                newEventsEeg[count] = eventsEeg[i, :]
+                count += 1
+            elif eventsEeg[i, 2] == 148:
+                newEventsEeg[count] = eventsEeg[i, :]
+                count += 1
+
+        finalEventsEeg = np.zeros((64, 3)).astype(int)
+        count = 0
+        for i in range(finalEventsEeg.shape[0]):
+            if not np.any(eegTriggerRepair == i):
+                finalEventsEeg[i, :] = newEventsEeg[count, :]
+                count += 1
+            else:
+                prevEegTime = (
+                    finalEventsEeg[i - 1, 0] / denoised.info["sfreq"]
+                )  # Get the time of the last eeg trigger in seconds
+                megDuration = (
+                    eventsMeg[i, 0] - eventsMeg[i - 1, 0]
+                ) / denoisedMegSfreq  # Get the inter-trigger interval from the meg in seconds
+                newTriggerTime = (prevEegTime + megDuration) * denoised.info[
+                    "sfreq"
+                ]  # Calculate the new trigger time in samples for the eeg
+                if eventsMeg[i, 2] == 174:
+                    newTrigger = 142
+                elif eventsMeg[i, 2] == 180:
+                    newTrigger = 148
+                finalEventsEeg[i, :] = np.array([newTriggerTime, 0, newTrigger]).astype(
+                    int
+                )
+        events = finalEventsEeg
+        print("\n")
+        print("****************************")
+        print("******Debugging*************")
+        print("****************************")
+        print("EEG:")
+        print(events)
+        print("\n")
+        print("MEG:")
+        print(eventsMeg)
+        print("****************************")
+        print("******Debugging*************")
+        print("****************************")
+        print("\n")
 
     count = 0
     for i in range(events.shape[0]):
@@ -662,10 +754,12 @@ def computeTrfs(
     # %%
     if l_freq is not None or h_freq is not None:
         denoised.filter(l_freq=l_freq, h_freq=h_freq)
-        denoisedMeg.filter(l_freq=l_freq, h_freq=h_freq)
+        if not eegOnly:
+            denoisedMeg.filter(l_freq=l_freq, h_freq=h_freq)
         print("\n")
     print(denoised.info)
-    print(denoisedMeg.info)
+    if not eegOnly:
+        print(denoisedMeg.info)
 
     # %%
     elp_ch_names = [
@@ -742,10 +836,11 @@ def computeTrfs(
         denoised.info["bads"].extend(badChanList)
         denoised.interpolate_bads()
 
-    for MEG_bad_channel in MEG_bad_channels:
-        denoisedMeg.info["bads"].append(MEG_bad_channel)
+    if not eegOnly:
+        for MEG_bad_channel in MEG_bad_channels:
+            denoisedMeg.info["bads"].append(MEG_bad_channel)
 
-    denoisedMeg.interpolate_bads(reset_bads=False)
+        denoisedMeg.interpolate_bads(reset_bads=False)
 
     # %%
     allPresEpochs = []
@@ -768,23 +863,24 @@ def computeTrfs(
                 baseline=None,
                 picks="eeg",
                 preload=True,
-            )            
-            print("\n")
-
-            epochMEG = mne.Epochs(
-                denoisedMeg,
-                eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
-                event_id=int(eventsMeg[0, 2]),
-                tmin=0,
-                tmax=tmax + debugCorrection,
-                baseline=None,
-                picks="meg",
-                preload=True,
             )
             print("\n")
-            
-            epochMEG.add_channels([epoch], force_update_info=force_update_info)
-            epoch = epochMEG
+
+            if not eegOnly:
+                epochMEG = mne.Epochs(
+                    denoisedMeg,
+                    eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
+                    event_id=int(eventsMeg[0, 2]),
+                    tmin=0,
+                    tmax=tmax + debugCorrection,
+                    baseline=None,
+                    picks="meg",
+                    preload=True,
+                )
+                print("\n")
+
+                epochMEG.add_channels([epoch], force_update_info=force_update_info)
+                epoch = epochMEG
 
             allPresEpochs.append(epoch)
 
@@ -806,22 +902,27 @@ def computeTrfs(
             )
             print("\n")
 
-            epochMEG = mne.Epochs(
-                denoisedMeg,
-                eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
-                event_id=int(eventsMeg[0, 2]),
-                tmin=0,
-                tmax=tmax + debugCorrection,
-                baseline=None,
-                picks="meg",
-                preload=True,
-            )
-            print("\n")
-            
-            epochMEG.add_channels([epoch], force_update_info=force_update_info)
-            epoch = epochMEG
+            if not eegOnly:
+                epochMEG = mne.Epochs(
+                    denoisedMeg,
+                    eventsMeg[i * 2 : i * 2 + 1, :].astype(int),
+                    event_id=int(eventsMeg[0, 2]),
+                    tmin=0,
+                    tmax=tmax + debugCorrection,
+                    baseline=None,
+                    picks="meg",
+                    preload=True,
+                )
+                print("\n")
+
+                epochMEG.add_channels([epoch], force_update_info=force_update_info)
+                epoch = epochMEG
 
             allTrigEpochs.append(epoch)
+
+    del denoised
+    if not eegOnly:
+        del denoisedMeg
 
     if doPresentation and not doTriggy:
         for i in range(presStartEvents.shape[0]):
@@ -844,23 +945,29 @@ def computeTrfs(
 
             tempRegressorList = []
             tempLengthList = []
-            
+
             for j in range(len(regressorNames[i])):
-            
+
                 if fs == 16384:  # If fs is 5000 it is probably the AN model...
                     if (
-                        not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
+                        not np.any(skipDist[conditionNum] == i)
+                        or typeOfRegressor == "mix"
                     ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                        regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i][j]}")
+                        regressor = eb.load.unpickle(
+                            f"{regressorDir}{regressorNames[i][j]}"
+                        )
                     else:  # otherwise save it as numpy array with 0; this won't error out, and will not get used below anyway
                         regressor = np.array([0])
                 elif (
                     fs == 500
                 ):  # Else it is probably a regressor from Eelbrain, so it's an NDVar so we need .x
                     if (
-                        not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
+                        not np.any(skipDist[conditionNum] == i)
+                        or typeOfRegressor == "mix"
                     ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                        regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i][j]}")
+                        regressor = eb.load.unpickle(
+                            f"{regressorDir}{regressorNames[i][j]}"
+                        )
                         if isinstance(regressor, eb._data_obj.NDVar):
                             regressor = regressor.x
                             lenRegressor = len(regressor)
@@ -876,12 +983,12 @@ def computeTrfs(
             # The reason for zero padding out slightly shorter regressors here is that the ones from Eelbrain/TRF-Tools end up
             # 10 ms shorter than the input because of a default 10 ms integration window time. So it is appropriate to just
             # add zeros to the end of that to bring it within a sample or two of being exactly "correct", meaning the length of
-            # the other regressors. 
+            # the other regressors.
             maxLen = np.array(tempLengthList).max()
             regressors = np.zeros((maxLen, len(regressorNames[i])))
             for j in range(len(regressorNames[i])):
                 regressors[: len(tempRegressorList[j]), j] = tempRegressorList[j]
-            
+
             # invVarProps.append(invVarProp)
 
             # And then append this to the main list of regressors for each trial of the session
@@ -908,23 +1015,29 @@ def computeTrfs(
 
             tempRegressorList = []
             tempLengthList = []
-            
+
             for j in range(len(regressorNames[i])):
-            
+
                 if fs == 16384:  # If fs is 5000 it is probably the AN model...
                     if (
-                        not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
+                        not np.any(skipDist[conditionNum] == i)
+                        or typeOfRegressor == "mix"
                     ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                        regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i][j]}")
+                        regressor = eb.load.unpickle(
+                            f"{regressorDir}{regressorNames[i][j]}"
+                        )
                     else:  # otherwise save it as numpy array with 0; this won't error out, and will not get used below anyway
                         regressor = np.array([0])
                 elif (
                     fs == 500
                 ):  # Else it is probably a regressor from Eelbrain, so it's an NDVar so we need .x
                     if (
-                        not np.any(skipDist[conditionNum] == i) or typeOfRegressor == "mix"
+                        not np.any(skipDist[conditionNum] == i)
+                        or typeOfRegressor == "mix"
                     ):  # If it's not a trial without a distractor, or if we're getting mixes anyway
-                        regressor = eb.load.unpickle(f"{regressorDir}{regressorNames[i][j]}")
+                        regressor = eb.load.unpickle(
+                            f"{regressorDir}{regressorNames[i][j]}"
+                        )
                         if isinstance(regressor, eb._data_obj.NDVar):
                             regressor = regressor.x
                             lenRegressor = len(regressor)
@@ -940,12 +1053,12 @@ def computeTrfs(
             # The reason for zero padding out slightly shorter regressors here is that the ones from Eelbrain/TRF-Tools end up
             # 10 ms shorter than the input because of a default 10 ms integration window time. So it is appropriate to just
             # add zeros to the end of that to bring it within a sample or two of being exactly "correct", meaning the length of
-            # the other regressors. 
+            # the other regressors.
             maxLen = np.array(tempLengthList).max()
             regressors = np.zeros((maxLen, len(regressorNames[i])))
             for j in range(len(regressorNames[i])):
                 regressors[: len(tempRegressorList[j]), j] = tempRegressorList[j]
-            
+
             # invVarProps.append(invVarProp)
 
             # And then append this to the main list of regressors for each trial of the session
@@ -982,26 +1095,27 @@ def computeTrfs(
 
     # Initialize this with the third dimension being the length of the input parameter nameOfRegressor, which is
     # a list of strings, one string for each regressor filename, even if it's only one regressor
-    regressorsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), len(nameOfRegressor)))
+    regressorsToDo = np.zeros(
+        (lenToAnalyze * fs, len(trialsToAnalyze), len(nameOfRegressor))
+    )
 
-    
     # trainSubset = np.arange(0, len(trialsToAnalyze))
     # testSubset = np.arange(0, len(trialsToAnalyze))
-    
+
     # if condition == "A" or condition == "B":
     #     trainSubset = np.arange(0, len(trialsToAnalyze))[::2]
     #     testSubset = np.arange(0, len(trialsToAnalyze))[1::2]
     # elif condition == "C" or condition == "D":
     #     trainSubset = np.arange(0, len(trialsToAnalyze))[1::2]
     #     testSubset = np.arange(0, len(trialsToAnalyze))[::2]
-    
+
     # nFolds = 4
     nFolds = len(trialsToAnalyze)
     indsToDo = np.arange(len(trialsToAnalyze))
     allTestInds = np.random.choice(indsToDo, nFolds, replace=False)
 
     if doPresentation:
-        
+
         presEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
@@ -1041,43 +1155,69 @@ def computeTrfs(
         print("\n")
         print("Done")
         print("\n")
-        
-        def doOnePresFold(indsToDo, allTestInds, fold, windowStart, edgePad, windowEnd, fs, eps, scoring, regressorsToDo, presEpochsToDo):
+
+        def doOnePresFold(
+            indsToDo,
+            allTestInds,
+            fold,
+            windowStart,
+            edgePad,
+            windowEnd,
+            fs,
+            eps,
+            scoring,
+            regressorsToDo,
+            presEpochsToDo,
+        ):
 
             testSubset = allTestInds[fold]
             trainSubset = np.delete(indsToDo, testSubset)
-        
+
             rfPres = mne.decoding.ReceptiveField(
-                windowStart - edgePad, windowEnd + edgePad, fs, estimator=eps, scoring=scoring, 
+                windowStart - edgePad,
+                windowEnd + edgePad,
+                fs,
+                estimator=eps,
+                scoring=scoring,
             )
 
-            # Now there is no need for any indexing or adding dimensions etc. here, because regressors 
+            # Now there is no need for any indexing or adding dimensions etc. here, because regressors
             # matrix is already time x epochs x regressors, and M/EEG is already time x epochs x channels
-            rfPres.fit(regressorsToDo[:, trainSubset, :], presEpochsToDo[:, trainSubset, :])
+            rfPres.fit(
+                regressorsToDo[:, trainSubset, :], presEpochsToDo[:, trainSubset, :]
+            )
 
-            score = rfPres.score(regressorsToDo[:, testSubset, :], presEpochsToDo[:, testSubset, :])
+            score = rfPres.score(
+                regressorsToDo[:, testSubset, :], presEpochsToDo[:, testSubset, :]
+            )
 
             # The coef_ matrix in here is channels x regressors x time/n_delays, so move
             # the axes so that time is the first dimension, and then channels and then regressors
-            TRFsTimePres = np.moveaxis(rfPres.coef_[:, :, int(edgePad * fs) : int(-edgePad * fs - 1)], -1, 0)
+            TRFsTimePres = np.moveaxis(
+                rfPres.coef_[:, :, int(edgePad * fs) : int(-edgePad * fs - 1)], -1, 0
+            )
 
             return rfPres, score, TRFsTimePres
 
         if doParallel:
-            results = joblib.Parallel(n_jobs=nFolds, backend=parallelBackend, verbose=verbose)(joblib.delayed(doOnePresFold)(
-                indsToDo,
-                allTestInds,
-                fold,
-                windowStart,
-                edgePad,
-                windowEnd,
-                fs,
-                eps,
-                scoring,
-                regressorsToDo,
-                presEpochsToDo,
+            results = joblib.Parallel(
+                n_jobs=nFolds, backend=parallelBackend, verbose=verbose
+            )(
+                joblib.delayed(doOnePresFold)(
+                    indsToDo,
+                    allTestInds,
+                    fold,
+                    windowStart,
+                    edgePad,
+                    windowEnd,
+                    fs,
+                    eps,
+                    scoring,
+                    regressorsToDo,
+                    presEpochsToDo,
+                )
+                for fold in range(nFolds)
             )
-            for fold in range(nFolds))
             rfPresAll = []
             scoresAll = []
             TRFsTimePresAll = []
@@ -1107,11 +1247,12 @@ def computeTrfs(
                 scoresAll.append(score)
                 TRFsTimePresAll.append(TRFsTimePres)
 
-        rfPres = rfPresAll[-1]  # Here just get the last receptive field object to save, but not sure whether we would need any at all
+        rfPres = rfPresAll[
+            -1
+        ]  # Here just get the last receptive field object to save, but not sure whether we would need any at all
         score = np.array(scoresAll).mean(axis=0)
         TRFsTimePres = np.array(TRFsTimePresAll).mean(axis=0)
-            
-            
+
         print("Scoring done")
         print(f"Shape of score is {score.shape}")
         print(f"Max of score is {score.max()}")
@@ -1122,7 +1263,7 @@ def computeTrfs(
         print("\n")
 
     if doTriggy:
-        
+
         trigEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
@@ -1162,43 +1303,69 @@ def computeTrfs(
         print("\n")
         print("Done")
         print("\n")
-        
-        def doOneTrigFold(indsToDo, allTestInds, fold, windowStart, edgePad, windowEnd, fs, eps, scoring, regressorsToDo, trigEpochsToDo):
+
+        def doOneTrigFold(
+            indsToDo,
+            allTestInds,
+            fold,
+            windowStart,
+            edgePad,
+            windowEnd,
+            fs,
+            eps,
+            scoring,
+            regressorsToDo,
+            trigEpochsToDo,
+        ):
 
             testSubset = allTestInds[fold]
             trainSubset = np.delete(indsToDo, testSubset)
-        
+
             rfTrig = mne.decoding.ReceptiveField(
-                windowStart - edgePad, windowEnd + edgePad, fs, estimator=eps, scoring=scoring, 
+                windowStart - edgePad,
+                windowEnd + edgePad,
+                fs,
+                estimator=eps,
+                scoring=scoring,
             )
 
-            # Now there is no need for any indexing or adding dimensions etc. here, because regressors 
+            # Now there is no need for any indexing or adding dimensions etc. here, because regressors
             # matrix is already time x epochs x regressors, and M/EEG is already time x epochs x channels
-            rfTrig.fit(regressorsToDo[:, trainSubset, :], trigEpochsToDo[:, trainSubset, :])
+            rfTrig.fit(
+                regressorsToDo[:, trainSubset, :], trigEpochsToDo[:, trainSubset, :]
+            )
 
-            score = rfTrig.score(regressorsToDo[:, testSubset, :], trigEpochsToDo[:, testSubset, :])
+            score = rfTrig.score(
+                regressorsToDo[:, testSubset, :], trigEpochsToDo[:, testSubset, :]
+            )
 
             # The coef_ matrix in here is channels x regressors x time/n_delays, so move
             # the axes so that time is the first dimension, and then channels and then regressors
-            TRFsTimeTrig = np.moveaxis(rfTrig.coef_[:, :, int(edgePad * fs) : int(-edgePad * fs - 1)], -1, 0)
+            TRFsTimeTrig = np.moveaxis(
+                rfTrig.coef_[:, :, int(edgePad * fs) : int(-edgePad * fs - 1)], -1, 0
+            )
 
             return rfTrig, score, TRFsTimeTrig
 
         if doParallel:
-            results = joblib.Parallel(n_jobs=nFolds, backend=parallelBackend, verbose=verbose)(joblib.delayed(doOneTrigFold)(
-                indsToDo,
-                allTestInds,
-                fold,
-                windowStart,
-                edgePad,
-                windowEnd,
-                fs,
-                eps,
-                scoring,
-                regressorsToDo,
-                trigEpochsToDo,
+            results = joblib.Parallel(
+                n_jobs=nFolds, backend=parallelBackend, verbose=verbose
+            )(
+                joblib.delayed(doOneTrigFold)(
+                    indsToDo,
+                    allTestInds,
+                    fold,
+                    windowStart,
+                    edgePad,
+                    windowEnd,
+                    fs,
+                    eps,
+                    scoring,
+                    regressorsToDo,
+                    trigEpochsToDo,
+                )
+                for fold in range(nFolds)
             )
-            for fold in range(nFolds))
             rfTrigAll = []
             scoresAll = []
             TRFsTimeTrigAll = []
@@ -1228,7 +1395,9 @@ def computeTrfs(
                 scoresAll.append(score)
                 TRFsTimeTrigAll.append(TRFsTimeTrig)
 
-        rfTrig = rfTrigAll[-1]  # Here just get the last receptive field object to save, but not sure whether we would need any at all
+        rfTrig = rfTrigAll[
+            -1
+        ]  # Here just get the last receptive field object to save, but not sure whether we would need any at all
         score = np.array(scoresAll).mean(axis=0)
         TRFsTimeTrig = np.array(TRFsTimeTrigAll).mean(axis=0)
 
@@ -1250,7 +1419,9 @@ def computeTrfs(
 
     if doTriggy:
 
-        print(f"Shape of time-domain Triggy TRF matrix is now {TRFsTimeTrig.shape} which should be time/n_delays X channels X regressors")
+        print(
+            f"Shape of time-domain Triggy TRF matrix is now {TRFsTimeTrig.shape} which should be time/n_delays X channels X regressors"
+        )
         print("\n")
 
     print(f"Deconvolution took {time.time()-tDeconv} seconds")
@@ -1272,11 +1443,11 @@ def computeTrfs(
     figsize = [15, 9]
 
     if doPresentation:
-        
+
         timePres_portion = TRFsTimePres * unitCoefficient
 
     if doTriggy:
-        
+
         timeTrig_portion = TRFsTimeTrig * unitCoefficient
 
     # %%
@@ -1359,50 +1530,60 @@ def computeTrfs(
             plt.show()
 
     # %%
+
+    if eegOnly:
+        saveLocation = eegLocation
+    else:
+        saveLocation = megLocation
+
     if doPresentation:
 
         evokedTimePres = []
         for i in range(len(nameOfRegressor)):
-            evokedTimePres.append(mne.EvokedArray(
-                timePres_portion[:, :, i].T, epoch.info, tmin=windowStart
-            ))
+            evokedTimePres.append(
+                mne.EvokedArray(
+                    timePres_portion[:, :, i].T, epoch.info, tmin=windowStart
+                )
+            )
 
         if saveEvoked:
 
             for i in range(len(nameOfRegressor)):
                 evokedTimePres[i].save(
-                    f"{megLocation}{filenamePrefix}{nameOfRegressor[i]}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+                    f"{saveLocation}{filenamePrefix}{nameOfRegressor[i]}_{typeOfRegressor}{filenameSuffix}-ave.fif",
                     overwrite=True,
                 )
 
         if saveRf:
-                
+
             eb.save.pickle(
                 (rfPres, evokedTimePres, score, eps),
-                f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle",
+                f"{saveLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle",
             )
 
     if doTriggy:
 
         evokedTimeTrig = []
         for i in range(len(nameOfRegressor)):
-            evokedTimeTrig.append(mne.EvokedArray(
-                timeTrig_portion[:, :, i].T, epoch.info, tmin=windowStart
-            ))
+            evokedTimeTrig.append(
+                mne.EvokedArray(
+                    timeTrig_portion[:, :, i].T, epoch.info, tmin=windowStart
+                )
+            )
 
         if saveEvoked:
 
             for i in range(len(nameOfRegressor)):
                 evokedTimeTrig[i].save(
-                    f"{megLocation}{filenamePrefix}{nameOfRegressor[i]}_{typeOfRegressor}{filenameSuffix}-ave.fif",
+                    f"{saveLocation}{filenamePrefix}{nameOfRegressor[i]}_{typeOfRegressor}{filenameSuffix}-ave.fif",
                     overwrite=True,
                 )
 
         if saveRf:
-                
+
             eb.save.pickle(
                 (rfTrig, evokedTimeTrig, score, eps),
-                f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle",
+                f"{saveLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}_lambda{lambdaInd}.pickle",
             )
 
     # %%
@@ -1429,6 +1610,7 @@ def computeTrfs(
     print(
         f"Everything took {time.time()-t0overall} seconds; deconvolution itself took {time.time()-tDeconv} seconds"
     )
+
 
 # %%
 def computeSources(
@@ -1624,7 +1806,7 @@ def computeSources(
         add_interpolator=True,  # just for speed, usually this should be True
         verbose=True,
     )
-    
+
     fwd_vol = mne.make_forward_solution(
         evoked.info,
         trans,
@@ -1656,7 +1838,7 @@ def computeSources(
     inverse_operator_vol = mne.minimum_norm.make_inverse_operator(
         evoked.info, fwd_vol, baselineCov, depth=depth, loose=loose_vol, verbose=True
     )
-    
+
     # %%
     stc_vec = mne.minimum_norm.apply_inverse(
         evoked, inverse_operator_vol, lambda2, inv_method, pick_ori="vector"
@@ -1679,12 +1861,12 @@ def computeSources(
         # brain2 = stc.surface().plot(
         #     initial_time=initial_time, subjects_dir=subjects_dir, smoothing_steps=7
         # )
-    
+
         # %%
         # fig = stc.volume().plot(initial_time=initial_time, src=src, subjects_dir=subjects_dir)
-    
+
         # %%
-    
+
         # Plot electrode locations on scalp
 
     if doPlotting:
@@ -1705,7 +1887,7 @@ def computeSources(
         mne.viz.set_3d_view(figure=fig, azimuth=135, elevation=80)
 
     if doSaving:
-    
+
         eb.save.pickle(
             (
                 subject,

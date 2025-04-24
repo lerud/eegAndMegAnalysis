@@ -49,7 +49,8 @@ n_jobs = 4
 backend = "loky"
 verbose = 49
 
-lambdas = np.logspace(-1, 9, 15)
+# lambdas = np.logspace(-1, 9, 15)
+lambdas = np.array([0, 1e3, 1e6, 1e9])
 
 conditionNames = dict(
     A=[
@@ -206,9 +207,11 @@ subjects = [
     "R3193",
     "R3184",
     "R3214",
+    "R3265",
 ]
 
-subset = [i for i in range(len(subjects))]
+# subset = [i for i in range(len(subjects))]
+subset = [15]
 # subset = [6,7,8,9,10,11,12,13,14]
 # subset = np.arange(1, len(subjects))
 subjects = [subjects[i] for i in subset]
@@ -229,7 +232,12 @@ presStopCorrections = [
     None,
     None,
     None,
-]
+    None,
+]  # Remember the purpose of this is to tell us which stimulus was
+# actually delivered to the subject: the ones with the ending
+# trigger click (taking up an extra 1/600 seconds at the end), or
+# the ones without the ending trigger (from before we had Triggy)
+
 presStopCorrections = [presStopCorrections[i] for i in subset]
 
 badChanLists = [
@@ -265,10 +273,28 @@ badChanLists = [
     None,
     None,
     None,
+    None,
 ]
 badChanLists = [badChanLists[i] for i in subset]
 
-conditions = ["A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C"]
+conditions = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "A",
+    "B",
+    "C",
+    "D",
+    "A",
+    "B",
+    "C",
+    "D",
+    "A",
+    "B",
+    "C",
+    "D",
+]
 conditions = [conditions[i] for i in subset]
 
 
@@ -389,7 +415,7 @@ filenameSuffixes = [
     "_hard",
 ]
 
-# nameOfRegressors = ["_ANmodel_maxFs"]
+nameOfRegressors = [["_ANmodel_maxFs"]]
 # nameOfRegressors = ["_ANmodel_correctedLevels", "~gammatone-1", "~gammatone-on-1"]
 # nameOfRegressors = ["~wordOnsets", "~phoneOnsets"]
 # nameOfRegressors = ["~wordOnsets_gaussian", "~phoneOnsets_gaussian"]
@@ -408,7 +434,7 @@ filenameSuffixes = [
 #     "~wordsurp",
 # ]
 
-# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element, 
+# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element,
 # which is a list of strings:
 # nameOfRegressors = [[
 #     "~gammatone-1",
@@ -421,17 +447,17 @@ filenameSuffixes = [
 #     "~wordsurp",
 # ]]
 
-# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element, 
+# This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element,
 # which is a list of strings:
-nameOfRegressors = [[
-    "~gammatone-1",
-    "~gammatone-on-1",
-    "~wordOnsets_gaussian15msSD",
-    "~phoneOnsets_gaussian15msSD",
-    "~phsurp",
-    "~cohtent",
-    "~wordsurp",
-]]
+# nameOfRegressors = [[
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordsurp",
+# ]]
 
 # Acoustic only for acoustic rf
 # nameOfRegressors = [[
@@ -440,7 +466,7 @@ nameOfRegressors = [[
 # ]]
 
 
-# Linguistic only 
+# Linguistic only
 # nameOfRegressors = [[
 #     "~wordOnsets_gaussian15msSD",
 #     "~phoneOnsets_gaussian15msSD",
@@ -460,7 +486,7 @@ nameOfRegressors = [[
 #     "~wordsurp",
 # ]]
 
-# Alternatively, to run each regressor separately, make it a list of lists again, but where each element is a list 
+# Alternatively, to run each regressor separately, make it a list of lists again, but where each element is a list
 # itself with only one string:
 # nameOfRegressors = [
 #     ["~gammatone-1"],
@@ -482,7 +508,8 @@ nameOfRegressors = [[
 # filenamePrefix = "acousticRecFieldAllFolds"
 # filenamePrefix = "linguisticConcurRecField"
 # filenamePrefix = "linguisticRecFieldAllFolds"
-filenamePrefix = "combinedRecFieldAllFolds"
+# filenamePrefix = "combinedRecFieldAllFolds"
+filenamePrefix = "anRecFieldAllFolds"
 
 # newestSubjectsToDo = 1  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
 # newestSubjectsToDo = len(
@@ -494,10 +521,26 @@ filenamePrefix = "combinedRecFieldAllFolds"
 #     subjects[-newestSubjectsToDo:], start=len(subjects) - newestSubjectsToDo
 # ):
 
-def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, regressorDirs, conditions, filenamePrefix, filenameSuffixes, conditionNames, parentDir, presStopCorrections, badChanLists, lambdaInd, thisLambda):
+
+def doOneSubject(
+    iSubject,
+    subjects,
+    typeOfRegressors,
+    nameOfRegressors,
+    regressorDirs,
+    conditions,
+    filenamePrefix,
+    filenameSuffixes,
+    conditionNames,
+    parentDir,
+    presStopCorrections,
+    badChanLists,
+    lambdaInd,
+    thisLambda,
+):
 
     subject = subjects[iSubject]
-    
+
     for iType, typeOfRegressor in enumerate(typeOfRegressors):
         for nameOfRegressor in nameOfRegressors:
 
@@ -631,7 +674,7 @@ def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, regress
                     trialsToAnalyze,
                     filenamePrefix,
                     filenameSuffix,
-                    lambdaInd, 
+                    lambdaInd,
                     thisLambda,
                 ]
             )
@@ -649,56 +692,53 @@ def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, regress
                 trialsToAnalyze=trialsToAnalyze,
                 filenamePrefix=filenamePrefix,
                 filenameSuffix=filenameSuffix,
-                lambdaInd=lambdaInd, 
+                lambdaInd=lambdaInd,
                 thisLambda=thisLambda,
             )
 
 
 # %%
-for lambdaInd, thisLambda in enumerate(lambdas):
-# for lambdaInd, thisLambda in enumerate(lambdas[-4:], start=len(lambdas) - 4):
+# for lambdaInd, thisLambda in enumerate(lambdas):
+for lambdaInd, thisLambda in enumerate(lambdas[-1:], start=len(lambdas) - 1):
 
     if doParallel:
-    
-        joblib.Parallel(n_jobs=n_jobs, backend=backend, verbose=verbose)(joblib.delayed(doOneSubject)(
-                iSubject, 
-                subjects, 
-                typeOfRegressors, 
-                nameOfRegressors, 
-                regressorDirs, 
-                conditions, 
-                filenamePrefix, 
-                filenameSuffixes, 
-                conditionNames, 
-                parentDir, 
-                presStopCorrections, 
-                badChanLists, 
-                lambdaInd, 
+
+        joblib.Parallel(n_jobs=n_jobs, backend=backend, verbose=verbose)(
+            joblib.delayed(doOneSubject)(
+                iSubject,
+                subjects,
+                typeOfRegressors,
+                nameOfRegressors,
+                regressorDirs,
+                conditions,
+                filenamePrefix,
+                filenameSuffixes,
+                conditionNames,
+                parentDir,
+                presStopCorrections,
+                badChanLists,
+                lambdaInd,
                 thisLambda,
             )
             for iSubject in range(len(subjects))
         )
-        
+
     else:
-        
+
         for iSubject in range(len(subjects)):
             doOneSubject(
-                iSubject, 
-                subjects, 
-                typeOfRegressors, 
-                nameOfRegressors, 
-                regressorDirs, 
-                conditions, 
-                filenamePrefix, 
-                filenameSuffixes, 
-                conditionNames, 
-                parentDir, 
-                presStopCorrections, 
-                badChanLists, 
-                lambdaInd, 
+                iSubject,
+                subjects,
+                typeOfRegressors,
+                nameOfRegressors,
+                regressorDirs,
+                conditions,
+                filenamePrefix,
+                filenameSuffixes,
+                conditionNames,
+                parentDir,
+                presStopCorrections,
+                badChanLists,
+                lambdaInd,
                 thisLambda,
             )
-
-
-
-

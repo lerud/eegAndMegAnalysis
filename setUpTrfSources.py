@@ -28,6 +28,7 @@ from neuroAndSignalTools.freqAnalysis import *
 from neuroAndSignalTools.deconvGeneralized import *
 
 from computeTrfsMEEG import computeTrfs, computeSources
+
 # from computeTrfsEEG import computeTrfs, computeSources
 
 matplotlib.use("QtAgg")
@@ -154,7 +155,16 @@ nameOfRegressors = [
     "~wordsurp",
 ]
 
-bandpassFreqsList = [[2, None], [2, None], [2, None], [2, None], [2, None], [2, None], [2, None], [2, None]]
+bandpassFreqsList = [
+    [2, None],
+    [2, None],
+    [2, None],
+    [2, None],
+    [2, None],
+    [2, None],
+    [2, None],
+    [2, None],
+]
 # bandpassFreqsList = [[20, 1000]]
 
 
@@ -169,10 +179,20 @@ bandpassFreqsList = [[2, None], [2, None], [2, None], [2, None], [2, None], [2, 
 # ):
 
 
-def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, parentDir, useAvgBrains, badChanLists, bandpassFreqsList, filenameSuffixes):
+def doOneSubject(
+    iSubject,
+    subjects,
+    typeOfRegressors,
+    nameOfRegressors,
+    parentDir,
+    useAvgBrains,
+    badChanLists,
+    bandpassFreqsList,
+    filenameSuffixes,
+):
 
     subject = subjects[iSubject]
-    
+
     for iType, typeOfRegressor in enumerate(typeOfRegressors):
         for iName, nameOfRegressor in enumerate(nameOfRegressors):
 
@@ -205,35 +225,32 @@ def doOneSubject(iSubject, subjects, typeOfRegressors, nameOfRegressors, parentD
 # %%
 if doParallel:
 
-    joblib.Parallel(n_jobs=n_jobs, backend=backend, verbose=verbose)(joblib.delayed(doOneSubject)(
-            iSubject, 
-            subjects, 
-            typeOfRegressors, 
-            nameOfRegressors, 
-            parentDir, 
-            useAvgBrains, 
-            badChanLists, 
-            bandpassFreqsList, 
-            filenameSuffixes,  
+    joblib.Parallel(n_jobs=n_jobs, backend=backend, verbose=verbose)(
+        joblib.delayed(doOneSubject)(
+            iSubject,
+            subjects,
+            typeOfRegressors,
+            nameOfRegressors,
+            parentDir,
+            useAvgBrains,
+            badChanLists,
+            bandpassFreqsList,
+            filenameSuffixes,
         )
         for iSubject in range(len(subjects))
     )
-    
+
 else:
-    
+
     for iSubject in range(len(subjects)):
         doOneSubject(
-            iSubject, 
-            subjects, 
-            typeOfRegressors, 
-            nameOfRegressors, 
-            parentDir, 
-            useAvgBrains, 
-            badChanLists, 
-            bandpassFreqsList, 
-            filenameSuffixes,  
+            iSubject,
+            subjects,
+            typeOfRegressors,
+            nameOfRegressors,
+            parentDir,
+            useAvgBrains,
+            badChanLists,
+            bandpassFreqsList,
+            filenameSuffixes,
         )
-
-
-
-
