@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -20,26 +20,27 @@ import numpy as np
 import scipy as sp
 
 # %%
+cropStart = None  # Do this usually
+# cropStart = 100  # In units of seconds; for the R3214 dataset for maintask because we started with the Presentation audio settings incorrect. Then we started over, but didn't restart the EEG recording
+
 # mainDir = "/Users/karl/map/"
 mainDir = "/Volumes/Seagate/map/"
 
-subject = "R3265"
+subject = "notSubjectR3283"
 
 subDirs = "/eegAndMeg/eeg/"
 # subDirs='/ffrTests/'
 
 # runName="tones"
-# runName="trftrial"
+runName="trftrial"
 # runName='stacks'
-runName = "maintask"
+# runName = "maintask"
 # runName='triggytest-erp'
 # runName='triggytest-trf'
 
 refs = ["EXG3", "EXG4"]
 freqsToNotch = np.arange(60, 8192, 60)
 
-cropStart = None  # Do this usually
-# cropStart = 100  # In units of seconds; for the R3214 dataset for maintask because we started with the Presentation audio settings incorrect. Then we started over, but didn't restart the EEG recording
 
 
 # %%
@@ -140,14 +141,14 @@ def process_initial_raw_eeg(readpath, writepath, refs=None, freqsToNotch=None):
 # %%
 try:  # Try to load the raw fif file, which will work if we've made it before
     process_initial_raw_eeg(
-        mainDir + subject + subDirs + subject + "_" + runName + ".fif",
+        mainDir + subject + subDirs + subject[-5:] + "_" + runName + ".fif",
         mainDir + subject + subDirs,
         refs=refs,
         freqsToNotch=freqsToNotch,
     )
 except:  # if it doesn't exist, we'll make it first, and then load it
     targetFiles = sorted(
-        glob.glob(mainDir + subject + subDirs + subject + "_*" + runName + "*.bdf")
+        glob.glob(mainDir + subject + subDirs + subject[-5:] + "_*" + runName + "*.bdf")
     )
     if len(targetFiles) == 1:
         print(f"There is 1 bdf file being processed: {targetFiles[0]}")
@@ -158,7 +159,7 @@ except:  # if it doesn't exist, we'll make it first, and then load it
 
         raw.save(targetFiles[0][:-4] + ".fif")
         process_initial_raw_eeg(
-            mainDir + subject + subDirs + subject + "_" + runName + ".fif",
+            mainDir + subject + subDirs + subject[-5:] + "_" + runName + ".fif",
             mainDir + subject + subDirs,
             refs=refs,
             freqsToNotch=freqsToNotch,
@@ -172,7 +173,7 @@ except:  # if it doesn't exist, we'll make it first, and then load it
         raw.append(raw2)
         raw.save(targetFiles[0][:-4] + ".fif")
         process_initial_raw_eeg(
-            mainDir + subject + subDirs + subject + "_" + runName + ".fif",
+            mainDir + subject + subDirs + subject[-5:] + "_" + runName + ".fif",
             mainDir + subject + subDirs,
             refs=refs,
             freqsToNotch=freqsToNotch,

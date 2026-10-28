@@ -107,23 +107,23 @@ complexSubtypeNames = [" (real)", " (imag)", " (abs)", " (phase)"]
 ci = 0.95  # confidence interval for shading
 
 
-# subjectsToAverage = [
-#     "R3045",
-#     "R3089",
-#     "R3093",
-#     "R3095",
-#     "R3151",
-#     "R2774",
-#     "R3152",
-#     "R2877",
-#     "R3157",
-#     "R2783",
-#     "R3170",
-#     "R3172",
-#     "R3193",
-#     "R3184",
-#     "R3214",
-# ]
+subjectsToAverage = [
+    "R3045",
+    "R3089",
+    "R3093",
+    "R3095",
+    "R3151",
+    "R2774",
+    "R3152",
+    "R2877",
+    "R3157",
+    "R2783",
+    "R3170",
+    "R3172",
+    "R3193",
+    "R3184",
+    "R3214",
+]
 
 # subjectsToAverage = [
 #     "R3045",
@@ -143,8 +143,7 @@ ci = 0.95  # confidence interval for shading
 # subjectsToAverage=["R3045", "R3089", "R3093", "R3095", "R3151", "R2774", "R3152", "R2877"]
 # subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
 # subjectsToAverage=["R2877", "R3151", "R3152"]
-subjectsToAverage = ["R3157"]
-
+# subjectsToAverage = ["R3157"]
 
 # %%
 def makeAnalytic(mat):
@@ -908,8 +907,8 @@ complexSubtype = 0
 # condsToPlot = [evokedAvgDistHard, evokedAvgTargetEasy, evokedAvgDistEasy, evokedAvgTargetHard]
 # colors = ["brown", "cyan", "red", "green"]
 
-# condsToPlot = [evokedAvgQuiet, evokedAvgTargetEasy, evokedAvgTargetHard]
-# colors = ["blue", "cyan", "green"]
+condsToPlot = [evokedAvgQuiet, evokedAvgTargetEasy, evokedAvgTargetHard]
+colors = ["blue", "cyan", "green"]
 
 # condsToPlot = [evokedAvgQuiet, evokedAvgMixHard, evokedAvgMixEasy]
 # colors = ["blue", "red", "green"]
@@ -920,8 +919,8 @@ complexSubtype = 0
 # condsToPlot = [evokedAvgMix4dB, evokedAvgMix0dB, evokedAvgMixNeg4dB]
 # colors = ["cyan", "xkcd:light green", "green"]
 
-condsToPlot = [evokedAvgMixEasy, evokedAvgMixHard]
-colors = ["cyan", "red"]
+# condsToPlot = [evokedAvgMixEasy, evokedAvgMixHard]
+# colors = ["cyan", "red"]
 
 
 # condsToPlot = [evokedAvgTarget4dB, evokedAvgTargetNeg4dB, evokedAvgDist4dB, evokedAvgDistNeg4dB]

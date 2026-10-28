@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -28,6 +28,8 @@ plt.ion()
 # %%
 iciFilename = "randomICIs.pickle"
 wavFilename = "fullABRstim.wav"
+clicksWavFilename = "clickABRstim.wav"
+tonesWavFilename = "toneABRstim.wav"
 toneWavfilename = "toneNew.wav"
 
 #########################################################################
@@ -84,6 +86,8 @@ else:
 
 
 fullTimeSeries = np.zeros(int((allICIs.sum() + 0.001) * fs))
+clickTimeSeries = np.zeros(int((allICIs.sum() + 0.001) * fs))
+toneTimeSeries = np.zeros(int((allICIs.sum() + 0.001) * fs))
 
 count = 0
 countAlternate = 0
@@ -96,6 +100,7 @@ for i in range(numClicks):
     thisTonePeriod = np.zeros(int(round(allICIsAlternate[i] * fs)))
     # thisClick[: len(click)] = click
     fullTimeSeries[count : count + len(click)] += click
+    clickTimeSeries[count : count + len(click)] += click
     clickTimes.append(count)  # These numbers are in sample time right now
     if i != 0:
         prevICIvalues.append(allICIs[i - 1])
@@ -104,6 +109,7 @@ for i in range(numClicks):
     if countTotalTones < desiredNumTones and i == clickIndsForTones[countTotalTones]:
         # fullTimeSeries[count:count + len(tone)] = tone
         fullTimeSeries[countAlternate : countAlternate + len(tone)] += tone
+        toneTimeSeries[countAlternate : countAlternate + len(tone)] += tone
         toneTimes.append(countAlternate)  # These numbers are in sample time now
         # print(moduloForTones)
         countTotalTones += 1
@@ -118,6 +124,8 @@ print(f"Total tones written is {countTotalTones}")
 t = np.linspace(0, len(fullTimeSeries) / fs, len(fullTimeSeries))
 
 sp.io.wavfile.write(wavFilename, fs, fullTimeSeries)
+sp.io.wavfile.write(clicksWavFilename, fs, clickTimeSeries)
+sp.io.wavfile.write(tonesWavFilename, fs, toneTimeSeries)
 
 # %%
 print(

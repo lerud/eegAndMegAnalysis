@@ -17,7 +17,6 @@ import mne
 import numpy as np
 import eelbrain as eb
 import scipy as sp
-import mat73
 import matplotlib
 import matplotlib.pyplot as plt
 import pickle
@@ -29,6 +28,8 @@ matplotlib.use("QtAgg")
 plt.ion()
 
 # %%
+saveTonesCombined = True
+
 # subject='R3151';badChanList=['C3','FC5']
 
 # subject = "R2774"
@@ -57,7 +58,9 @@ plt.ion()
 # subject = "R3214"
 # badChanList = ["T8"]
 
-subject = "R3265"
+# subject = "R3247"
+subject = "R3247"
+# subject = "R3247"
 badChanList = None
 
 # badChanList = ["CP6"]  # Keep an eye on CP2 and possibly others
@@ -70,6 +73,17 @@ eventID = 130  # the usual
 # eventID=32898  # R3089
 # eventID=49282  # R3093
 
+eventIDmeg = 162
+
+badChanListMeg = ["MEG 056", "MEG 086"]
+
+
+
+l_freq = 3
+h_freq = 20
+
+
+
 parentDir = "/Volumes/Seagate/map/"
 
 # eegLocation='/Users/karl/Dropbox/UMD/multilevel0/230908/'
@@ -77,12 +91,14 @@ parentDir = "/Volumes/Seagate/map/"
 # eegLocation='/Users/karl/map/R3045/eegAndMeg/eeg/'
 # eegLocation = "/Users/karl/map/" + subject + "/eegAndMeg/eeg/"
 eegLocation = parentDir + subject + "/eegAndMeg/eeg/"
+megLocation = parentDir + subject + "/eegAndMeg/meg/"
 
 # bdfFilename='multilevel0_tones.bdf'
 # bdfFilename='R3045_tones.bdf'
 # bdfFilename='R3045_stacks.bdf'
 
 bdfFilename = subject + "_" + runName + ".fif"
+bdfFilenameMeg = subject + "_" + runName + "-raw.fif"
 
 # matFilename='tonesSnsTspcaOutput.mat'
 # matFilename='stacksSnsTspcaOutput.mat'
@@ -93,16 +109,20 @@ denoiseMatlab = False
 refs = ["EXG3", "EXG4"]
 # refs=["Fp1"]
 
-edgePad = 0.01
+edgePad = 0.05
 
 # %%
 tones = mne.io.read_raw_fif(f"{eegLocation}{bdfFilename}", preload=True)
+tonesMeg = mne.io.read_raw_fif(f"{megLocation}{bdfFilenameMeg}", preload=True)
 
 # %%
 if not denoiseMatlab:
     tonesDenoised = tones
+    tonesDenoisedMeg = tonesMeg
     notchFreqs = np.arange(60, 8192, 60)
+    notchFreqsMeg = np.arange(60, 1000, 60)
     tonesDenoised.notch_filter(notchFreqs)
+    tonesDenoisedMeg.notch_filter(notchFreqsMeg)
     tonesDenoised.set_eeg_reference(ref_channels=refs)
 else:
     preprocMat = mat73.loadmat(f"{eegLocation}{matFilename}")["full_output"]
@@ -117,7 +137,10 @@ else:
 
 # %%
 events = mne.find_events(tonesDenoised, shortest_event=0)
+eventsMeg = mne.find_events(tonesDenoisedMeg, shortest_event=0)
+
 tonesDenoised, events = tonesDenoised.resample(sfreq=500, events=events, verbose=True)
+tonesDenoisedMeg, eventsMeg = tonesDenoisedMeg.resample(sfreq=500, events=eventsMeg, verbose=True)
 # events = mne.find_events(tonesDenoised)
 # print(tonesDenoised.ch_names)
 print(events[:30, :])
@@ -151,10 +174,12 @@ tonesDenoised.set_montage(easycap_montage)
 # tonesDenoised.set_eeg_reference(ref_channels='average')
 
 # %%
-# tonesDenoised.filter(l_freq=0.1, h_freq=20)
-tonesDenoised.filter(l_freq=3, h_freq=20)
-# tonesDenoised.filter(l_freq=80,h_freq=630)
+tonesDenoised.filter(l_freq=l_freq, h_freq=h_freq)
 print(tonesDenoised.info)
+
+tonesDenoisedMeg.filter(l_freq=l_freq, h_freq=h_freq)
+print(tonesDenoisedMeg.info)
+
 
 # %%
 elp_ch_names = [
@@ -231,6 +256,11 @@ if badChanList is not None:
     tonesDenoised.info["bads"].extend(badChanList)
     tonesDenoised.interpolate_bads()
 
+if badChanListMeg is not None:
+    for badChan in badChanListMeg:
+        tonesDenoisedMeg.info["bads"].append(badChan)
+    tonesDenoisedMeg.interpolate_bads(reset_bads=False)
+
 # %%
 # plt.figure()
 # plt.plot(data[40,145700:146000])
@@ -242,6 +272,7 @@ if badChanList is not None:
 # event_dict = {"Tones": 130}
 # event_dict = {"Tones": 32898}
 event_dict = {"Tones": eventID}
+event_dict_meg = {"Tones": eventIDmeg}
 
 # fig = mne.viz.plot_events(
 #    events, event_id=event_dict, sfreq=tonesDenoised.info["sfreq"], first_samp=tonesDenoised.first_samp
@@ -249,13 +280,23 @@ event_dict = {"Tones": eventID}
 
 # %%
 reject_criteria = dict(
-    #    mag=4000e-15,  # 4000 fT
+    # mag=4000e-15,  # 4000 fT
     #   grad=4000e-13,  # 4000 fT/cm
     # eeg=250e-6,  # 150 µV  # Often this threshold seems best
     eeg=550e-6,  # 150 µV  # Often this threshold seems best
     #    eeg=550e-5,  # 150 µV
     #    eog=250e-6,
 )  # 250 µV
+
+reject_criteria_meg = dict(
+    mag=4000e-15,  # 4000 fT
+    #   grad=4000e-13,  # 4000 fT/cm
+    # eeg=250e-6,  # 150 µV  # Often this threshold seems best
+    # eeg=550e-6,  # 150 µV  # Often this threshold seems best
+    #    eeg=550e-5,  # 150 µV
+    #    eog=250e-6,
+)  # 250 µV
+
 
 # %%
 epochs = mne.Epochs(
@@ -270,14 +311,35 @@ epochs = mne.Epochs(
     preload=True,
 )
 
+epochsMeg = mne.Epochs(
+    tonesDenoisedMeg,
+    eventsMeg,
+    event_id=event_dict_meg,
+    tmin=-0.2,  # These are ok for slower ERP
+    tmax=0.7,
+    #    tmin=-0.05,  # Try these for FFRish ERP?
+    #    tmax=.2,
+    reject=reject_criteria_meg,
+    preload=True,
+)
+
 # %%
 toneEpochs = epochs["Tones"]
+
+toneEpochsMeg = epochsMeg["Tones"]
+
+
+
+
 # toneEpochs.ch_names
 
 # toneEpochs.plot_image(picks=["FC1", "CP2"])
 
 # %%
-tonesEvoked = toneEpochs.average()
+tonesEvokedEeg = toneEpochs.average()
+tonesEvokedMeg = toneEpochsMeg.average()
+
+tonesEvoked = tonesEvokedMeg.copy().add_channels([tonesEvokedEeg], force_update_info=True)
 
 # %%
 toneTimes = events[events[:, 2] == 130, 0] / tonesDenoised.info["sfreq"]
@@ -292,9 +354,18 @@ tonesRegressor = sp.ndimage.gaussian_filter1d(
 )
 tonesResponse = sp.stats.zscore(tonesResponse)
 
-rfTones = mne.decoding.ReceptiveField(
-    -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], estimator=1e1
+
+
+# rfTones = mne.decoding.ReceptiveField(
+#     -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], estimator=1e6
+# )
+
+rfTones = mne.decoding.TimeDelayingRidge(
+    -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], alpha=1e1, 
+    reg_type="ridge"
 )
+
+
 rfTones.fit(tonesRegressor[:, np.newaxis], tonesResponse)
 TRFsTones = np.moveaxis(
     rfTones.coef_[
@@ -312,9 +383,13 @@ tonesTrfsEvoked = mne.EvokedArray(
 )
 
 # %%
-tonesEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False)
-tonesTrfsEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False)
+tonesEvoked.copy().pick_types(meg=True).plot_topo(color="r", legend=False, title="Evoked average")
+tonesTrfsEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False, title="TRF deconvolution")
 
+
+# %%
+if saveTonesCombined:
+    tonesEvoked.save(megLocation + "tonesCombinedERP.fif", overwrite=True)
 
 # %%
 # tonesEvokedSpec=tonesEvoked.compute_psd(method="welch", tmin=0, tmax=.25, fmin=50, fmax=550, n_per_seg=16384, n_fft=16384)

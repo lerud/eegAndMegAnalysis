@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -24,19 +24,23 @@ import os
 import sys
 from nilearn import plotting
 
+from neuroAndSignalTools.utilityFuncs import *
+
 matplotlib.use("QtAgg")
 plt.ion()
 
 
 # %%
-def calcPC(mat, doPC):
+def calcPC_OLD(mat, doPC, comparisonSignal):
     if doPC:
         outmat = np.zeros((mat.shape[2], mat.shape[0]))
         for i in range(mat.shape[0]):
             submat = mat[i, :, :].T
             u, s, _ = np.linalg.svd(submat)
             PC = u[:, 0] * s[0]
-            pearsonR = np.corrcoef(PC, submat.mean(axis=1))[1, 0]
+            if comparisonSignal is None:
+                comparisonSignal = submat.mean(axis=1)
+            pearsonR = np.corrcoef(PC, comparisonSignal)[1, 0]
             print(pearsonR)
             PC *= np.sign(pearsonR)
             outmat[:, i] = PC
@@ -49,18 +53,18 @@ def calcPC(mat, doPC):
 def extractSourcesSingleCondition(
     subjectsToAverage,
     subDirs,
+    filenamePrefix,
     nameOfRegressor,
     typeOfRegressor,
     filenameSuffix,
+    evokedFilename,
     doPC,
     vecMode,
     nonVecMode,
     doVec,
     subjects_dir,
+    useSensorTRF,
 ):
-
-    # filenamePrefix = "sources"
-    filenamePrefix = "concurSources"
 
     transvGyrusTimeCoursesAllSubjs = []
     transvSulcusTimeCoursesAllSubjs = []
@@ -80,6 +84,8 @@ def extractSourcesSingleCondition(
         # eegLocation = "/Users/karl/map/" + subject + subDirs
         megLocation = "/Volumes/Seagate/map/" + subject + subDirs
 
+        tempLocation = doRsync(f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}.pickle")
+
         (
             subject,
             mriSubject,
@@ -89,9 +95,20 @@ def extractSourcesSingleCondition(
             inverse_operator_vol,
             stc_vec,
         ) = eb.load.unpickle(
-            f"{megLocation}{filenamePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
+            # f"{megLocation}{filenamePrefix}{nameOfRegressor}_{typeOfRegressor}{filenameSuffix}.pickle"
+            # f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}.pickle"
+            tempLocation
         )
 
+
+        if useSensorTRF:
+            evoked = eb.load.unpickle(f"{megLocation}{evokedFilename}_{typeOfRegressor}{filenameSuffix}")
+            evoked = evoked[1][0]
+            sensorTRF = evoked.get_data()[evoked.ch_names.index("Fz")]  # Can index like this because the data's first dim is sensors
+            inputComparison = sensorTRF
+        else:
+            inputComparison = None
+        
         volLocation = f"{subjects_dir}/{mriSubject}/mri/aparc.a2009s+aseg.mgz"
 
         if doVec:
@@ -103,7 +120,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(transvGyrusTimeCourses.shape)
             allSourceTimeCourses.append(transvGyrusTimeCourses)
@@ -113,7 +130,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(transvSulcusTimeCourses.shape)
             allSourceTimeCourses.append(transvSulcusTimeCourses)
@@ -123,7 +140,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(planTempTimeCourses.shape)
             allSourceTimeCourses.append(planTempTimeCourses)
@@ -133,7 +150,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(insulaTimeCourses.shape)
             allSourceTimeCourses.append(insulaTimeCourses)
@@ -143,7 +160,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(planPolarTimeCourses.shape)
             allSourceTimeCourses.append(planPolarTimeCourses)
@@ -153,7 +170,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(supTempGyrusTimeCourses.shape)
             allSourceTimeCourses.append(supTempGyrusTimeCourses)
@@ -163,7 +180,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(supTempSulcusTimeCourses.shape)
             allSourceTimeCourses.append(supTempSulcusTimeCourses)
@@ -173,7 +190,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(infFrontTimeCourses.shape)
             allSourceTimeCourses.append(infFrontTimeCourses)
@@ -183,7 +200,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(midFrontTimeCourses.shape)
             allSourceTimeCourses.append(midFrontTimeCourses)
@@ -193,7 +210,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(parahipTimeCourses.shape)
             allSourceTimeCourses.append(parahipTimeCourses)
@@ -203,7 +220,7 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:3, :, :],
-                doPC,
+                doPC, inputComparison,
             )
             print(subcortTimeCourses.shape)
 
@@ -358,8 +375,11 @@ def extractSourcesSingleCondition(
 # fs = 5000
 
 
-lenResponse = 426
-fs = 500
+# lenResponse = 426
+# fs = 500
+
+lenResponse = 850
+fs = 5000
 
 
 # nameOfRegressor = "~gammatone-1"
@@ -372,17 +392,22 @@ fs = 500
 
 # nameOfRegressor = "~phsurp"
 
-nameOfRegressor = "~cohtent"
+# nameOfRegressor = "~cohtent"
 
 # nameOfRegressor = "~wordprob"
 
 # nameOfRegressor = "~wordsurp"
+
+
+nameOfRegressor = ""
+
 
 timeToAddToStart = 0
 # timeToAddToStart = .008
 
 
 doPC = True
+# doPC = False
 
 vecMode = "mean"
 nonVecMode = "mean_flip"
@@ -394,46 +419,67 @@ subjects_dir = os.path.expandvars("$SUBJECTS_DIR")
 subDirs = "/eegAndMeg/meg/"
 
 
-subjectsToAverage = [
-    "R3045",
-    "R3089",
-    "R3093",
-    "R3095",
-    "R3151",
-    "R2774",
-    "R3152",
-    "R2877",
-    "R3157",
-    "R2783",
-    "R3170",
-    "R3172",
-    "R3193",
-    "R3184",
-    "R3214",
-]
-
 # subjectsToAverage = [
+#     "R3045",
+#     "R3089",
 #     "R3093",
 #     "R3095",
 #     "R3151",
+#     "R2774",
 #     "R3152",
 #     "R2877",
 #     "R3157",
 #     "R2783",
+#     "R3170",
+#     "R3172",
+#     "R3193",
+#     "R3184",
+#     "R3214",
+#     "R3265",
+#     "R3275",
+#     "R3247",
+#     "R3292",
+#     "R3293",
+#     "R3294",
+#     "R3303",
+#     "R3304",
+#     "R3306",
 # ]
+
+subjectsToAverage = [
+    "R3292",
+    "R3293",
+    "R3294",
+    "R3303",
+    "R3304",
+    "R3306",
+]
 # subjectsToAverage=["R3045"]
 
+lambdaSuffix = "_lambda1"
 
 # typeOfRegressor = "mix"
-typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
+# typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
+typeOfRegressors = ["mix"]
 # typeOfRegressors = ["mix", "target", "target"]
 # typeOfRegressor = "distractor"
 
-filenameSuffixes = ["_quiet", "_easy", "_hard", "_easy", "_hard"]
+# filenameSuffixes = [f"_quiet{lambdaSuffix}", f"_easy{lambdaSuffix}", f"_hard{lambdaSuffix}", f"_easy{lambdaSuffix}", f"_hard{lambdaSuffix}"]
+filenameSuffixes = [f"_quiet{lambdaSuffix}"]
 # filenameSuffixes = ["_quiet", "_easy", "_hard"]
 # filenameSuffix = "_easy"
 # filenameSuffix = "_hard"
 # filenameSuffixes = ""
+
+
+# filenamePrefix = "sources"
+filenamePrefix = "anMeegSources"
+# filenamePrefix = "anMeegSourcesNoEEG"
+# filenamePrefix = "anMeegSourcesNoMEG"
+
+evokedFilename = "anMeegRecFieldAllFolds"
+
+useSensorTRF = True
 
 allSourcesAllConds = dict()
 condLabels = []
@@ -447,14 +493,17 @@ for iType, typeOfRegressor in enumerate(typeOfRegressors):
     allSourcesAllConds[condLabels[iType]] = extractSourcesSingleCondition(
         subjectsToAverage,
         subDirs,
+        filenamePrefix,
         nameOfRegressor,
         typeOfRegressor,
         filenameSuffix,
+        evokedFilename,
         doPC,
         vecMode,
         nonVecMode,
         doVec,
         subjects_dir,
+        useSensorTRF,
     )
 
 

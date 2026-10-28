@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -42,6 +42,7 @@ parallelBackend = "loky"
 # regTypes=['target','distractor','mix']
 
 mainDirSuff = ""
+# mainDirSuff = "Testing2"
 # mainDirSuff = "Inverted"
 
 mainDirs = [
@@ -245,12 +246,16 @@ anf_types = ["hsr"]  # select lsr, msr, or hsr for spont rate
 # cfs=(125, 6000, 50)  # 43 comes from the scripting I inherited from Maddox/Vrishab
 # cfs = (125, 16000, 43)  # 43 comes from the scripting I inherited from Maddox/Vrishab
 
+noiseInstances = np.arange(3, 20)
+
 fsForModel = 100000  # This is the sampling rate that the Zilany/Carney model needs to run it, so upsample if we don't have that
 # fsForRegressor = 5000  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
-fsForRegressor = 16384  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
+# fsForRegressor = 16384  # This is the sampling rate we want for the regressor eventually, so downsample at the end of everything
+# fsForRegressors = [5000, 16384]
+fsForRegressors = [16384]
 
-numBandsAll = [43, 100]
-# numBandsAll = [43]
+# numBandsAll = [43, 100]
+numBandsAll = [43]
 
 
 # %%
@@ -312,11 +317,12 @@ def doMultANmodels(
             cf=cfs,
             powerlaw="approximate",
             species="human",
+            ffGn=True,
         )
 
         rates = rates.to_numpy()
 
-        # rates = rates.mean(axis=1)  # Uncomment this line to take the average response from all fibers that were modeled
+        rates = rates.mean(axis=1)  # Uncomment this line to take the average response from all fibers that were modeled
 
         rates = sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel))
 
@@ -332,69 +338,76 @@ def doMultANmodels(
         print("\n")
         print("\n")
 
+for fsForRegressor in fsForRegressors:
 
-for numBands in numBandsAll:
-
-    fileSuffix = f"_ANmodel_maxFs_{numBands}bands.pickle"
-
-    cfs = (
-        125,
-        16000,
-        numBands,
-    )  # 43 comes from the scripting I inherited from Maddox/Vrishab
-
-    for i, mainDir in enumerate(mainDirs):
-
-        for j, condition in enumerate(conditions):
-
-            if doParallel:
-
-                joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
-                    joblib.delayed(doMultANmodels)(
-                        i,
-                        j,
-                        k,
-                        condition,
-                        regTypes,
-                        mainDir,
-                        fsForModel,
-                        fsForRegressor,
-                        dBSPLs,
-                        skipDist,
-                        anf_types,
-                        cfs,
-                        fileSuffix,
-                    )
-                    for k in np.arange(1, 17)
-                )
-
+    for noiseInstance in noiseInstances:
+    
+        for numBands in numBandsAll:
+        
+            # fileSuffix = f"_ANmodel_maxFs_{numBands}bands.pickle"
+            if fsForRegressor == 16384:
+                fileSuffix = f"_ANmodel_maxFs-{noiseInstance}.pickle"
             else:
-
-                for k in np.arange(1, 17):
-                    doMultANmodels(
-                        i,
-                        j,
-                        k,
-                        condition,
-                        regTypes,
-                        mainDir,
-                        fsForModel,
-                        fsForRegressor,
-                        dBSPLs,
-                        skipDist,
-                        anf_types,
-                        cfs,
-                        fileSuffix,
-                    )
-
-            ### Plot rates
-            # fig, ax = plt.subplots()
-            # img = ax.imshow(
-            #    rates.T,
-            #    aspect='auto'
-            # )
-            # plt.colorbar(img)
-            # plt.show()
+                fileSuffix = f"_ANmodel_fs{fsForRegressor}-{noiseInstance}.pickle"
+        
+            cfs = (
+                125,
+                16000,
+                numBands,
+            )  # 43 comes from the scripting I inherited from Maddox/Vrishab
+        
+            for i, mainDir in enumerate(mainDirs):
+        
+                for j, condition in enumerate(conditions):
+        
+                    if doParallel:
+        
+                        joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
+                            joblib.delayed(doMultANmodels)(
+                                i,
+                                j,
+                                k,
+                                condition,
+                                regTypes,
+                                mainDir,
+                                fsForModel,
+                                fsForRegressor,
+                                dBSPLs,
+                                skipDist,
+                                anf_types,
+                                cfs,
+                                fileSuffix,
+                            )
+                            for k in np.arange(1, 17)
+                        )
+        
+                    else:
+        
+                        for k in np.arange(1, 17):
+                            doMultANmodels(
+                                i,
+                                j,
+                                k,
+                                condition,
+                                regTypes,
+                                mainDir,
+                                fsForModel,
+                                fsForRegressor,
+                                dBSPLs,
+                                skipDist,
+                                anf_types,
+                                cfs,
+                                fileSuffix,
+                            )
+        
+                    ### Plot rates
+                    # fig, ax = plt.subplots()
+                    # img = ax.imshow(
+                    #    rates.T,
+                    #    aspect='auto'
+                    # )
+                    # plt.colorbar(img)
+                    # plt.show()
 
 # %%
 # print(type(rates))

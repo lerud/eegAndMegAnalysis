@@ -166,3 +166,7 @@ cython_debug/
 *.wav
 *.pickle
 .DS_Store
+*.csv
+*.*~
+*.pdf
+*.png

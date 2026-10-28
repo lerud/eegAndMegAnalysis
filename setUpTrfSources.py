@@ -49,10 +49,11 @@ parentDir = "/Volumes/Seagate/map/"
 
 
 doParallel = True
-n_jobs = 16
+n_jobs = 12
 backend = "loky"
 verbose = 49
 
+lambdaSuffixes = ["_lambda0", "_lambda1", "_lambda2", "_lambda3"] 
 
 subjects = [
     "R3045",
@@ -70,6 +71,15 @@ subjects = [
     "R3193",
     "R3184",
     "R3214",
+    "R3265",
+    "R3275",
+    "R3247",
+    "R3292",
+    "R3293",
+    "R3294",
+    "R3303",
+    "R3304",
+    "R3306",
 ]
 
 subset = [i for i in range(len(subjects))]
@@ -90,6 +100,15 @@ useAvgBrains = [
     False,
     True,
     True,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
     False,
     False,
 ]
@@ -128,44 +147,50 @@ badChanLists = [
     None,
     None,
     None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
 ]
 badChanLists = [badChanLists[i] for i in subset]
 
 
 typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
-filenameSuffixes = [
-    "_quiet",
-    "_easy",
-    "_hard",
-    "_easy",
-    "_hard",
-]
+
 
 
 # nameOfRegressors = ["_ANmodel_maxFs"]
 
-nameOfRegressors = [
-    "~gammatone-1",
-    "~gammatone-on-1",
-    "~wordOnsets_gaussian15msSD",
-    "~phoneOnsets_gaussian15msSD",
-    "~phsurp",
-    "~cohtent",
-    "~wordprob",
-    "~wordsurp",
-]
+# nameOfRegressors = [
+#     "~gammatone-1",
+#     "~gammatone-on-1",
+#     "~wordOnsets_gaussian15msSD",
+#     "~phoneOnsets_gaussian15msSD",
+#     "~phsurp",
+#     "~cohtent",
+#     "~wordprob",
+#     "~wordsurp",
+# ]
 
-bandpassFreqsList = [
-    [2, None],
-    [2, None],
-    [2, None],
-    [2, None],
-    [2, None],
-    [2, None],
-    [2, None],
-    [2, None],
-]
+nameOfRegressors = [[]]
+
+# bandpassFreqsList = [
+#     [2, None],
+#     [2, None],
+#     [2, None],
+#     [2, None],
+#     [2, None],
+#     [2, None],
+#     [2, None],
+#     [2, None],
+# ]
 # bandpassFreqsList = [[20, 1000]]
+bandpassFreqsList = [[10, 300]]
 
 
 # newestSubjectsToDo = 2  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
@@ -188,17 +213,39 @@ def doOneSubject(
     useAvgBrains,
     badChanLists,
     bandpassFreqsList,
-    filenameSuffixes,
 ):
 
     subject = subjects[iSubject]
 
-    for iType, typeOfRegressor in enumerate(typeOfRegressors):
-        for iName, nameOfRegressor in enumerate(nameOfRegressors):
+    for lambdaSuffix in lambdaSuffixes:
 
-            print("\n")
-            print(
-                [
+        filenameSuffixes = [
+        f"_quiet{lambdaSuffix}",
+        f"_easy{lambdaSuffix}",
+        f"_hard{lambdaSuffix}",
+        f"_easy{lambdaSuffix}",
+        f"_hard{lambdaSuffix}",
+    ]
+        
+        for iType, typeOfRegressor in enumerate(typeOfRegressors):
+            
+            for iName, nameOfRegressor in enumerate(nameOfRegressors):
+    
+                print("\n")
+                print(
+                    [
+                        parentDir,
+                        subject,
+                        useAvgBrains[iSubject],
+                        badChanLists[iSubject],
+                        typeOfRegressor,
+                        nameOfRegressor,
+                        bandpassFreqsList[iName],
+                        filenameSuffixes[iType],
+                    ]
+                )
+                print("\n")
+                computeSources(
                     parentDir,
                     subject,
                     useAvgBrains[iSubject],
@@ -207,19 +254,7 @@ def doOneSubject(
                     nameOfRegressor,
                     bandpassFreqsList[iName],
                     filenameSuffixes[iType],
-                ]
-            )
-            print("\n")
-            computeSources(
-                parentDir,
-                subject,
-                useAvgBrains[iSubject],
-                badChanLists[iSubject],
-                typeOfRegressor,
-                nameOfRegressor,
-                bandpassFreqsList[iName],
-                filenameSuffixes[iType],
-            )
+                )
 
 
 # %%
@@ -235,7 +270,6 @@ if doParallel:
             useAvgBrains,
             badChanLists,
             bandpassFreqsList,
-            filenameSuffixes,
         )
         for iSubject in range(len(subjects))
     )
@@ -252,5 +286,4 @@ else:
             useAvgBrains,
             badChanLists,
             bandpassFreqsList,
-            filenameSuffixes,
         )
