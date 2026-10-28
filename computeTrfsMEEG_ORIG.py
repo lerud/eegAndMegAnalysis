@@ -62,7 +62,7 @@ def computeTrfs(
 
     # addNoiseToRegressors = None
     addNoiseToRegressors = 2.5
-        
+
     t0overall = time.time()
 
     doPlotting = False
@@ -87,7 +87,7 @@ def computeTrfs(
 
     # filterPhase = "zero"
     filterPhase = "minimum"
-    
+
     if presStopCorrection is None:
         doPresentation = False
         doTriggy = True
@@ -95,7 +95,12 @@ def computeTrfs(
         doPresentation = True
         doTriggy = False
 
-    if subject == "R3265" or subject == "R3275" or subject == "R3247" or subject == "R3304":
+    if (
+        subject == "R3265"
+        or subject == "R3275"
+        or subject == "R3247"
+        or subject == "R3304"
+    ):
         doPresentation = True
         doTriggy = False
 
@@ -153,19 +158,20 @@ def computeTrfs(
         0  # Positive or negative time duration in seconds to add to all epoch lengths
     )
 
-    for i in range(len(nameOfRegressor)):  # Now that we have the correct filenames in the variable regressorNames, take the dash and noise instance number out of the nameOfRegressor variable (if they exist) so that we can still use these strings generally later
+    for i in range(
+        len(nameOfRegressor)
+    ):  # Now that we have the correct filenames in the variable regressorNames, take the dash and noise instance number out of the nameOfRegressor variable (if they exist) so that we can still use these strings generally later
         if "ANmodel_fs5000" in nameOfRegressor[i]:
             nameOfRegressor[i] = "_ANmodel_fs5000"
         elif "ANmodel_maxFs" in nameOfRegressor[i]:
             nameOfRegressor[i] = "_ANmodel_maxFs"
-    
+
     denoisePipeline = "noDenoiseMatlab"
     # denoisePipeline = "maxwellAndNotch"
 
-    newMat = np.array([[1,     0,      -0.05, 0   ],
-                       [0,     1,      0.325, 0   ],
-                       [0.05,  -0.325, 1,     0.03],
-                       [0,     0,      0,     1   ]])
+    newMat = np.array(
+        [[1, 0, -0.05, 0], [0, 1, 0.325, 0], [0.05, -0.325, 1, 0.03], [0, 0, 0, 1]]
+    )
     commonDestination = mne.transforms.Transform("meg", "head", newMat)
 
     # Low and high cutoff frequencies for main MNE bandpass filter
@@ -278,17 +284,26 @@ def computeTrfs(
     # %%
     justDidIt = False
     justDidItMeg = False
-    
-    if doPresentation:  # This hash includes doTriggy for both on purpose; it will be False if using Presentation triggers, and True if using Triggy triggers
-        presPipelineHashList = [subject.encode("utf-8"), denoisePipeline.encode("utf-8"), str(eegTriggerRepair).encode("utf-8"), str(doTriggy).encode("utf-8"), np.array(fs), str(l_freq).encode("utf-8"), str(h_freq).encode("utf-8")]
-    
+
+    if (
+        doPresentation
+    ):  # This hash includes doTriggy for both on purpose; it will be False if using Presentation triggers, and True if using Triggy triggers
+        presPipelineHashList = [
+            subject.encode("utf-8"),
+            denoisePipeline.encode("utf-8"),
+            str(eegTriggerRepair).encode("utf-8"),
+            str(doTriggy).encode("utf-8"),
+            np.array(fs),
+            str(l_freq).encode("utf-8"),
+            str(h_freq).encode("utf-8"),
+        ]
+
         if badChanListEEG is not None:
             presPipelineHashList.append("".join(badChanListEEG).encode("utf-8"))
 
         if not eegOnly:
             if badChanListMEG is not None:
                 presPipelineHashList.append("".join(badChanListMEG).encode("utf-8"))
-
 
         presHasher = hashlib.blake2b(digest_size=20)
         [presHasher.update(i) for i in presPipelineHashList]
@@ -301,19 +316,26 @@ def computeTrfs(
         print("\n")
         print("*************Debugging******************")
         print("\n")
-        
+
         presHash = presHasher.hexdigest()
 
     if doTriggy:
-        trigPipelineHashList = [subject.encode("utf-8"), denoisePipeline.encode("utf-8"), str(eegTriggerRepair).encode("utf-8"), str(doTriggy).encode("utf-8"), np.array(fs), str(l_freq).encode("utf-8"), str(h_freq).encode("utf-8")]
-    
+        trigPipelineHashList = [
+            subject.encode("utf-8"),
+            denoisePipeline.encode("utf-8"),
+            str(eegTriggerRepair).encode("utf-8"),
+            str(doTriggy).encode("utf-8"),
+            np.array(fs),
+            str(l_freq).encode("utf-8"),
+            str(h_freq).encode("utf-8"),
+        ]
+
         if badChanListEEG is not None:
             trigPipelineHashList.append("".join(badChanListEEG).encode("utf-8"))
 
         if not eegOnly:
             if badChanListMEG is not None:
                 trigPipelineHashList.append("".join(badChanListMEG).encode("utf-8"))
-
 
         trigHasher = hashlib.blake2b(digest_size=20)
         [trigHasher.update(i) for i in trigPipelineHashList]
@@ -326,19 +348,20 @@ def computeTrfs(
         print("\n")
         print("*************Debugging******************")
         print("\n")
-        
+
         trigHash = trigHasher.hexdigest()
 
     passThrough = False
 
-
     print(f"Set to use denoising pipeline {denoisePipeline}")
     print("\n")
-    
+
     if not os.path.exists(eegLocation + f"{denoisePipeline}-raw.fif"):
 
         t0 = time.time()
-        print(f"Raw EEG fif files for denoising pipeline {denoisePipeline} do not exist, so opening original EEG fif files to create and save them, and keep MNE raw object in kernel")
+        print(
+            f"Raw EEG fif files for denoising pipeline {denoisePipeline} do not exist, so opening original EEG fif files to create and save them, and keep MNE raw object in kernel"
+        )
         print("\n")
         denoised = mne.io.read_raw_fif(eegLocation + fifFilename, preload=True)
 
@@ -413,15 +436,16 @@ def computeTrfs(
         denoised.set_montage(digMontage)
         # denoised.set_montage(easycap_montage)
 
-        
         if badChanListEEG is not None:
             denoised.info["bads"].extend(badChanListEEG)
             denoised.interpolate_bads(reset_bads=False)
 
         print("\n")
-        print(f"Took {time.time()-t0} seconds to load raw fif and interpolate bad channels")
+        print(
+            f"Took {time.time()-t0} seconds to load raw fif and interpolate bad channels"
+        )
         print("\n")
-        
+
         print("Now referencing and denoising")
         t1 = time.time()
         denoised.set_eeg_reference(ref_channels=refs)
@@ -431,20 +455,23 @@ def computeTrfs(
         t2 = time.time()
         print(f"Took {t2-t1} seconds")
         print("\n")
-        print(
-            "Finally saving denoised EEG raw fif file"
-        )
+        print("Finally saving denoised EEG raw fif file")
         denoised.save(eegLocation + f"{denoisePipeline}-raw.fif")
         print(f"Took {time.time()-t2} seconds")
 
-
         tNoise = time.time()
-        print(f"Making temporary copy of EEG and filtering it for creating highpass noise covariance matrix")
-        eegCopyForNoise = denoised.copy().filter(l_freq=1500, h_freq=None, phase=filterPhase)
+        print(
+            f"Making temporary copy of EEG and filtering it for creating highpass noise covariance matrix"
+        )
+        eegCopyForNoise = denoised.copy().filter(
+            l_freq=1500, h_freq=None, phase=filterPhase
+        )
         t1 = time.time()
         print(f"Took {t1-tNoise} seconds to copy and filter raw EEG")
 
-        print(f"Now calculating and saving full sample rate EEG-only highpass noise covariance matrix")
+        print(
+            f"Now calculating and saving full sample rate EEG-only highpass noise covariance matrix"
+        )
         print("\n")
         eegNoiseCov = mne.compute_raw_covariance(eegCopyForNoise)
         eb.save.pickle(eegNoiseCov, eegLocation + "highpassNoiseCovariance.pickle")
@@ -453,40 +480,44 @@ def computeTrfs(
             del eegCopyForNoise
         else:
             print(f"and downsampling raw EEG copy for creating M/EEG covariance matrix")
-            eegCopyForNoise.resample(sfreq=2000)  # Magic number 2000 here is hopefully the MEG sampling rate
+            eegCopyForNoise.resample(
+                sfreq=2000
+            )  # Magic number 2000 here is hopefully the MEG sampling rate
         t2 = time.time()
         print(f"Took {t2-t1} seconds")
         print("\n")
-            
-        justDidIt = True
-        
 
+        justDidIt = True
 
     if (not eegOnly or eegTriggerRepair is not None) and not os.path.exists(
         megLocation + f"{denoisePipeline}-raw.fif"
     ):
 
         t0 = time.time()
-        print(f"Raw MEG fif files for denoising pipeline {denoisePipeline} do not exist, so opening original MEG fif files to create and save them, and keep MNE raw object in kernel")
+        print(
+            f"Raw MEG fif files for denoising pipeline {denoisePipeline} do not exist, so opening original MEG fif files to create and save them, and keep MNE raw object in kernel"
+        )
         print("\n")
         # For now, just going to do the comparable same thing for the MEG
-        denoisedMeg = mne.io.read_raw_fif(
-            megLocation + fifFilenameMeg, preload=True
-        )
+        denoisedMeg = mne.io.read_raw_fif(megLocation + fifFilenameMeg, preload=True)
 
         if badChanListMEG is not None:
             for MEG_bad_channel in badChanListMEG:
                 denoisedMeg.info["bads"].append(MEG_bad_channel)
             denoisedMeg.interpolate_bads(reset_bads=False)
-            
+
         print("\n")
-        print(f"Took {time.time()-t0} seconds to load raw fif and interpolate bad channels")
+        print(
+            f"Took {time.time()-t0} seconds to load raw fif and interpolate bad channels"
+        )
         print("\n")
         t0 = time.time()
         if denoisePipeline == "maxwellAndNotch":
             print("Now implementing Maxwell filter")
             print("\n")
-            denoisedMeg = mne.preprocessing.maxwell_filter(denoisedMeg, st_duration=10, st_correlation=.9, ignore_ref=True)
+            denoisedMeg = mne.preprocessing.maxwell_filter(
+                denoisedMeg, st_duration=10, st_correlation=0.9, ignore_ref=True
+            )
             print(f"Took {time.time()-t0} seconds")
             print("Now notching")
             t1 = time.time()
@@ -508,24 +539,34 @@ def computeTrfs(
         denoisedMeg.save(megLocation + f"{denoisePipeline}-raw.fif")
         print(f"Took {time.time()-t2} seconds")
 
-
         tNoise = time.time()
-        print(f"Making temporary copy of MEG and filtering it for creating highpass noise covariance matrix")
-        megCopyForNoise = denoisedMeg.copy().filter(l_freq=350, h_freq=None, phase=filterPhase)
+        print(
+            f"Making temporary copy of MEG and filtering it for creating highpass noise covariance matrix"
+        )
+        megCopyForNoise = denoisedMeg.copy().filter(
+            l_freq=350, h_freq=None, phase=filterPhase
+        )
         t1 = time.time()
         print(f"Took {t1-tNoise} seconds to copy and filter raw MEG")
-        print("Now combining EEG and MEG, creating noise covariance matrix, saving, and deleting copies")
+        print(
+            "Now combining EEG and MEG, creating noise covariance matrix, saving, and deleting copies"
+        )
         print("\n")
 
-        if not justDidIt:  # If the EEG has been done previously, then we already have the EEG noise covariance, but we still have to load it
-            print("Loading and resampling full-sampling-rate EEG, just for the purpose of merging with the MEG and making noise covariance object with both modalities")
+        if (
+            not justDidIt
+        ):  # If the EEG has been done previously, then we already have the EEG noise covariance, but we still have to load it
+            print(
+                "Loading and resampling full-sampling-rate EEG, just for the purpose of merging with the MEG and making noise covariance object with both modalities"
+            )
             print("\n")
             eegCopyForNoise = mne.io.read_raw_fif(
                 eegLocation + f"{denoisePipeline}-raw.fif", preload=True
             ).resample(sfreq=2000)
-            eegNoiseCov = eb.load.unpickle(eegLocation + "highpassNoiseCovariance.pickle")
+            eegNoiseCov = eb.load.unpickle(
+                eegLocation + "highpassNoiseCovariance.pickle"
+            )
 
-        
         lenEEG = eegCopyForNoise.times[-1]
         lenMEG = megCopyForNoise.times[-1]
         if lenEEG > lenMEG:
@@ -535,79 +576,132 @@ def computeTrfs(
         megCopyForNoise.add_channels([eegCopyForNoise], force_update_info=True)
         megNoiseCov = mne.compute_raw_covariance(megCopyForNoise)
         eegSize = eegNoiseCov.data.shape[0]
-        megNoiseCov.data[-eegSize:, -eegSize:] = eegNoiseCov.data  # replace the EEG covariances with what we calculated above at the full sampling rate
+        megNoiseCov.data[-eegSize:, -eegSize:] = (
+            eegNoiseCov.data
+        )  # replace the EEG covariances with what we calculated above at the full sampling rate
         eb.save.pickle(megNoiseCov, megLocation + "highpassNoiseCovariance.pickle")
         del eegCopyForNoise
         del megCopyForNoise
         t2 = time.time()
         print(f"Took {t2-t1} seconds")
-            
 
         justDidItMeg = True
 
     # %%
     alreadyFiltered = False
-    
+
     if os.path.exists(eegLocation + f"{denoisePipeline}-fs{fs}.pickle"):
         t0 = time.time()
         if fs != 16384:
-            if os.path.exists(eegLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"):
+            if os.path.exists(
+                eegLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+            ):
                 if doPresentation:
                     if not os.path.exists(hashedLocation + presHash + ".pickle"):
-                        print(f"Unpickling saved resampled and filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoised, events = eb.load.unpickle(eegLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                        print(
+                            f"Unpickling saved resampled and filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoised, events = eb.load.unpickle(
+                            eegLocation
+                            + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+                        )
                         t1 = time.time()
                         print(f"Took {t1-t0} seconds to load")
                         print("\n")
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
                 if doTriggy:
                     if not os.path.exists(hashedLocation + trigHash + ".pickle"):
-                        print(f"Unpickling saved resampled and filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoised, events = eb.load.unpickle(eegLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                        print(
+                            f"Unpickling saved resampled and filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoised, events = eb.load.unpickle(
+                            eegLocation
+                            + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+                        )
                         t1 = time.time()
                         print(f"Took {t1-t0} seconds to load")
                         print("\n")
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
             else:
-                print(f"Unpickling saved resampled EEG raw file and events matrix for fs {fs}")
-                denoised, events = eb.load.unpickle(eegLocation + f"{denoisePipeline}-fs{fs}.pickle")
+                print(
+                    f"Unpickling saved resampled EEG raw file and events matrix for fs {fs}"
+                )
+                denoised, events = eb.load.unpickle(
+                    eegLocation + f"{denoisePipeline}-fs{fs}.pickle"
+                )
                 t1 = time.time()
-                print(f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving")
+                print(
+                    f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving"
+                )
                 print("\n")
                 if l_freq is not None or h_freq is not None:
                     denoised.filter(l_freq=l_freq, h_freq=h_freq, phase=filterPhase)
-                    eb.save.pickle((denoised, events), eegLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                    eb.save.pickle(
+                        (denoised, events),
+                        eegLocation
+                        + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle",
+                    )
                 t2 = time.time()
                 print(f"Took {t2-t1} seconds to filter and save")
                 print("\n")
         else:
-            if os.path.exists(eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif"):
+            if os.path.exists(
+                eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif"
+            ):
                 if doPresentation:
                     if not os.path.exists(hashedLocation + presHash + ".pickle"):
-                        print(f"Unpickling saved filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoised = mne.io.read_raw_fif(eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif", preload=True)
+                        print(
+                            f"Unpickling saved filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoised = mne.io.read_raw_fif(
+                            eegLocation
+                            + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif",
+                            preload=True,
+                        )
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
                 if doTriggy:
                     if not os.path.exists(hashedLocation + trigHash + ".pickle"):
-                        print(f"Unpickling saved filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoised = mne.io.read_raw_fif(eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif", preload=True)
+                        print(
+                            f"Unpickling saved filtered EEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoised = mne.io.read_raw_fif(
+                            eegLocation
+                            + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif",
+                            preload=True,
+                        )
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
             else:
                 t0 = time.time()
-                print(f"Loading EEG raw fif file for denoising pipeline {denoisePipeline}")
-                denoised = mne.io.read_raw_fif(eegLocation + f"{denoisePipeline}-raw.fif", preload=True)
+                print(
+                    f"Loading EEG raw fif file for denoising pipeline {denoisePipeline}"
+                )
+                denoised = mne.io.read_raw_fif(
+                    eegLocation + f"{denoisePipeline}-raw.fif", preload=True
+                )
                 t1 = time.time()
-                print(f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving")
+                print(
+                    f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving"
+                )
                 denoised.filter(l_freq=l_freq, h_freq=h_freq, phase=filterPhase)
-                denoised.save(eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif")
+                denoised.save(
+                    eegLocation + f"{denoisePipeline}-raw-filt{l_freq}And{h_freq}.fif"
+                )
                 t2 = time.time()
                 print(f"Took {t2-t1} seconds to filter and save")
                 print("\n")
@@ -615,16 +709,20 @@ def computeTrfs(
             events = eb.load.unpickle(eegLocation + f"{denoisePipeline}-fs{fs}.pickle")
         print("\n")
         alreadyFiltered = True
-        
-    else:        
+
+    else:
         t0 = time.time()
         if not justDidIt:
-            print(f"Loading denoised EEG raw file, finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle")
+            print(
+                f"Loading denoised EEG raw file, finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle"
+            )
             denoised = mne.io.read_raw_fif(
                 eegLocation + f"{denoisePipeline}-raw.fif", preload=True
             )
         else:
-            print(f"Finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle")
+            print(
+                f"Finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle"
+            )
         events = mne.find_events(denoised, shortest_event=0)
         t1 = time.time()
         print("\n")
@@ -636,9 +734,7 @@ def computeTrfs(
         if fs == denoised.info["sfreq"]:
             denoised, _ = denoised.resample(sfreq=fs, events=events, verbose=True)
         else:
-            denoised, events = denoised.resample(
-                sfreq=fs, events=events, verbose=True
-            )
+            denoised, events = denoised.resample(sfreq=fs, events=events, verbose=True)
         t2 = time.time()
         print("\n")
         print(f"Took {t2-t1} seconds to calculate")
@@ -658,45 +754,77 @@ def computeTrfs(
 
         if os.path.exists(megLocation + f"{denoisePipeline}-fs{fs}.pickle"):
             t0 = time.time()
-            if os.path.exists(megLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"):
+            if os.path.exists(
+                megLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+            ):
                 if doPresentation:
                     if not os.path.exists(hashedLocation + presHash + ".pickle"):
-                        print(f"Unpickling saved resampled and filtered MEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoisedMeg, eventsMeg = eb.load.unpickle(megLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                        print(
+                            f"Unpickling saved resampled and filtered MEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoisedMeg, eventsMeg = eb.load.unpickle(
+                            megLocation
+                            + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+                        )
                         t1 = time.time()
                         print(f"Took {t1-t0} seconds to load")
                         print("\n")
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
                 if doTriggy:
                     if not os.path.exists(hashedLocation + trigHash + ".pickle"):
-                        print(f"Unpickling saved resampled and filtered MEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}")
-                        denoisedMeg, eventsMeg = eb.load.unpickle(megLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                        print(
+                            f"Unpickling saved resampled and filtered MEG raw file and events matrix for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}"
+                        )
+                        denoisedMeg, eventsMeg = eb.load.unpickle(
+                            megLocation
+                            + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle"
+                        )
                         t1 = time.time()
                         print(f"Took {t1-t0} seconds to load")
                         print("\n")
                     else:
-                        print(f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it")
+                        print(
+                            f"M/EEG epochs object exists for fs {fs}, l_freq {l_freq}, and h_freq {h_freq}, so unpickling it"
+                        )
                         passThrough = True
             else:
-                print(f"Unpickling saved resampled MEG raw file and events matrix for fs {fs}")
-                denoisedMeg, eventsMeg = eb.load.unpickle(megLocation + f"{denoisePipeline}-fs{fs}.pickle")
+                print(
+                    f"Unpickling saved resampled MEG raw file and events matrix for fs {fs}"
+                )
+                denoisedMeg, eventsMeg = eb.load.unpickle(
+                    megLocation + f"{denoisePipeline}-fs{fs}.pickle"
+                )
                 t1 = time.time()
-                print(f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving pickle")
+                print(
+                    f"Took {t1-t0} seconds to load; now filtering for l_freq {l_freq} and h_freq {h_freq} and saving pickle"
+                )
                 if l_freq is not None or h_freq is not None:
                     denoisedMeg.filter(l_freq=l_freq, h_freq=h_freq, phase=filterPhase)
-                    eb.save.pickle((denoisedMeg, eventsMeg), megLocation + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle")
+                    eb.save.pickle(
+                        (denoisedMeg, eventsMeg),
+                        megLocation
+                        + f"{denoisePipeline}-fs{fs}-filt{l_freq}And{h_freq}.pickle",
+                    )
                 t2 = time.time()
                 print(f"Took {t2-t1} seconds to filter and save")
             alreadyFiltered = True
         else:
             t0 = time.time()
             if not justDidItMeg:
-                print(f"Loading denoised MEG raw file, finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle")
-                denoisedMeg = mne.io.read_raw_fif(megLocation + f"{denoisePipeline}-raw.fif", preload=True)
+                print(
+                    f"Loading denoised MEG raw file, finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle"
+                )
+                denoisedMeg = mne.io.read_raw_fif(
+                    megLocation + f"{denoisePipeline}-raw.fif", preload=True
+                )
             else:
-                print(f"Finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle")
+                print(
+                    f"Finding all events, resampling raw data and events matrix for fs {fs}, and saving pickle"
+                )
             eventsMeg = mne.find_events(denoisedMeg, shortest_event=0)
             t1 = time.time()
             print("\n")
@@ -719,9 +847,7 @@ def computeTrfs(
                 print("\n")
                 print(f"Took {t2-t1} seconds to calculate")
                 print("\n")
-                print(
-                    "Now pickling and saving resampled raw file and events matrix"
-                )
+                print("Now pickling and saving resampled raw file and events matrix")
                 eb.save.pickle(
                     (denoisedMeg, eventsMeg),
                     megLocation + f"{denoisePipeline}-fs{fs}.pickle",
@@ -736,7 +862,7 @@ def computeTrfs(
     # %%
 
     if not passThrough:
-    
+
         if printAllEvents:
             print(events)
             print("\n")
@@ -853,9 +979,9 @@ def computeTrfs(
                         newTrigger = 142
                     elif eventsMeg[i, 2] == 180:
                         newTrigger = 148
-                    finalEventsEeg[i, :] = np.array([newTriggerTime, 0, newTrigger]).astype(
-                        int
-                    )
+                    finalEventsEeg[i, :] = np.array(
+                        [newTriggerTime, 0, newTrigger]
+                    ).astype(int)
             events = finalEventsEeg
             # print("\n")
             # print("****************************")
@@ -919,7 +1045,8 @@ def computeTrfs(
             if np.any(events[i, 2] == trigStartCodes):
                 if (
                     not np.any(
-                        events[i - 1, 2] == np.concatenate((presStopCodes, trigStopCodes))
+                        events[i - 1, 2]
+                        == np.concatenate((presStopCodes, trigStopCodes))
                     )
                     or events[i - 1, 0] + fs > events[i, 0]
                 ):
@@ -975,7 +1102,9 @@ def computeTrfs(
         # %%
         if not alreadyFiltered:
             t0 = time.time()
-            print(f"Not already filtered, so filtering EEG and MEG now for l_freq {l_freq} and h_freq {h_freq}")
+            print(
+                f"Not already filtered, so filtering EEG and MEG now for l_freq {l_freq} and h_freq {h_freq}"
+            )
             print("\n")
             if l_freq is not None or h_freq is not None:
                 denoised.filter(l_freq=l_freq, h_freq=h_freq, phase=filterPhase)
@@ -997,7 +1126,6 @@ def computeTrfs(
                 print(denoisedMeg.info)
                 print("\n")
 
-        
         force_update_info = True
 
         if doPresentation:
@@ -1044,7 +1172,9 @@ def computeTrfs(
                 allPresEpochs.append(epoch)
                 allPresEpochsForCov.append(epoch.copy().crop(tmin=0, tmax=60))
 
-            print(f"Done creating Presentation epochs object, now calculating and saving data covariance matrix, and saving info object and epochs object")
+            print(
+                f"Done creating Presentation epochs object, now calculating and saving data covariance matrix, and saving info object and epochs object"
+            )
             t0 = time.time()
             info = epoch.info
             dataCov = mne.compute_covariance(allPresEpochsForCov)
@@ -1057,7 +1187,9 @@ def computeTrfs(
             else:
                 eb.save.pickle(dataCov, f"{eegLocation}dataCovariance_fs{fs}")
             t2 = time.time()
-            print(f"Time taken was {t2-t1} seconds; now saving info object and epochs object")
+            print(
+                f"Time taken was {t2-t1} seconds; now saving info object and epochs object"
+            )
             eb.save.pickle(allPresEpochs, hashedLocation + presHash + ".pickle")
             tempHasher = presHasher.copy()
             tempHasher.update("info".encode("utf-8"))
@@ -1105,7 +1237,9 @@ def computeTrfs(
                 allTrigEpochs.append(epoch)
                 allTrigEpochsForCov.append(epoch.copy().crop(tmin=0, tmax=60))
 
-            print(f"Done creating Triggy epochs object, now calculating and saving data covariance matrix, and saving info object and epochs object")
+            print(
+                f"Done creating Triggy epochs object, now calculating and saving data covariance matrix, and saving info object and epochs object"
+            )
             t0 = time.time()
             info = epoch.info
             dataCov = mne.compute_covariance(allTrigEpochsForCov)
@@ -1118,7 +1252,9 @@ def computeTrfs(
             else:
                 eb.save.pickle(dataCov, f"{eegLocation}dataCovariance_fs{fs}")
             t2 = time.time()
-            print(f"Time taken was {t2-t1} seconds; now saving info object and epochs object")
+            print(
+                f"Time taken was {t2-t1} seconds; now saving info object and epochs object"
+            )
             eb.save.pickle(allTrigEpochs, hashedLocation + trigHash + ".pickle")
             tempHasher = trigHasher.copy()
             tempHasher.update("info".encode("utf-8"))
@@ -1127,7 +1263,7 @@ def computeTrfs(
             t3 = time.time()
             print(f"Took {t3-t2} seconds to save")
             print("\n")
-            
+
         del denoised
         if not eegOnly:
             del denoisedMeg
@@ -1152,10 +1288,14 @@ def computeTrfs(
                 if not os.path.exists(hashedLocation + tempHash + ".pickle"):
                     existingInds[count] = 0
             if sum(existingInds) != trialsToAnalyze.shape[0]:
-                print(f"Only {sum(existingInds)} out of a total of {trialsToAnalyze.shape[0]} individual resampled epochs have been saved, therefore loading the pickle with MNE object with all epochs")
+                print(
+                    f"Only {sum(existingInds)} out of a total of {trialsToAnalyze.shape[0]} individual resampled epochs have been saved, therefore loading the pickle with MNE object with all epochs"
+                )
                 allPresEpochs = eb.load.unpickle(hashedLocation + presHash + ".pickle")
             else:
-                print(f"All {sum(existingInds)} individual resampled epochs have been saved, so only loading those instead of loading MNE object with all epochs")
+                print(
+                    f"All {sum(existingInds)} individual resampled epochs have been saved, so only loading those instead of loading MNE object with all epochs"
+                )
         if doTriggy:
             tempHasher = trigHasher.copy()
             tempHasher.update("info".encode("utf-8"))
@@ -1173,13 +1313,23 @@ def computeTrfs(
                 if not os.path.exists(hashedLocation + tempHash + ".pickle"):
                     existingInds[count] = 0
             if sum(existingInds) != trialsToAnalyze.shape[0]:
-                print(f"Only {sum(existingInds)} out of a total of {trialsToAnalyze.shape[0]} individual resampled epochs have been saved, therefore loading the pickle with MNE object with all epochs")
+                print(
+                    f"Only {sum(existingInds)} out of a total of {trialsToAnalyze.shape[0]} individual resampled epochs have been saved, therefore loading the pickle with MNE object with all epochs"
+                )
                 allTrigEpochs = eb.load.unpickle(hashedLocation + trigHash + ".pickle")
             else:
-                print(f"All {sum(existingInds)} individual resampled epochs have been saved, so only loading those instead of loading MNE object with all epochs")
+                print(
+                    f"All {sum(existingInds)} individual resampled epochs have been saved, so only loading those instead of loading MNE object with all epochs"
+                )
 
-
-    regressorHashList = [subject.encode("utf-8"), denoisePipeline.encode("utf-8"), np.array(fs), str(l_freq).encode("utf-8"), str(h_freq).encode("utf-8"), filterPhase.encode("utf-8")]
+    regressorHashList = [
+        subject.encode("utf-8"),
+        denoisePipeline.encode("utf-8"),
+        np.array(fs),
+        str(l_freq).encode("utf-8"),
+        str(h_freq).encode("utf-8"),
+        filterPhase.encode("utf-8"),
+    ]
     regressorHashList.append(typeOfRegressor.encode("utf-8"))
     regressorHashList.append(condition.encode("utf-8"))
     [regressorHashList.append(i.encode("utf-8")) for i in nameOfRegressor]
@@ -1199,12 +1349,16 @@ def computeTrfs(
     if os.path.exists(regressorDir + "hashFiles/" + regressorHash + ".pickle"):
 
         print(f"Regressor object has been created and saved already, so loading it")
-        allRegressors = eb.load.unpickle(regressorDir + "hashFiles/" + regressorHash + ".pickle")
+        allRegressors = eb.load.unpickle(
+            regressorDir + "hashFiles/" + regressorHash + ".pickle"
+        )
 
     else:
 
         t0 = time.time()
-        print(f"Regressor object has not been saved yet, so loading all regressors, filtering them, and saving them")
+        print(
+            f"Regressor object has not been saved yet, so loading all regressors, filtering them, and saving them"
+        )
         allRegressors = []
 
         for i in range(32):
@@ -1230,7 +1384,9 @@ def computeTrfs(
 
             for j in range(len(regressorNames[i])):
 
-                if fs == 16384 or fs == 5000:  # If fs is 5000 it is probably the AN model...
+                if (
+                    fs == 16384 or fs == 5000
+                ):  # If fs is 5000 it is probably the AN model...
                     if (
                         not np.any(skipDist[conditionNum] == i)
                         or typeOfRegressor == "mix"
@@ -1276,22 +1432,33 @@ def computeTrfs(
             t1 = time.time()
             print(f"Took {t1-t0} seconds to load and organize regressors")
             print(f"Regressor matrix is shape {regressors.shape}")
-            regressors = regressors.T  # Time is now the second dimension, for making MNE RawArray
-            print(f"Regressor matrix is now shape {regressors.shape} in order to be the data of an MNE raw object for filtering")
+            regressors = (
+                regressors.T
+            )  # Time is now the second dimension, for making MNE RawArray
+            print(
+                f"Regressor matrix is now shape {regressors.shape} in order to be the data of an MNE raw object for filtering"
+            )
             print("\n")
-            regressorInfo = mne.create_info(ch_names=regressorNames[i], sfreq=fs, ch_types="stim")
+            regressorInfo = mne.create_info(
+                ch_names=regressorNames[i], sfreq=fs, ch_types="stim"
+            )
             regressorRaw = mne.io.RawArray(data=regressors, info=regressorInfo)
-            regressorRaw.notch_filter(np.arange(60, fs/2, 60), picks="all", phase=filterPhase)
-            regressorRaw.filter(l_freq=l_freq, h_freq=h_freq, picks="all", phase=filterPhase)
+            regressorRaw.notch_filter(
+                np.arange(60, fs / 2, 60), picks="all", phase=filterPhase
+            )
+            regressorRaw.filter(
+                l_freq=l_freq, h_freq=h_freq, picks="all", phase=filterPhase
+            )
 
             # And then append this to the main list of regressors for each trial of the session
             allRegressors.append(regressorRaw)
 
-        eb.save.pickle(allRegressors, regressorDir + "hashFiles/" + regressorHash + ".pickle")
+        eb.save.pickle(
+            allRegressors, regressorDir + "hashFiles/" + regressorHash + ".pickle"
+        )
         t2 = time.time()
         print(f"Then took {t2-t1} seconds to filter and save regressors")
 
-            
     print("\n")
     print("\n")
 
@@ -1341,9 +1508,11 @@ def computeTrfs(
 
     if doPresentation:
 
-        if not passThrough:  # passThrough means we already have the epochs object saved, and if we did, we already updated the hashers above
+        if (
+            not passThrough
+        ):  # passThrough means we already have the epochs object saved, and if we did, we already updated the hashers above
             [presHasher.update(i.encode("utf-8")) for i in nameOfRegressor]
-        
+
         presEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
 
         for count, i in enumerate(trialsToAnalyze):
@@ -1373,12 +1542,16 @@ def computeTrfs(
                     f"Now resampling M/EEG response matrix to be length {regressor.shape[0]}"
                 )
                 print("\n")
-                response = sp.signal.resample(currentEpochMat, regressor.shape[0], axis=0)
-                print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
+                response = sp.signal.resample(
+                    currentEpochMat, regressor.shape[0], axis=0
+                )
+                print(
+                    f"And then truncating both to be exactly length {lenToAnalyze*fs}"
+                )
                 print("\n")
 
                 eb.save.pickle(response, hashedLocation + presHash + ".pickle")
-                
+
             else:
 
                 response = eb.load.unpickle(hashedLocation + presHash + ".pickle")
@@ -1386,25 +1559,32 @@ def computeTrfs(
             regressorsToDo[:, count, :] = regressor[: lenToAnalyze * fs, :]
             presEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
 
-
         if np.any(np.isinf(regressorsToDo)):
-            print(f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isinf(presEpochsToDo)):
-            print(f"There are {np.sum(np.isinf(presEpochsToDo))} infs in trig response matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isinf(presEpochsToDo))} infs in trig response matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isnan(regressorsToDo)):
-            print(f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isnan(presEpochsToDo)):
-            print(f"There are {np.sum(np.isnan(presEpochsToDo))} NaNs in trig response matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isnan(presEpochsToDo))} NaNs in trig response matrix for subject {subject} before z-scoring"
+            )
 
         if addNoiseToRegressors is not None:
             regressorSTDs = np.std(regressorsToDo, axis=0)
             noise = np.random.random(regressorsToDo.shape) * 2 - 1
             noise *= addNoiseToRegressors * regressorSTDs
             regressorsToDo += noise
-            
+
         regressorSTDs = np.std(regressorsToDo, axis=0)
         presEpochsSTDs = np.std(presEpochsToDo, axis=0)
-            
+
         print("Now z-scoring regressor matrix...")
         regressorsToDo = sp.stats.zscore(regressorsToDo)
         print("\n")
@@ -1441,14 +1621,21 @@ def computeTrfs(
                 scoring=scoring,
             )
             if np.any(np.isinf(regressorsToDo)):
-                print(f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isinf(presEpochsToDo)):
-                print(f"There are {np.sum(np.isinf(presEpochsToDo))} infs in trig response matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isinf(presEpochsToDo))} infs in trig response matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isnan(regressorsToDo)):
-                print(f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isnan(presEpochsToDo)):
-                print(f"There are {np.sum(np.isnan(presEpochsToDo))} NaNs in trig response matrix for subject {subject} after z-scoring")
-
+                print(
+                    f"There are {np.sum(np.isnan(presEpochsToDo))} NaNs in trig response matrix for subject {subject} after z-scoring"
+                )
 
             # Now there is no need for any indexing or adding dimensions etc. here, because regressors
             # matrix is already time x epochs x regressors, and M/EEG is already time x epochs x channels
@@ -1474,7 +1661,7 @@ def computeTrfs(
                 n_jobs = nFolds / 2
             else:
                 n_jobs = nFolds
-                
+
             results = joblib.Parallel(
                 n_jobs=n_jobs, backend=parallelBackend, verbose=verbose
             )(
@@ -1539,7 +1726,9 @@ def computeTrfs(
 
     if doTriggy:
 
-        if not passThrough:  # passThrough means we already have the epochs object saved, and if we did, we already updated the hashers above
+        if (
+            not passThrough
+        ):  # passThrough means we already have the epochs object saved, and if we did, we already updated the hashers above
             [trigHasher.update(i.encode("utf-8")) for i in nameOfRegressor]
 
         trigEpochsToDo = np.zeros((lenToAnalyze * fs, len(trialsToAnalyze), nChannels))
@@ -1547,7 +1736,7 @@ def computeTrfs(
         for count, i in enumerate(trialsToAnalyze):
 
             regressor = allRegressors[i].get_data().T
-            
+
             tempHasher = trigHasher.copy()
             tempHasher.update(np.array(i))
             trigHash = tempHasher.hexdigest()
@@ -1571,8 +1760,12 @@ def computeTrfs(
                     f"Now resampling M/EEG response matrix to be length {regressor.shape[0]}"
                 )
                 print("\n")
-                response = sp.signal.resample(currentEpochMat, regressor.shape[0], axis=0)
-                print(f"And then truncating both to be exactly length {lenToAnalyze*fs}")
+                response = sp.signal.resample(
+                    currentEpochMat, regressor.shape[0], axis=0
+                )
+                print(
+                    f"And then truncating both to be exactly length {lenToAnalyze*fs}"
+                )
                 print("\n")
 
                 eb.save.pickle(response, hashedLocation + trigHash + ".pickle")
@@ -1584,22 +1777,29 @@ def computeTrfs(
             regressorsToDo[:, count, :] = regressor[: lenToAnalyze * fs, :]
             trigEpochsToDo[:, count, :] = response[: lenToAnalyze * fs, :]
 
-            
         if np.any(np.isinf(regressorsToDo)):
-            print(f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isinf(trigEpochsToDo)):
-            print(f"There are {np.sum(np.isinf(trigEpochsToDo))} infs in trig response matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isinf(trigEpochsToDo))} infs in trig response matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isnan(regressorsToDo)):
-            print(f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} before z-scoring"
+            )
         if np.any(np.isnan(trigEpochsToDo)):
-            print(f"There are {np.sum(np.isnan(trigEpochsToDo))} NaNs in trig response matrix for subject {subject} before z-scoring")
+            print(
+                f"There are {np.sum(np.isnan(trigEpochsToDo))} NaNs in trig response matrix for subject {subject} before z-scoring"
+            )
 
         if addNoiseToRegressors is not None:
             regressorSTDs = np.std(regressorsToDo, axis=0)
             noise = np.random.random(regressorsToDo.shape) * 2 - 1
             noise *= addNoiseToRegressors * regressorSTDs
             regressorsToDo += noise
-            
+
         regressorSTDs = np.std(regressorsToDo, axis=0)
         trigEpochsSTDs = np.std(trigEpochsToDo, axis=0)
 
@@ -1639,13 +1839,21 @@ def computeTrfs(
                 scoring=scoring,
             )
             if np.any(np.isinf(regressorsToDo)):
-                print(f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isinf(regressorsToDo))} infs in regressor matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isinf(trigEpochsToDo)):
-                print(f"There are {np.sum(np.isinf(trigEpochsToDo))} infs in trig response matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isinf(trigEpochsToDo))} infs in trig response matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isnan(regressorsToDo)):
-                print(f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isnan(regressorsToDo))} NaNs in regressor matrix for subject {subject} after z-scoring"
+                )
             if np.any(np.isnan(trigEpochsToDo)):
-                print(f"There are {np.sum(np.isnan(trigEpochsToDo))} NaNs in trig response matrix for subject {subject} after z-scoring")
+                print(
+                    f"There are {np.sum(np.isnan(trigEpochsToDo))} NaNs in trig response matrix for subject {subject} after z-scoring"
+                )
 
             # Now there is no need for any indexing or adding dimensions etc. here, because regressors
             # matrix is already time x epochs x regressors, and M/EEG is already time x epochs x channels
@@ -1671,7 +1879,7 @@ def computeTrfs(
                 n_jobs = nFolds / 2
             else:
                 n_jobs = nFolds
-                
+
             results = joblib.Parallel(
                 n_jobs=n_jobs, backend=parallelBackend, verbose=verbose
             )(
@@ -1865,9 +2073,7 @@ def computeTrfs(
         evokedTimePres = []
         for i in range(len(nameOfRegressor)):
             evokedTimePres.append(
-                mne.EvokedArray(
-                    timePres_portion[:, :, i].T, info, tmin=windowStart
-                )
+                mne.EvokedArray(timePres_portion[:, :, i].T, info, tmin=windowStart)
             )
 
         if saveEvoked:
@@ -1895,9 +2101,7 @@ def computeTrfs(
         evokedTimeTrig = []
         for i in range(len(nameOfRegressor)):
             evokedTimeTrig.append(
-                mne.EvokedArray(
-                    timeTrig_portion[:, :, i].T, info, tmin=windowStart
-                )
+                mne.EvokedArray(timeTrig_portion[:, :, i].T, info, tmin=windowStart)
             )
 
         if saveEvoked:

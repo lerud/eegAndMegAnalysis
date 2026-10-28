@@ -52,7 +52,7 @@ if parallelType == "slurmArrayLambdasAndSubjects":
     iSubject = int(slurmArrayInd // len(lambdas))
 else:
     lambdaInd = slurmArrayInd
-    
+
 conditionNames = dict(
     A=[
         "FemaleBrit_over_FemaleAmer_Easy",
@@ -301,52 +301,130 @@ presStopCorrections = [
 presStopCorrections = [presStopCorrections[i] for i in subset]
 
 badChanLists = [
-    [["Fp2", "AF3", "FC1", "F3", "Fz", "Cz", "CP5", "P3", "CP6", "F7"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3045
-    [["P7", "CP6", "C4", "T7", "CP5", "P3", "P4", "O2", "Oz", "PO4", "F8"], ["MEG 056", "MEG 086"]],  # R3089
+    [
+        ["Fp2", "AF3", "FC1", "F3", "Fz", "Cz", "CP5", "P3", "CP6", "F7"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3045
+    [
+        ["P7", "CP6", "C4", "T7", "CP5", "P3", "P4", "O2", "Oz", "PO4", "F8"],
+        ["MEG 056", "MEG 086"],
+    ],  # R3089
     [["Oz", "P8", "CP6", "Fp2", "F8"], ["MEG 056", "MEG 086"]],  # R3093
     [["P7", "T8", "O2", "PO4", "Fp2", "F4", "T7"], ["MEG 056", "MEG 086"]],  # R3095
     [["C3", "FC5", "P4", "Oz"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3151
-    [[
-        "Fp1",
-        "AF3",
-        "F7",
-        "F3",
-        "Fz",
-        "F4",
-        "FC6",
-        "C3",
-        "CP5",
-        "Pz",
-        "CP6",
-        "P8",
-        "P3",
-        "FC1",
-        "FC5",
-        "T7",
-        "AF4",
-        "PO4",
-    ], ["MEG 056", "MEG 086"]],  # R2774
-    [["T7", "C3", "P7", "Pz", "O1", "P8", "CP6", "Oz", "O2"], ["MEG 056", "MEG 086", "MEG 046", "MEG 062", "MEG 105"]],  # R3152
-    [["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"], ["MEG 056", "MEG 086", "MEG 046", "MEG 062"]],  # R2877
-    [["CP6", "P8", "F4", "FC6", "T7", "C3", "Pz", "Oz", "O2", "P3"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3157
-    [["CP6", "P8", "T7", "CP5", "P7", "Oz", "FC5", "C3", "CP2"], ["MEG 056", "MEG 086", "MEG 046"]],  # R2783
-    [["CP5", "P3", "F3", "P4", "T7", "Fp1"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3170
-    [["F8", "FC6", "C4", "T8", "CP6", "P8", "P4", "P7", "Pz", "CP5", "FC1", "F7", "F3", "Oz"], ["MEG 056", "MEG 086", "MEG 046", "MEG 157"]],  # R3172
+    [
+        [
+            "Fp1",
+            "AF3",
+            "F7",
+            "F3",
+            "Fz",
+            "F4",
+            "FC6",
+            "C3",
+            "CP5",
+            "Pz",
+            "CP6",
+            "P8",
+            "P3",
+            "FC1",
+            "FC5",
+            "T7",
+            "AF4",
+            "PO4",
+        ],
+        ["MEG 056", "MEG 086"],
+    ],  # R2774
+    [
+        ["T7", "C3", "P7", "Pz", "O1", "P8", "CP6", "Oz", "O2"],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 062", "MEG 105"],
+    ],  # R3152
+    [
+        ["CP5", "P7", "F3", "FC5", "C3", "P4", "FC6", "FC1", "P8"],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 062"],
+    ],  # R2877
+    [
+        ["CP6", "P8", "F4", "FC6", "T7", "C3", "Pz", "Oz", "O2", "P3"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3157
+    [
+        ["CP6", "P8", "T7", "CP5", "P7", "Oz", "FC5", "C3", "CP2"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R2783
+    [
+        ["CP5", "P3", "F3", "P4", "T7", "Fp1"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3170
+    [
+        [
+            "F8",
+            "FC6",
+            "C4",
+            "T8",
+            "CP6",
+            "P8",
+            "P4",
+            "P7",
+            "Pz",
+            "CP5",
+            "FC1",
+            "F7",
+            "F3",
+            "Oz",
+        ],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 157"],
+    ],  # R3172
     [None, ["MEG 056", "MEG 086", "MEG 046"]],  # R3193
-    [["F3", "T7", "F4", "FC6", "P8", "FC2", "P4", "P7", "FC2"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3184
+    [
+        ["F3", "T7", "F4", "FC6", "P8", "FC2", "P4", "P7", "FC2"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3184
     [["F8", "C3", "T8", "P7"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3214
     [None, ["MEG 056", "MEG 086", "MEG 046", "MEG 062"]],  # R3265
-    [["T7", "P7", "F7", "T8"], ["MEG 056", "MEG 086", "MEG 046", "MEG 157", "MEG 105"]],  # R3275
+    [
+        ["T7", "P7", "F7", "T8"],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 157", "MEG 105"],
+    ],  # R3275
     [["P4", "F8", "F3"], ["MEG 056", "MEG 086", "MEG 046", "MEG 157"]],  # R3247
     [["T8", "FC6"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3292
     [["Oz", "T7", "T8", "P3"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3293
-    [["CP6", "T8", "FC6", "T7", "FC5", "P7", "P8", "CP5", "F3", "Oz"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3294
+    [
+        ["CP6", "T8", "FC6", "T7", "FC5", "P7", "P8", "CP5", "F3", "Oz"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3294
     [["CP5", "P7"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3303
     [["FC1"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3304
-    [["CP6", "T8", "P8", "PO4", "PO3", "O1", "O2", "FC6", "F4", "P7"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3306
-    [["CP6", "P8", "FC5", "FC6", "F3", "T7", "PO3", "PO4", "O1", "T8", "F4", "CP5", "C3", "FC1"], ["MEG 056", "MEG 086", "MEG 046", "MEG 121"]],  # R3313
-    [["CP6", "T8", "P7", "P8", "Oz", "T7"], ["MEG 056", "MEG 086", "MEG 046", "MEG 062"]],  # R3317
-    [["P3", "F7", "FC5", "F8", "FC6", "F4", "T8"], ["MEG 056", "MEG 086", "MEG 046"]],  # R3320
+    [
+        ["CP6", "T8", "P8", "PO4", "PO3", "O1", "O2", "FC6", "F4", "P7"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3306
+    [
+        [
+            "CP6",
+            "P8",
+            "FC5",
+            "FC6",
+            "F3",
+            "T7",
+            "PO3",
+            "PO4",
+            "O1",
+            "T8",
+            "F4",
+            "CP5",
+            "C3",
+            "FC1",
+        ],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 121"],
+    ],  # R3313
+    [
+        ["CP6", "T8", "P7", "P8", "Oz", "T7"],
+        ["MEG 056", "MEG 086", "MEG 046", "MEG 062"],
+    ],  # R3317
+    [
+        ["P3", "F7", "FC5", "F8", "FC6", "F4", "T8"],
+        ["MEG 056", "MEG 086", "MEG 046"],
+    ],  # R3320
     [["PO3"], ["MEG 056", "MEG 086", "MEG 046", "MEG 087"]],  # R0286
     [["P8"], ["MEG 056", "MEG 086", "MEG 062", "MEG 087", "MEG 105"]],  # R3362
 ]
@@ -430,7 +508,10 @@ regressorDirs = [
     [parentDir + "stimAndPredictors/distractors/predictors/"],
     [parentDir + "stimAndPredictors/distractors/predictors/"],
     [parentDir + "stimAndPredictors/distractors/predictors/"],
-    [parentDir + "stimAndPredictors/mixes/predictors/", parentDir + "stimAndPredictors/mixes/predictors/"],
+    [
+        parentDir + "stimAndPredictors/mixes/predictors/",
+        parentDir + "stimAndPredictors/mixes/predictors/",
+    ],
     [parentDir + "stimAndPredictors/targets/predictors/"],
     [parentDir + "stimAndPredictors/targets/predictors/"],
     [parentDir + "stimAndPredictors/distractors/predictors/"],
@@ -446,17 +527,55 @@ regressorDirs = [
     [parentDir + "stimAndPredictors/mixes/predictors/"],
     [parentDir + "stimAndPredictors/mixes/predictors/"],
     [parentDir + "stimAndPredictors/mixes/predictors/"],
-    [parentDir + "stimAndPredictors/mixes/predictors/", parentDir + "stimAndPredictors/mixes/predictors/", parentDir + "stimAndPredictors/mixes/predictors/"],
-    [parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/"],
-    [parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/"],
-    [parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/"],
-    [parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/"],
-    [parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/"],
-    [parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/"],
-    [parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/"],
-    [parentDir + "stimAndPredictors/targets/predictors/", parentDir + "stimAndPredictors/targets/predictors/"],
-    [parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/"],
-    [parentDir + "stimAndPredictors/distractors/predictors/", parentDir + "stimAndPredictors/distractors/predictors/"],
+    [
+        parentDir + "stimAndPredictors/mixes/predictors/",
+        parentDir + "stimAndPredictors/mixes/predictors/",
+        parentDir + "stimAndPredictors/mixes/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/targets/predictors/",
+        parentDir + "stimAndPredictors/targets/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+    ],
+    [
+        parentDir + "stimAndPredictors/distractors/predictors/",
+        parentDir + "stimAndPredictors/distractors/predictors/",
+    ],
 ]
 
 filenameSuffixes = [
@@ -500,6 +619,7 @@ nameOfRegressors = [["_ANmodel_fs5000", "_glottalPulses_fs5000", "_halfWave_fs50
 
 filenamePrefix = "anMeegRecFieldAllFolds"
 
+
 def doOneSubject(
     iSubject,
     subjects,
@@ -520,7 +640,7 @@ def doOneSubject(
 
     subject = subjects[iSubject]
     condition = conditions[iSubject]
-    
+
     for nameOfRegressor in nameOfRegressors:
         nameOfRegressor[0] = nameOfRegressor[0] + ANmodelTackOn[iSubject]
 
@@ -548,7 +668,9 @@ def doOneSubject(
                         if filenameSuffix == "_hard" and conditionName[-1] == "d":
                             trialsToAnalyze.append(iTrial)
                         if filenameSuffix == "_all":
-                            trialsToAnalyze.append(iTrial)  # We're already inside if conditionName > 16, so all the rest are 2 speakers
+                            trialsToAnalyze.append(
+                                iTrial
+                            )  # We're already inside if conditionName > 16, so all the rest are 2 speakers
 
                         # M is male, F is female
                         if (
@@ -666,10 +788,7 @@ def doOneSubject(
                                 trialsToAnalyze.append(iTrial)
                         if filenameSuffix == "_easy_male":
                             if typeOfRegressor == "target":
-                                if (
-                                    conditionName[0] == "M"
-                                    and conditionName[-1] == "y"
-                                ):
+                                if conditionName[0] == "M" and conditionName[-1] == "y":
                                     trialsToAnalyze.append(iTrial)
                             if typeOfRegressor == "distractor":
                                 if (
@@ -679,10 +798,7 @@ def doOneSubject(
                                     trialsToAnalyze.append(iTrial)
                         if filenameSuffix == "_easy_female":
                             if typeOfRegressor == "target":
-                                if (
-                                    conditionName[0] == "F"
-                                    and conditionName[-1] == "y"
-                                ):
+                                if conditionName[0] == "F" and conditionName[-1] == "y":
                                     trialsToAnalyze.append(iTrial)
                             if typeOfRegressor == "distractor":
                                 if (
@@ -692,10 +808,7 @@ def doOneSubject(
                                     trialsToAnalyze.append(iTrial)
                         if filenameSuffix == "_hard_male":
                             if typeOfRegressor == "target":
-                                if (
-                                    conditionName[0] == "M"
-                                    and conditionName[-1] == "d"
-                                ):
+                                if conditionName[0] == "M" and conditionName[-1] == "d":
                                     trialsToAnalyze.append(iTrial)
                             if typeOfRegressor == "distractor":
                                 if (
@@ -705,10 +818,7 @@ def doOneSubject(
                                     trialsToAnalyze.append(iTrial)
                         if filenameSuffix == "_hard_female":
                             if typeOfRegressor == "target":
-                                if (
-                                    conditionName[0] == "F"
-                                    and conditionName[-1] == "d"
-                                ):
+                                if conditionName[0] == "F" and conditionName[-1] == "d":
                                     trialsToAnalyze.append(iTrial)
                             if typeOfRegressor == "distractor":
                                 if (
@@ -753,13 +863,15 @@ def doOneSubject(
                         # M is male, F is female
                         if filenameSuffix == "_quiet_male" and conditionName[0] == "M":
                             trialsToAnalyze.append(iTrial)
-                        if filenameSuffix == "_quiet_female" and conditionName[0] == "F":
+                        if (
+                            filenameSuffix == "_quiet_female"
+                            and conditionName[0] == "F"
+                        ):
                             trialsToAnalyze.append(iTrial)
 
                 trialsToAnalyze = np.array(trialsToAnalyze)
                 trialsToAnalyzeAll.append(trialsToAnalyze)
-            
-            
+
             print("\n")
             print(
                 [
@@ -865,7 +977,7 @@ elif parallelType == "slurmArrayLambdasAndSubjects":
         thisLambda,
         ANmodelTackOn,
     )
-    
+
 else:
 
     print("Wrong parallel type")

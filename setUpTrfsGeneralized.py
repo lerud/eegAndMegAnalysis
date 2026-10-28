@@ -484,15 +484,17 @@ filenameSuffixes = [
 
 # This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element,
 # which is a list of strings:
-nameOfRegressors = [[
-    "~gammatone-1",
-    "~gammatone-on-1",
-    "~wordOnsets_gaussian15msSD",
-    "~phoneOnsets_gaussian15msSD",
-    "~phsurp",
-    "~cohtent",
-    "~wordsurp",
-]]
+nameOfRegressors = [
+    [
+        "~gammatone-1",
+        "~gammatone-on-1",
+        "~wordOnsets_gaussian15msSD",
+        "~phoneOnsets_gaussian15msSD",
+        "~phsurp",
+        "~cohtent",
+        "~wordsurp",
+    ]
+]
 
 # Acoustic only for acoustic rf
 # nameOfRegressors = [[
@@ -735,7 +737,7 @@ def doOneSubject(
 
 # %%
 for lambdaInd, thisLambda in enumerate(lambdas):
-# for lambdaInd, thisLambda in enumerate(lambdas[-2:], start=len(lambdas) - 2):
+    # for lambdaInd, thisLambda in enumerate(lambdas[-2:], start=len(lambdas) - 2):
 
     if doParallel:
 
