@@ -1,0 +1,32 @@
+# Environment for Alice TRF analysis
+# usage: $ conda env create --file=environment.yml
+name: neuroTools
+channels:
+- conda-forge
+dependencies:
+- python=3.13
+- eelbrain
+- ipython
+- jupytext
+- seaborn
+- pyfftw
+- pillow
+- pyglet
+- pysurfer
+- librosa
+- pydub
+- cython
+- sympy
+- pip
+- pip:
+  - https://github.com/christianbrodbeck/TRF-Tools/archive/main.zip
+  - https://github.com/christianbrodbeck/gammatone/archive/fmax.zip
+  - mat73
+  - pyparallel
+  - rtmixer
+  - git+https://github.com/labsn/expyfun
+  - praat-parselmouth
+  - git+https://github.com/lerud/cochlea
+  - simpleaudio
+  - black
+  - py-spy
