@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -78,10 +78,8 @@ eventIDmeg = 162
 badChanListMeg = ["MEG 056", "MEG 086"]
 
 
-
 l_freq = 3
 h_freq = 20
-
 
 
 parentDir = "/Volumes/Seagate/map/"
@@ -140,7 +138,9 @@ events = mne.find_events(tonesDenoised, shortest_event=0)
 eventsMeg = mne.find_events(tonesDenoisedMeg, shortest_event=0)
 
 tonesDenoised, events = tonesDenoised.resample(sfreq=500, events=events, verbose=True)
-tonesDenoisedMeg, eventsMeg = tonesDenoisedMeg.resample(sfreq=500, events=eventsMeg, verbose=True)
+tonesDenoisedMeg, eventsMeg = tonesDenoisedMeg.resample(
+    sfreq=500, events=eventsMeg, verbose=True
+)
 # events = mne.find_events(tonesDenoised)
 # print(tonesDenoised.ch_names)
 print(events[:30, :])
@@ -329,8 +329,6 @@ toneEpochs = epochs["Tones"]
 toneEpochsMeg = epochsMeg["Tones"]
 
 
-
-
 # toneEpochs.ch_names
 
 # toneEpochs.plot_image(picks=["FC1", "CP2"])
@@ -339,7 +337,9 @@ toneEpochsMeg = epochsMeg["Tones"]
 tonesEvokedEeg = toneEpochs.average()
 tonesEvokedMeg = toneEpochsMeg.average()
 
-tonesEvoked = tonesEvokedMeg.copy().add_channels([tonesEvokedEeg], force_update_info=True)
+tonesEvoked = tonesEvokedMeg.copy().add_channels(
+    [tonesEvokedEeg], force_update_info=True
+)
 
 # %%
 toneTimes = events[events[:, 2] == 130, 0] / tonesDenoised.info["sfreq"]
@@ -355,14 +355,16 @@ tonesRegressor = sp.ndimage.gaussian_filter1d(
 tonesResponse = sp.stats.zscore(tonesResponse)
 
 
-
 # rfTones = mne.decoding.ReceptiveField(
 #     -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], estimator=1e6
 # )
 
 rfTones = mne.decoding.TimeDelayingRidge(
-    -0.2 - edgePad, 0.7 + edgePad, tonesDenoised.info["sfreq"], alpha=1e1, 
-    reg_type="ridge"
+    -0.2 - edgePad,
+    0.7 + edgePad,
+    tonesDenoised.info["sfreq"],
+    alpha=1e1,
+    reg_type="ridge",
 )
 
 
@@ -383,8 +385,12 @@ tonesTrfsEvoked = mne.EvokedArray(
 )
 
 # %%
-tonesEvoked.copy().pick_types(meg=True).plot_topo(color="r", legend=False, title="Evoked average")
-tonesTrfsEvoked.pick_types(eeg=True).plot_topo(color="r", legend=False, title="TRF deconvolution")
+tonesEvoked.copy().pick_types(meg=True).plot_topo(
+    color="r", legend=False, title="Evoked average"
+)
+tonesTrfsEvoked.pick_types(eeg=True).plot_topo(
+    color="r", legend=False, title="TRF deconvolution"
+)
 
 
 # %%

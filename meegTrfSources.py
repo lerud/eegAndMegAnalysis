@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -155,7 +155,9 @@ elp_ch_names = [
 
 channelFile = glob.glob("/Volumes/Seagate/map/" + subject + "/digitization/*eeg*.elp")
 if len(channelFile) == 0:
-    channelFile = glob.glob("/Volumes/Seagate/map/" + subject + "/digitization/*EEG*.elp")
+    channelFile = glob.glob(
+        "/Volumes/Seagate/map/" + subject + "/digitization/*EEG*.elp"
+    )
 print(f"Using the channel file {channelFile[0]}")
 
 digMontage = mne.channels.read_dig_polhemus_isotrak(
@@ -424,50 +426,58 @@ if doVec:
     allSourceTimeCourses = []
 
     audLabels = ["ctx-lh-transversetemporal", "ctx-rh-transversetemporal"]
-    audTimeCourses = stc_vec.extract_label_time_course([volLocation, audLabels], src_vol)[0:2, :, :]
+    audTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, audLabels], src_vol
+    )[0:2, :, :]
     print(audTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(audTimeCourses, doPC))
 
     tempLabels = ["ctx-lh-superiortemporal", "ctx-rh-superiortemporal"]
-    tempTimeCourses = stc_vec.extract_label_time_course([volLocation, tempLabels], src_vol)[0:2, :, :]
+    tempTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, tempLabels], src_vol
+    )[0:2, :, :]
     print(tempTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(tempTimeCourses, doPC))
 
     supParLabels = ["ctx-lh-superiorparietal", "ctx-rh-superiorparietal"]
-    supParTimeCourses = stc_vec.extract_label_time_course([volLocation, supParLabels], src_vol)[
-        0:2, :, :
-    ]
+    supParTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, supParLabels], src_vol
+    )[0:2, :, :]
     print(supParTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(supParTimeCourses, doPC))
 
     infParLabels = ["ctx-lh-inferiorparietal", "ctx-rh-inferiorparietal"]
-    infParTimeCourses = stc_vec.extract_label_time_course([volLocation, infParLabels], src_vol)[
-        0:2, :, :
-    ]
+    infParTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, infParLabels], src_vol
+    )[0:2, :, :]
     print(infParTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(infParTimeCourses, doPC))
 
     frontLabels = ["ctx-lh-frontalpole", "ctx-rh-frontalpole"]
-    frontTimeCourses = stc_vec.extract_label_time_course([volLocation, frontLabels], src_vol)[
-        0:2, :, :
-    ]
+    frontTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, frontLabels], src_vol
+    )[0:2, :, :]
     print(frontTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(frontTimeCourses, doPC))
 
     postcLabels = ["ctx-lh-postcentral", "ctx-rh-postcentral"]
-    postcTimeCourses = stc_vec.extract_label_time_course([volLocation, postcLabels], src_vol)[
-        0:2, :, :
-    ]
+    postcTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, postcLabels], src_vol
+    )[0:2, :, :]
     print(postcTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(postcTimeCourses, doPC))
 
     occLabels = ["ctx-lh-lateraloccipital", "ctx-rh-lateraloccipital"]
-    occTimeCourses = stc_vec.extract_label_time_course([volLocation, occLabels], src_vol)[0:2, :, :]
+    occTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, occLabels], src_vol
+    )[0:2, :, :]
     print(occTimeCourses.shape)
     allSourceTimeCourses.append(calcPC(occTimeCourses, doPC))
 
     subcortLabels = ["Left-Thalamus-Proper", "Right-Thalamus-Proper", "Brain-Stem"]
-    subcortTimeCourses = stc_vec.extract_label_time_course([volLocation, subcortLabels], src_vol)
+    subcortTimeCourses = stc_vec.extract_label_time_course(
+        [volLocation, subcortLabels], src_vol
+    )
     print(subcortTimeCourses.shape)
 
     ymax = np.max(
@@ -521,7 +531,9 @@ else:
     allSourceTimeCourses = []
 
     audLabels = mne.read_labels_from_annot(mriSubject, regexp="transversetemporal")
-    audTimeCourses = stc.extract_label_time_course([i.name for i in audLabels], src_surf, mode=nonVecMode)
+    audTimeCourses = stc.extract_label_time_course(
+        [i.name for i in audLabels], src_surf, mode=nonVecMode
+    )
     print(audTimeCourses.shape)
     allSourceTimeCourses.append(audTimeCourses[0:2, :].T)
 

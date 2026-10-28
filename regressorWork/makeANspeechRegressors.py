@@ -322,7 +322,9 @@ def doMultANmodels(
 
         rates = rates.to_numpy()
 
-        rates = rates.mean(axis=1)  # Uncomment this line to take the average response from all fibers that were modeled
+        rates = rates.mean(
+            axis=1
+        )  # Uncomment this line to take the average response from all fibers that were modeled
 
         rates = sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel))
 
@@ -338,31 +340,34 @@ def doMultANmodels(
         print("\n")
         print("\n")
 
+
 for fsForRegressor in fsForRegressors:
 
     for noiseInstance in noiseInstances:
-    
+
         for numBands in numBandsAll:
-        
+
             # fileSuffix = f"_ANmodel_maxFs_{numBands}bands.pickle"
             if fsForRegressor == 16384:
                 fileSuffix = f"_ANmodel_maxFs-{noiseInstance}.pickle"
             else:
                 fileSuffix = f"_ANmodel_fs{fsForRegressor}-{noiseInstance}.pickle"
-        
+
             cfs = (
                 125,
                 16000,
                 numBands,
             )  # 43 comes from the scripting I inherited from Maddox/Vrishab
-        
+
             for i, mainDir in enumerate(mainDirs):
-        
+
                 for j, condition in enumerate(conditions):
-        
+
                     if doParallel:
-        
-                        joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
+
+                        joblib.Parallel(
+                            n_jobs=n_jobs, backend=parallelBackend, verbose=49
+                        )(
                             joblib.delayed(doMultANmodels)(
                                 i,
                                 j,
@@ -380,9 +385,9 @@ for fsForRegressor in fsForRegressors:
                             )
                             for k in np.arange(1, 17)
                         )
-        
+
                     else:
-        
+
                         for k in np.arange(1, 17):
                             doMultANmodels(
                                 i,
@@ -399,7 +404,7 @@ for fsForRegressor in fsForRegressors:
                                 cfs,
                                 fileSuffix,
                             )
-        
+
                     ### Plot rates
                     # fig, ax = plt.subplots()
                     # img = ax.imshow(

@@ -54,7 +54,7 @@ for trial in np.arange(1, 17):
     for condInd, condition in enumerate(conditions):
 
         targetFilename = f"{parentDir}targets/{condition}_target{trial}.wav"
-        
+
         fsAudio, targetWav = sp.io.wavfile.read(targetFilename)
         # targetWav = sp.signal.resample(targetWav, int(len(targetWav)*fs / fsAudio))
         sound = parselmouth.Sound(targetFilename)
@@ -62,15 +62,21 @@ for trial in np.arange(1, 17):
         t = sound.ts()
         # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "no", "yes")
         # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "yes", "no")
-        point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", f0_min, f0_max)
+        point_process = parselmouth.praat.call(
+            sound, "To PointProcess (periodic, cc)", f0_min, f0_max
+        )
         numPoints = parselmouth.praat.call(point_process, "Get number of points")
         glottal_pulse_times = []
-        for i in range(1, numPoints+1):
-            glottal_pulse_times.append(parselmouth.praat.call(point_process, "Get time from index", i))
-        
+        for i in range(1, numPoints + 1):
+            glottal_pulse_times.append(
+                parselmouth.praat.call(point_process, "Get time from index", i)
+            )
+
         glottal_pulse_times = np.array(glottal_pulse_times)
-        
-        targetPulsePred = createPredictorTimeseries(glottal_pulse_times, fs, len(t), values=1)
+
+        targetPulsePred = createPredictorTimeseries(
+            glottal_pulse_times, fs, len(t), values=1
+        )
         targetWav = sp.signal.resample(targetWav, len(targetPulsePred))
         targetHalfWave = targetWav.copy()
         targetHalfWave[targetHalfWave < 0] = 0
@@ -78,9 +84,11 @@ for trial in np.arange(1, 17):
         if not np.any(
             trial == skipDist[condInd]  # trial and skipDist are both one-indexed
         ):  # If we're on a trial/condition with no distractor, simply don't make the predictors, and don't try to save them further down
-            
-            distractorFilename = f"{parentDir}distractors/{condition}_distractor{trial}.wav"
-            
+
+            distractorFilename = (
+                f"{parentDir}distractors/{condition}_distractor{trial}.wav"
+            )
+
             fsAudio, distractorWav = sp.io.wavfile.read(distractorFilename)
             # targetWav = sp.signal.resample(testWav, int(len(targetWav)*fs / fsAudio))
             sound = parselmouth.Sound(distractorFilename)
@@ -88,15 +96,21 @@ for trial in np.arange(1, 17):
             t = sound.ts()
             # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "no", "yes")
             # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "yes", "no")
-            point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", f0_min, f0_max)
+            point_process = parselmouth.praat.call(
+                sound, "To PointProcess (periodic, cc)", f0_min, f0_max
+            )
             numPoints = parselmouth.praat.call(point_process, "Get number of points")
             glottal_pulse_times = []
-            for i in range(1, numPoints+1):
-                glottal_pulse_times.append(parselmouth.praat.call(point_process, "Get time from index", i))
-            
+            for i in range(1, numPoints + 1):
+                glottal_pulse_times.append(
+                    parselmouth.praat.call(point_process, "Get time from index", i)
+                )
+
             glottal_pulse_times = np.array(glottal_pulse_times)
-            
-            distractorPulsePred = createPredictorTimeseries(glottal_pulse_times, fs, len(t), values=1)
+
+            distractorPulsePred = createPredictorTimeseries(
+                glottal_pulse_times, fs, len(t), values=1
+            )
 
             distractorWav = sp.signal.resample(distractorWav, len(distractorPulsePred))
             distractorHalfWave = distractorWav.copy()
@@ -106,9 +120,8 @@ for trial in np.arange(1, 17):
 
         mixPulsePred = targetPulsePred + distractorPulsePred
 
-        
         mixFilename = f"{parentDir}mixes/{condition}_mix{trial}.wav"
-        
+
         fsAudio, mixWav = sp.io.wavfile.read(mixFilename)
 
         mixWav = sp.signal.resample(mixWav, len(mixPulsePred))
@@ -126,10 +139,8 @@ for trial in np.arange(1, 17):
         eb.save.pickle(targetHalfWave, savePathHalfWave)
         print(f"Saved {savePath} and {savePathHalfWave}")
         print("\n")
-        
-        if not np.any(
-            trial == skipDist[condInd]
-        ):
+
+        if not np.any(trial == skipDist[condInd]):
             savePath = f"{parentDir}distractors/predictors/{condition}_distractor{trial}_glottalPulses_{suffix}.pickle"
             eb.save.pickle(distractorPulsePred, savePath)
             savePathHalfWave = f"{parentDir}distractors/predictors/{condition}_distractor{trial}_halfWave_{suffix}.pickle"

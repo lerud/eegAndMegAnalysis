@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -36,7 +36,6 @@ megLocation = f"{parentDir}{subject}/eegAndMeg/meg/"
 
 # badChanList = ["T7", "C3", "P7", "Pz", "O1", "P8", "CP6", "Oz"]  # R3152
 # MEG_bad_channels = ["MEG 056", "MEG 086", "MEG 046", "MEG 062"]  # R3152
-
 
 
 # badChanList = None  # R3292
@@ -170,8 +169,8 @@ t1 = time.time()
 print(f"Total time taken was {t1-t0} seconds")
 
 # %%
-temp=megNoiseCovAlt.data[:154, :154]
-mask=np.ones(temp.shape) - np.eye(temp.shape[0])
-plt.imshow(temp*mask)
+temp = megNoiseCovAlt.data[:154, :154]
+mask = np.ones(temp.shape) - np.eye(temp.shape[0])
+plt.imshow(temp * mask)
 
 # %%

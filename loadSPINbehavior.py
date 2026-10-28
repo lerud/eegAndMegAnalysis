@@ -224,12 +224,51 @@ constantToAdd = 3
 
 sentenceInds = np.array([1, 4, 7, 10])
 
-mainResultsSheet = [["Subject", "Condition", "Sentence", "TotalCorrect", "TotalMissed", "TotalWords", "Ratio", "dB", "difficulties", "genders", "gendersAll", "targetAccent", "distractorAccent", "targetGender", "distractorGender", "snr"]]
-perConditionResultsSheet = [["Subject", "Condition", "TotalCorrect", "TotalMissed", "TotalWords", "Ratio", "dB", "difficulties", "genders", "gendersAll", "targetAccent", "distractorAccent", "targetGender", "distractorGender", "snr"]]
+mainResultsSheet = [
+    [
+        "Subject",
+        "Condition",
+        "Sentence",
+        "TotalCorrect",
+        "TotalMissed",
+        "TotalWords",
+        "Ratio",
+        "dB",
+        "difficulties",
+        "genders",
+        "gendersAll",
+        "targetAccent",
+        "distractorAccent",
+        "targetGender",
+        "distractorGender",
+        "snr",
+    ]
+]
+perConditionResultsSheet = [
+    [
+        "Subject",
+        "Condition",
+        "TotalCorrect",
+        "TotalMissed",
+        "TotalWords",
+        "Ratio",
+        "dB",
+        "difficulties",
+        "genders",
+        "gendersAll",
+        "targetAccent",
+        "distractorAccent",
+        "targetGender",
+        "distractorGender",
+        "snr",
+    ]
+]
 
 for subject in subjectsToAverage:
     print(f"Starting subject {subject}")
-    filename = glob.glob(mainDir + subject + "*.xlsx")[0]  # There should definitely only be one filename per subject number, so safe to just take the first one of a list which will only have one element
+    filename = glob.glob(mainDir + subject + "*.xlsx")[
+        0
+    ]  # There should definitely only be one filename per subject number, so safe to just take the first one of a list which will only have one element
     for condition in conditions:
         sheet = pd.read_excel(filename, sheet_name=condition)
         perConditionTotalCorrect = 0
@@ -238,8 +277,12 @@ for subject in subjectsToAverage:
         for sentenceInd in sentenceInds:
             rowInd = 2  # The results always start at the third row
             totalCorrect = 0
-            while rowInd < sheet.shape[0] and not pd.isna(sheet.iloc[rowInd, sentenceInd]):
-                if sheet.iloc[rowInd, sentenceInd]:  # These will be either True or False, so just treat as bool
+            while rowInd < sheet.shape[0] and not pd.isna(
+                sheet.iloc[rowInd, sentenceInd]
+            ):
+                if sheet.iloc[
+                    rowInd, sentenceInd
+                ]:  # These will be either True or False, so just treat as bool
                     totalCorrect += 1
                 rowInd += 1
             totalWords = rowInd - 2
@@ -247,13 +290,55 @@ for subject in subjectsToAverage:
             perConditionTotalCorrect += totalCorrect
             perConditionTotalWords += totalWords
             ratio = totalCorrect / totalWords
-            dB = 20 * np.log10((totalCorrect + constantToAdd) / (totalWords + constantToAdd))
-            mainResultsSheet.append([subject, condition, sentenceCount, totalCorrect, totalMissed, totalWords, ratio, dB, difficulties.get(condition), genders.get(condition), gendersAll.get(condition), targetAccent.get(condition), distractorAccent.get(condition), targetGender.get(condition), distractorGender.get(condition), snr.get(condition)])
+            dB = 20 * np.log10(
+                (totalCorrect + constantToAdd) / (totalWords + constantToAdd)
+            )
+            mainResultsSheet.append(
+                [
+                    subject,
+                    condition,
+                    sentenceCount,
+                    totalCorrect,
+                    totalMissed,
+                    totalWords,
+                    ratio,
+                    dB,
+                    difficulties.get(condition),
+                    genders.get(condition),
+                    gendersAll.get(condition),
+                    targetAccent.get(condition),
+                    distractorAccent.get(condition),
+                    targetGender.get(condition),
+                    distractorGender.get(condition),
+                    snr.get(condition),
+                ]
+            )
             sentenceCount += 1
         perConditionTotalMissed = perConditionTotalWords - perConditionTotalCorrect
         perConditionRatio = perConditionTotalCorrect / perConditionTotalWords
-        perConditionDB = 20 * np.log10((perConditionTotalCorrect + constantToAdd) / (perConditionTotalWords + constantToAdd))
-        perConditionResultsSheet.append([subject, condition, perConditionTotalCorrect, perConditionTotalMissed, perConditionTotalWords, perConditionRatio, perConditionDB, difficulties.get(condition), genders.get(condition), gendersAll.get(condition), targetAccent.get(condition), distractorAccent.get(condition), targetGender.get(condition), distractorGender.get(condition), snr.get(condition)])
+        perConditionDB = 20 * np.log10(
+            (perConditionTotalCorrect + constantToAdd)
+            / (perConditionTotalWords + constantToAdd)
+        )
+        perConditionResultsSheet.append(
+            [
+                subject,
+                condition,
+                perConditionTotalCorrect,
+                perConditionTotalMissed,
+                perConditionTotalWords,
+                perConditionRatio,
+                perConditionDB,
+                difficulties.get(condition),
+                genders.get(condition),
+                gendersAll.get(condition),
+                targetAccent.get(condition),
+                distractorAccent.get(condition),
+                targetGender.get(condition),
+                distractorGender.get(condition),
+                snr.get(condition),
+            ]
+        )
 
 with open("mainResultsSheet.csv", "w", newline="") as f:
     writer = csv.writer(f)
@@ -262,4 +347,3 @@ with open("mainResultsSheet.csv", "w", newline="") as f:
 with open("perConditionResultsSheet.csv", "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerows(perConditionResultsSheet)
-

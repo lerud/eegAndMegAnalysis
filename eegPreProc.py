@@ -32,7 +32,7 @@ subDirs = "/eegAndMeg/eeg/"
 # subDirs='/ffrTests/'
 
 # runName="tones"
-runName="trftrial"
+runName = "trftrial"
 # runName='stacks'
 # runName = "maintask"
 # runName='triggytest-erp'
@@ -40,7 +40,6 @@ runName="trftrial"
 
 refs = ["EXG3", "EXG4"]
 freqsToNotch = np.arange(60, 8192, 60)
-
 
 
 # %%

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -144,6 +144,7 @@ subjectsToAverage = [
 # subjectsToAverage=["R3095", "R3151", "R2774", "R3152", "R2877", "R3157", "R2783"]
 # subjectsToAverage=["R2877", "R3151", "R3152"]
 # subjectsToAverage = ["R3157"]
+
 
 # %%
 def makeAnalytic(mat):

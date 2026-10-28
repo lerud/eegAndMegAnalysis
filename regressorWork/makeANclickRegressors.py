@@ -54,7 +54,7 @@ outputNames = ["clickANmodelEeg.pickle", "clickANmodelMeg.pickle"]
 filterBeforeModel = [20, 4000]
 filterPhase = "zero"
 
-    
+
 t0 = time.time()
 
 wavFileName = f"clickABRstim.wav"
@@ -67,7 +67,12 @@ print(
 if filterBeforeModel is not None:
     regressorInfo = mne.create_info(ch_names=1, sfreq=fs, ch_types="stim")
     raw = mne.io.RawArray(data=stimulus[np.newaxis, :], info=regressorInfo)
-    raw.filter(l_freq=filterBeforeModel[0], h_freq=filterBeforeModel[1], picks="all", phase=filterPhase)
+    raw.filter(
+        l_freq=filterBeforeModel[0],
+        h_freq=filterBeforeModel[1],
+        picks="all",
+        phase=filterPhase,
+    )
     stimulus = raw.get_data().squeeze()
 
 print("\n")
@@ -81,15 +86,14 @@ plt.plot(stimulus[:100000])
 
 stimulus = cochlea.set_dbspl(stimulus, dBSPL)
 
-print(
-    f"Stimulus has been resampled and normalized resulting in shape {stimulus.shape}"
-)
+print(f"Stimulus has been resampled and normalized resulting in shape {stimulus.shape}")
 print("\n")
 
 # cfs = (125, 16000, numBandsAll[0])
 cfs = np.linspace(125, 16000, numBandsAll[0])
 
 ### Run model
+
 
 def runOneModelCF(i, cfs, stimulus, fsForModel, anf_types):
 
@@ -104,6 +108,7 @@ def runOneModelCF(i, cfs, stimulus, fsForModel, anf_types):
         ffGn=True,
     )
     return rate
+
 
 rates = joblib.Parallel(n_jobs=n_jobs, backend=parallelBackend, verbose=49)(
     joblib.delayed(runOneModelCF)(
@@ -122,24 +127,30 @@ for i in range(len(rates)):
 
 rates = np.array(rates)
 
-rates = rates.mean(axis=0)  # Uncomment this line to take the average response from all fibers that were modeled
+rates = rates.mean(
+    axis=0
+)  # Uncomment this line to take the average response from all fibers that were modeled
 
 ratesForOutput = []
 for i, fsForRegressor in enumerate(fsForRegressors):
 
-    ratesForOutput.append(sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel)))
-    
+    ratesForOutput.append(
+        sp.signal.resample(rates, int(len(rates) * fsForRegressor / fsForModel))
+    )
+
     t1 = time.time()
-    
+
     print(f"AN model took {t1-t0} seconds to run")
     print(f"AN model to be saved is shape {ratesForOutput[i].shape}")
     print("\n")
-    
+
     plt.figure()
     plt.plot(ratesForOutput[i][0:10000])
     eb.save.pickle(ratesForOutput[i], f"{outputNames[i]}")
-    
-    print(f"Done creating and saving AN model for {wavFileName} at fs of {fsForRegressor}")
+
+    print(
+        f"Done creating and saving AN model for {wavFileName} at fs of {fsForRegressor}"
+    )
     print("\n")
     print("\n")
 

@@ -84,7 +84,9 @@ def extractSourcesSingleCondition(
         # eegLocation = "/Users/karl/map/" + subject + subDirs
         megLocation = "/Volumes/Seagate/map/" + subject + subDirs
 
-        tempLocation = doRsync(f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}.pickle")
+        tempLocation = doRsync(
+            f"{megLocation}{filenamePrefix}_{typeOfRegressor}{filenameSuffix}.pickle"
+        )
 
         (
             subject,
@@ -100,15 +102,18 @@ def extractSourcesSingleCondition(
             tempLocation
         )
 
-
         if useSensorTRF:
-            evoked = eb.load.unpickle(f"{megLocation}{evokedFilename}_{typeOfRegressor}{filenameSuffix}")
+            evoked = eb.load.unpickle(
+                f"{megLocation}{evokedFilename}_{typeOfRegressor}{filenameSuffix}"
+            )
             evoked = evoked[1][0]
-            sensorTRF = evoked.get_data()[evoked.ch_names.index("Fz")]  # Can index like this because the data's first dim is sensors
+            sensorTRF = evoked.get_data()[
+                evoked.ch_names.index("Fz")
+            ]  # Can index like this because the data's first dim is sensors
             inputComparison = sensorTRF
         else:
             inputComparison = None
-        
+
         volLocation = f"{subjects_dir}/{mriSubject}/mri/aparc.a2009s+aseg.mgz"
 
         if doVec:
@@ -120,7 +125,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(transvGyrusTimeCourses.shape)
             allSourceTimeCourses.append(transvGyrusTimeCourses)
@@ -130,7 +136,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(transvSulcusTimeCourses.shape)
             allSourceTimeCourses.append(transvSulcusTimeCourses)
@@ -140,7 +147,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(planTempTimeCourses.shape)
             allSourceTimeCourses.append(planTempTimeCourses)
@@ -150,7 +158,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(insulaTimeCourses.shape)
             allSourceTimeCourses.append(insulaTimeCourses)
@@ -160,7 +169,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(planPolarTimeCourses.shape)
             allSourceTimeCourses.append(planPolarTimeCourses)
@@ -170,7 +180,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(supTempGyrusTimeCourses.shape)
             allSourceTimeCourses.append(supTempGyrusTimeCourses)
@@ -180,7 +191,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(supTempSulcusTimeCourses.shape)
             allSourceTimeCourses.append(supTempSulcusTimeCourses)
@@ -190,7 +202,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(infFrontTimeCourses.shape)
             allSourceTimeCourses.append(infFrontTimeCourses)
@@ -200,7 +213,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(midFrontTimeCourses.shape)
             allSourceTimeCourses.append(midFrontTimeCourses)
@@ -210,7 +224,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:2, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(parahipTimeCourses.shape)
             allSourceTimeCourses.append(parahipTimeCourses)
@@ -220,7 +235,8 @@ def extractSourcesSingleCondition(
                 stc_vec.extract_label_time_course(
                     [volLocation, labels], src_vol, mode=vecMode
                 )[0:3, :, :],
-                doPC, inputComparison,
+                doPC,
+                inputComparison,
             )
             print(subcortTimeCourses.shape)
 

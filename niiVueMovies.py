@@ -61,7 +61,7 @@ structVol = "mni152.nii.gz"
 # timeRange = [.05, .055]
 # magThreshRatio = .5
 
-magThreshRatio = .4
+magThreshRatio = 0.4
 
 
 # if len(timeRange) == 1:
@@ -89,43 +89,50 @@ STDs = np.zeros(numFrames)
 for volInd in np.arange(numFrames):
     volInds = np.array([volInd])
     volSubdir = f"{condition}/magnitude/"
-    
+
     initialImg = nib.load(f"{volDir}{volSubdir}vol{volInds[0]:04d}.nii.gz")
-    sum_data = initialImg.get_fdata().astype(np.float64) # Use float64 for precision during averaging
+    sum_data = initialImg.get_fdata().astype(
+        np.float64
+    )  # Use float64 for precision during averaging
     for i in range(1, len(volInds)):
         img = nib.load(f"{volDir}{volSubdir}vol{volInds[i]:04d}.nii.gz")
         sum_data += img.get_fdata()
-    
+
     average_data = sum_data / len(volInds)
     STDs[volInd] = np.std(average_data)
 
 STDsRange = np.max(STDs) - np.min(STDs)
-STDsAlt = STDs - np.min(STDs) + .1 * STDsRange  # Start the STDs positive and near zero to prepare for dB transform
+STDsAlt = (
+    STDs - np.min(STDs) + 0.1 * STDsRange
+)  # Start the STDs positive and near zero to prepare for dB transform
 STDsAlt = 20 * np.log10(STDsAlt)  # Calculate the magnitude in decibels
 STDsAlt = STDsAlt - np.min(STDsAlt)  # Make the range of dBs start at zero
 STDsAlt /= np.max(STDsAlt)  # Make the range from zero to one
-STDsAlt = 1 - STDsAlt  # Reverse the numbers so close to zero become close to one, and vice versa
-STDsAlt *= (1 - magThreshRatio)  # Normalize it to the remainder of the ratio
+STDsAlt = (
+    1 - STDsAlt
+)  # Reverse the numbers so close to zero become close to one, and vice versa
+STDsAlt *= 1 - magThreshRatio  # Normalize it to the remainder of the ratio
 
 # plt.plot(STDsAlt)
 
 # %%
 for volInd in np.arange(numFrames):
     volInds = np.array([volInd])
-    
+
     average_data_all = []
     average_img_all = []
     volSubdir = f"{condition}/magnitude/"
-    
-    
+
     initialImg = nib.load(f"{volDir}{volSubdir}vol{volInds[0]:04d}.nii.gz")
-    sum_data = initialImg.get_fdata().astype(np.float64) # Use float64 for precision during averaging
+    sum_data = initialImg.get_fdata().astype(
+        np.float64
+    )  # Use float64 for precision during averaging
     affine = initialImg.affine
     header = initialImg.header
     for i in range(1, len(volInds)):
         img = nib.load(f"{volDir}{volSubdir}vol{volInds[i]:04d}.nii.gz")
         sum_data += img.get_fdata()
-    
+
     average_data = sum_data / len(volInds)
     magMax = np.max(average_data)
     magThreshAbs = magMax * (magThreshRatio + STDsAlt[volInd])
@@ -136,21 +143,19 @@ for volInd in np.arange(numFrames):
     average_img_all.append(average_img)
     if overwriteTemps or not os.path.exists(f"{volDir}temp0_{volInds[0]:04d}.nii.gz"):
         nib.save(average_img, f"{volDir}temp0_{volInds[0]:04d}.nii.gz")
-    
-    
-    
-    
-    
+
     volSubdir = f"{condition}/upDown/"
-    
+
     initialImg = nib.load(f"{volDir}{volSubdir}vol{volInds[0]:04d}.nii.gz")
-    sum_data = initialImg.get_fdata().astype(np.float64) # Use float64 for precision during averaging
+    sum_data = initialImg.get_fdata().astype(
+        np.float64
+    )  # Use float64 for precision during averaging
     affine = initialImg.affine
     header = initialImg.header
     for i in range(1, len(volInds)):
         img = nib.load(f"{volDir}{volSubdir}vol{volInds[i]:04d}.nii.gz")
         sum_data += img.get_fdata()
-    
+
     average_data = sum_data / len(volInds)
     average_data[maskInds] = 0
     average_data_all.append(average_data)
@@ -158,19 +163,19 @@ for volInd in np.arange(numFrames):
     average_img_all.append(average_img)
     if overwriteTemps or not os.path.exists(f"{volDir}temp1_{volInds[0]:04d}.nii.gz"):
         nib.save(average_img, f"{volDir}temp1_{volInds[0]:04d}.nii.gz")
-    
-    
-    
+
     volSubdir = f"{condition}/frontBack/"
-    
+
     initialImg = nib.load(f"{volDir}{volSubdir}vol{volInds[0]:04d}.nii.gz")
-    sum_data = initialImg.get_fdata().astype(np.float64) # Use float64 for precision during averaging
+    sum_data = initialImg.get_fdata().astype(
+        np.float64
+    )  # Use float64 for precision during averaging
     affine = initialImg.affine
     header = initialImg.header
     for i in range(1, len(volInds)):
         img = nib.load(f"{volDir}{volSubdir}vol{volInds[i]:04d}.nii.gz")
         sum_data += img.get_fdata()
-    
+
     average_data = sum_data / len(volInds)
     average_data[maskInds] = 0
     average_data_all.append(average_data)
@@ -178,26 +183,22 @@ for volInd in np.arange(numFrames):
     average_img_all.append(average_img)
     if overwriteTemps or not os.path.exists(f"{volDir}temp2_{volInds[0]:04d}.nii.gz"):
         nib.save(average_img, f"{volDir}temp2_{volInds[0]:04d}.nii.gz")
-    
-    
-    
-    
+
     average_data = np.atan2(average_data_all[1], average_data_all[2])
 
     # Run these next two lines to rotate these phases backwards by 90 degrees to make red on top
     average_data = average_data + (np.pi / 2)
     average_data = np.atan2(np.sin(average_data), np.cos(average_data))
-    
+
     average_data[maskInds] = -4
     average_data_all.append(average_data)
     average_img = nib.Nifti1Image(average_data, affine, header)
     average_img_all.append(average_img)
     if overwriteTemps or not os.path.exists(f"{volDir}temp3_{volInds[0]:04d}.nii.gz"):
         nib.save(average_img, f"{volDir}temp3_{volInds[0]:04d}.nii.gz")
-    
-    
+
     volumes = []
-    
+
     volumeDict = {
         "path": f"{volDir}{structVol}",
         "colormap": "gray",
@@ -205,7 +206,7 @@ for volInd in np.arange(numFrames):
         "opacity": 1,
     }
     volumes.append(volumeDict)
-    
+
     average_data = average_data_all[0]
     volumeDict = {
         # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
@@ -222,7 +223,7 @@ for volInd in np.arange(numFrames):
         # "frame_4d": 52,
     }
     # volumes.append(volumeDict)
-    
+
     average_data = average_data_all[1]
     volumeDict = {
         # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
@@ -243,7 +244,7 @@ for volInd in np.arange(numFrames):
         # "frame_4d": 52,
     }
     # volumes.append(volumeDict)
-    
+
     average_data = average_data_all[2]
     volumeDict = {
         # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
@@ -264,7 +265,7 @@ for volInd in np.arange(numFrames):
         # "frame_4d": 52,
     }
     # volumes.append(volumeDict)
-    
+
     # volumeDict = {
     #     # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
     #     "path": f"/usr/local/fsl/data/atlases/HarvardOxford/HG.nii.gz",
@@ -284,7 +285,7 @@ for volInd in np.arange(numFrames):
     #     # "frame_4d": 52,
     # }
     # volumes.append(volumeDict)
-    
+
     # volumeDict = {
     #     # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
     #     "path": f"/usr/local/fsl/data/atlases/HarvardOxford/bs.nii.gz",
@@ -304,7 +305,7 @@ for volInd in np.arange(numFrames):
     #     # "frame_4d": 52,
     # }
     # volumes.append(volumeDict)
-    
+
     # volumeDict = {
     #     # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
     #     "path": f"/usr/local/fsl/data/atlases/HarvardOxford/rt.nii.gz",
@@ -324,7 +325,7 @@ for volInd in np.arange(numFrames):
     #     # "frame_4d": 52,
     # }
     # volumes.append(volumeDict)
-    
+
     # volumeDict = {
     #     # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
     #     "path": f"/usr/local/fsl/data/atlases/HarvardOxford/lt.nii.gz",
@@ -344,7 +345,7 @@ for volInd in np.arange(numFrames):
     #     # "frame_4d": 52,
     # }
     # volumes.append(volumeDict)
-    
+
     volumeDict = {
         # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
         "path": f"/usr/local/fsl/data/atlases/HarvardOxford/all.nii.gz",
@@ -364,7 +365,7 @@ for volInd in np.arange(numFrames):
         # "frame_4d": 52,
     }
     volumes.append(volumeDict)
-    
+
     average_data = average_data_all[3]
     volumeDict = {
         # "path": f"{volDir}{volSubdir}vol{volInd:04d}.nii.gz",
@@ -389,22 +390,21 @@ for volInd in np.arange(numFrames):
     volumesAll.append(volumes)
     print(f"Done with {volInd}")
 
-    
 
 # %%
 
 for i in np.arange(340, 345):
-# for i in np.arange(240, 345):
-# for i in np.arange(228, 229):
+    # for i in np.arange(240, 345):
+    # for i in np.arange(228, 229):
     azimuth = azimuthsAll[i]
     elevation = elevationsAll[i]
     nv = NiiVue(is_orient_cube=False)
     nv.opts.mesh_xray = 0.02
     nv.height = 1000
     nv.set_slice_type("RENDER")
-    
+
     nv.load_volumes(volumesAll[i])
-    
+
     nv.set_render_azimuth_elevation(azimuth, elevation)
     # time.sleep(2)
     display(nv)
@@ -416,30 +416,30 @@ for i in np.arange(340, 345):
 
 # %%
 # volumes = [
-    # {
-    #     "path": f"{volDir}vol{volInd:04d}.nii.gz",
-    #     "colormap": "red",
-    #     "colormapNegative": "blue",
-    #     "visible": True,
-    #     "opacity": 0.5,
-    #     "cal_min": 0.05,
-    #     "cal_max": 1.0,
-    #     "cal_minNeg": -0.05,
-    #     "cal_maxNeg": -1.0 
-    #     # "frame_4d": 52,
-    # },
-    # {
-    #     "path": f"/Users/karl/speechFrontBack/vol{volInd:04d}.nii.gz",
-    #     "colormap": "violet",
-    #     "colormapNegative": "green",
-    #     "visible": True,
-    #     "opacity": 0.5,
-    #     "cal_min": 0.05,
-    #     "cal_max": 2.0,
-    #     "cal_minNeg": -0.05,
-    #     "cal_maxNeg": -2.0 
-    #     # "frame_4d": 52,
-    # },
+# {
+#     "path": f"{volDir}vol{volInd:04d}.nii.gz",
+#     "colormap": "red",
+#     "colormapNegative": "blue",
+#     "visible": True,
+#     "opacity": 0.5,
+#     "cal_min": 0.05,
+#     "cal_max": 1.0,
+#     "cal_minNeg": -0.05,
+#     "cal_maxNeg": -1.0
+#     # "frame_4d": 52,
+# },
+# {
+#     "path": f"/Users/karl/speechFrontBack/vol{volInd:04d}.nii.gz",
+#     "colormap": "violet",
+#     "colormapNegative": "green",
+#     "visible": True,
+#     "opacity": 0.5,
+#     "cal_min": 0.05,
+#     "cal_max": 2.0,
+#     "cal_minNeg": -0.05,
+#     "cal_maxNeg": -2.0
+#     # "frame_4d": 52,
+# },
 # ]
 # meshes = [
 #     {
@@ -510,12 +510,12 @@ for i in np.arange(340, 345):
 # # nv.add_volume(volumes[1])
 # # nv.add_volume(volumes[2])
 # nv
-     
+
 
 # # nv.volumes[1].colormap = "red"
 # # nv.volumes[2].colormap = "blue"
 # # nv.volumes[0].opacity = 0.4
-     
+
 
 # nv.opts.show_3d_crosshair = True
 # nv.opts.crosshair_color = [0, 1, 1, 1]
@@ -524,7 +524,7 @@ for i in np.arange(340, 345):
 # nv.opts.view_mode_hot_key = "KeyN"
 # nv.set_clip_plane(20, 180, 180)
 # nv.opts.clip_plane_color = [0, 1, 1, 1]
-     
+
 
 # nv.height = 800
 # nv
@@ -546,7 +546,6 @@ for i in np.arange(340, 345):
 # nv.set_clip_plane(0.1, 180, 20)
 
 
-
 # cutaway_check = widgets.Checkbox(value=False, description="Cutaway")
 
 
@@ -556,7 +555,7 @@ for i in np.arange(340, 345):
 
 
 # cutaway_check.observe(on_cutaway_change, names="value")
-     
+
 
 # planes_options = ["0", "1", "2", "3", "4", "5", "6"]
 
@@ -565,8 +564,6 @@ for i in np.arange(340, 345):
 #     value="2",
 #     description="Planes:",
 # )
-
-
 
 
 # shade_options = ["none", "outside", "inside"]
@@ -608,7 +605,6 @@ for i in np.arange(340, 345):
 # nv.save_scene("test.png")
 
 
-
 # %%
 
 # time.sleep(1)
@@ -618,7 +614,7 @@ for i in np.arange(340, 345):
 
 # Create an Image object (replace with your actual image source)
 # This example loads an image from a file for demonstration
-# img = Image(filename='my_image.png') 
+# img = Image(filename='my_image.png')
 
 # # Access the raw data and save it to a new file
 # with open("saved_image.png", "wb") as f:
@@ -644,7 +640,6 @@ for i in np.arange(340, 345):
 # nv.set_clip_plane(0.1, 180, 20)
 
 
-
 # cutaway_check = widgets.Checkbox(value=False, description="Cutaway")
 
 
@@ -654,7 +649,7 @@ for i in np.arange(340, 345):
 
 
 # cutaway_check.observe(on_cutaway_change, names="value")
-     
+
 
 # planes_options = ["0", "1", "2", "3", "4", "5", "6"]
 
@@ -714,7 +709,7 @@ for i in np.arange(340, 345):
 
 
 # planes_dropdown.observe(on_planes_change, names="value")
-     
+
 
 # shade_options = ["none", "outside", "inside"]
 
@@ -741,7 +736,7 @@ for i in np.arange(340, 345):
 
 
 # shade_dropdown.observe(on_shade_change, names="value")
-     
+
 # # Display Viewer
 
 # controls = widgets.HBox([planes_dropdown, shade_dropdown, cutaway_check])
@@ -753,7 +748,7 @@ for i in np.arange(340, 345):
 
 
 # %%
-# xval = np.arange(0, 2 * np.pi, 0.01) 
+# xval = np.arange(0, 2 * np.pi, 0.01)
 # # yval will represent the radius (constant for a solid wheel)
 # yval = np.ones_like(xval)
 
@@ -761,11 +756,11 @@ for i in np.arange(340, 345):
 # colormap = plt.get_cmap('hsv')
 
 # # 3. Normalize the data for the colormap to span the full range (0 to 2*pi)
-# norm = matplotlib.colors.Normalize(0.0, 2 * np.pi) 
+# norm = matplotlib.colors.Normalize(0.0, 2 * np.pi)
 
 # # 4. Create a subplot with polar coordinates
 # fig = plt.figure(figsize=(6, 6))
-# ax = fig.add_subplot(1, 1, 1, polar=True) 
+# ax = fig.add_subplot(1, 1, 1, polar=True)
 
 # # 5. Use scatter plot to draw the wheel
 # # The 'c' argument maps the angle (xval) to the color using the colormap
@@ -775,9 +770,9 @@ for i in np.arange(340, 345):
 # # Remove the radial ticks (the Y-axis values)
 # ax.set_yticks([])
 # # Set the direction for zero angle (optional, makes red point upwards)
-# ax.set_theta_zero_location('W') 
+# ax.set_theta_zero_location('W')
 # # Set the theta direction to clockwise (optional)
-# ax.set_theta_direction(1) 
+# ax.set_theta_direction(1)
 
 # # 7. Display the plot
 # plt.show()
@@ -793,7 +788,7 @@ for i in np.arange(340, 345):
 # RHO, PHI = np.meshgrid(rho,phi) # get every combination of rho and phi
 
 # h = (PHI-PHI.min()) / (PHI.max()-PHI.min()) # use angle to determine hue, normalized from 0-1
-# h = np.flip(h)        
+# h = np.flip(h)
 # s = RHO               # saturation is set as a function of radias
 # v = np.ones_like(RHO) # value is constant
 

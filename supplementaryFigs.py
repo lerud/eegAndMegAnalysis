@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.5
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -19,6 +19,7 @@ import numpy as np
 import scipy as sp
 import matplotlib
 import os
+
 matplotlib.use("QtAgg")
 import matplotlib.pyplot as plt
 import ipyniivue
@@ -46,71 +47,98 @@ partialColor = 0.3
 fullColor = 1
 linewidthTimeseries = 0.5
 
-speechFs, speechStim = sp.io.wavfile.read("/Volumes/Seagate/map/stimAndPredictors/mixes/A_mix6.wav")
-speechStim = sp.stats.zscore(sp.signal.resample(speechStim, int(np.round(len(speechStim) * mainFs / speechFs))))
-speechStimPlot = speechStim[int(np.round(startToPlot * mainFs)): int(np.round(startToPlot * mainFs)) + len(t)]
+speechFs, speechStim = sp.io.wavfile.read(
+    "/Volumes/Seagate/map/stimAndPredictors/mixes/A_mix6.wav"
+)
+speechStim = sp.stats.zscore(
+    sp.signal.resample(speechStim, int(np.round(len(speechStim) * mainFs / speechFs)))
+)
+speechStimPlot = speechStim[
+    int(np.round(startToPlot * mainFs)) : int(np.round(startToPlot * mainFs)) + len(t)
+]
 
-speechAN = eb.load.unpickle("/Volumes/Seagate/map/stimAndPredictors/mixes/predictors/A_mix6_ANmodel_fs5000-0.pickle")
-speechAN = sp.stats.zscore(sp.signal.resample(speechAN, int(np.round(len(speechAN) * mainFs / 5000))))
-speechANPlot = speechAN[int(np.round(startToPlot * mainFs)): int(np.round(startToPlot * mainFs)) + len(t)]
+speechAN = eb.load.unpickle(
+    "/Volumes/Seagate/map/stimAndPredictors/mixes/predictors/A_mix6_ANmodel_fs5000-0.pickle"
+)
+speechAN = sp.stats.zscore(
+    sp.signal.resample(speechAN, int(np.round(len(speechAN) * mainFs / 5000)))
+)
+speechANPlot = speechAN[
+    int(np.round(startToPlot * mainFs)) : int(np.round(startToPlot * mainFs)) + len(t)
+]
 
-clickFs, clickStim  = sp.io.wavfile.read("regressorWork/clickABRstim.wav")
-clickStim = sp.stats.zscore(sp.signal.resample(clickStim, int(np.round(len(clickStim) * mainFs / clickFs))))
-clickStimPlot = clickStim[int(np.round(startToPlot * mainFs)): int(np.round(startToPlot * mainFs)) + len(t)]
+clickFs, clickStim = sp.io.wavfile.read("regressorWork/clickABRstim.wav")
+clickStim = sp.stats.zscore(
+    sp.signal.resample(clickStim, int(np.round(len(clickStim) * mainFs / clickFs)))
+)
+clickStimPlot = clickStim[
+    int(np.round(startToPlot * mainFs)) : int(np.round(startToPlot * mainFs)) + len(t)
+]
 
 clickAN = eb.load.unpickle("regressorWork/clickANmodelMeg.pickle").squeeze()
-clickAN = sp.stats.zscore(sp.signal.resample(clickAN, int(np.round(len(clickAN) * mainFs / 5000))))
-clickANPlot = clickAN[int(np.round(startToPlot * mainFs)): int(np.round(startToPlot * mainFs)) + len(t)]
+clickAN = sp.stats.zscore(
+    sp.signal.resample(clickAN, int(np.round(len(clickAN) * mainFs / 5000)))
+)
+clickANPlot = clickAN[
+    int(np.round(startToPlot * mainFs)) : int(np.round(startToPlot * mainFs)) + len(t)
+]
 
 
-norm_factor = np.sqrt(np.sum(np.abs(speechStim)**2) * np.sum(np.abs(speechStim)**2))
+norm_factor = np.sqrt(np.sum(np.abs(speechStim) ** 2) * np.sum(np.abs(speechStim) ** 2))
 speechStimAuto = sp.signal.correlate(speechStim, speechStim, mode="full") / norm_factor
 lags = sp.signal.correlation_lags(len(speechStim), len(speechStim), mode="full")
-speechStimLags = lags * 1/mainFs * 1000  # Now the lags are in milliseconds
+speechStimLags = lags * 1 / mainFs * 1000  # Now the lags are in milliseconds
 
-norm_factor = np.sqrt(np.sum(np.abs(speechAN)**2) * np.sum(np.abs(speechAN)**2))
+norm_factor = np.sqrt(np.sum(np.abs(speechAN) ** 2) * np.sum(np.abs(speechAN) ** 2))
 speechANAuto = sp.signal.correlate(speechAN, speechAN, mode="full") / norm_factor
 lags = sp.signal.correlation_lags(len(speechAN), len(speechAN), mode="full")
-speechANLags = lags * 1/mainFs * 1000  # Now the lags are in milliseconds
+speechANLags = lags * 1 / mainFs * 1000  # Now the lags are in milliseconds
 
-norm_factor = np.sqrt(np.sum(np.abs(clickStim)**2) * np.sum(np.abs(clickStim)**2))
+norm_factor = np.sqrt(np.sum(np.abs(clickStim) ** 2) * np.sum(np.abs(clickStim) ** 2))
 clickStimAuto = sp.signal.correlate(clickStim, clickStim, mode="full") / norm_factor
 lags = sp.signal.correlation_lags(len(clickStim), len(clickStim), mode="full")
-clickStimLags = lags * 1/mainFs * 1000  # Now the lags are in milliseconds
+clickStimLags = lags * 1 / mainFs * 1000  # Now the lags are in milliseconds
 
-norm_factor = np.sqrt(np.sum(np.abs(clickAN)**2) * np.sum(np.abs(clickAN)**2))
+norm_factor = np.sqrt(np.sum(np.abs(clickAN) ** 2) * np.sum(np.abs(clickAN) ** 2))
 clickANAuto = sp.signal.correlate(clickAN, clickAN, mode="full") / norm_factor
 lags = sp.signal.correlation_lags(len(clickAN), len(clickAN), mode="full")
-clickANLags = lags * 1/mainFs * 1000  # Now the lags are in milliseconds
+clickANLags = lags * 1 / mainFs * 1000  # Now the lags are in milliseconds
 
 
 # %%
-blues = plt.colormaps['Blues_r']
-oranges = plt.colormaps['Oranges_r']
+blues = plt.colormaps["Blues_r"]
+oranges = plt.colormaps["Oranges_r"]
 
 stimFig, stimAxs = plt.subplots(2, 2, figsize=[10, 6])
-stimAxs[0, 0].plot(t, speechStimPlot, color=blues(partialColor), linewidth=linewidthTimeseries)
+stimAxs[0, 0].plot(
+    t, speechStimPlot, color=blues(partialColor), linewidth=linewidthTimeseries
+)
 stimAxs[0, 0].set_title("Speech mixture stimulus")
 stimAxs[0, 0].set_xticklabels([])
 stimAxs[0, 0].set_ylabel("Z-scored amplitude")
 
-stimAxs[1, 0].plot(t, speechANPlot, color=blues(fullColor), linewidth=linewidthTimeseries)
+stimAxs[1, 0].plot(
+    t, speechANPlot, color=blues(fullColor), linewidth=linewidthTimeseries
+)
 stimAxs[1, 0].set_title("Speech AN model regressor")
 stimAxs[1, 0].set_xlabel("Time (s)")
 stimAxs[1, 0].set_ylabel("Z-scored spikes per second")
 
-stimAxs[0, 1].plot(t, clickStimPlot, color=oranges(partialColor), linewidth=linewidthTimeseries)
+stimAxs[0, 1].plot(
+    t, clickStimPlot, color=oranges(partialColor), linewidth=linewidthTimeseries
+)
 stimAxs[0, 1].set_title("Click stimulus")
 stimAxs[0, 1].set_yticklabels([])
 stimAxs[0, 1].set_xticklabels([])
 stimAxs[0, 1].tick_params(axis="y", left=False)
 
-stimAxs[1, 1].plot(t, clickANPlot, color=oranges(fullColor), linewidth=linewidthTimeseries)
+stimAxs[1, 1].plot(
+    t, clickANPlot, color=oranges(fullColor), linewidth=linewidthTimeseries
+)
 stimAxs[1, 1].set_title("Click AN model regressor")
 stimAxs[1, 1].set_xlabel("Time (s)")
 stimAxs[1, 1].set_yticklabels([])
 stimAxs[1, 1].tick_params(axis="y", left=False)
-
 
 
 # %%
@@ -122,35 +150,72 @@ autoFig, autoAxs = plt.subplots(1, 2, figsize=[10, 4])
 corrPlotInds = []
 corrPlotInds.append(np.abs(corrPlotTimes[0] - speechStimLags).argmin())
 corrPlotInds.append(np.abs(corrPlotTimes[1] - speechStimLags).argmin())
-autoAxs[0].plot(speechStimLags[corrPlotInds[0]: corrPlotInds[1]], speechStimAuto[corrPlotInds[0]:corrPlotInds[1]], color=blues(partialColor), alpha=0.75, linewidth=linewidth)
+autoAxs[0].plot(
+    speechStimLags[corrPlotInds[0] : corrPlotInds[1]],
+    speechStimAuto[corrPlotInds[0] : corrPlotInds[1]],
+    color=blues(partialColor),
+    alpha=0.75,
+    linewidth=linewidth,
+)
 
 corrPlotInds = []
 corrPlotInds.append(np.abs(corrPlotTimes[0] - speechANLags).argmin())
 corrPlotInds.append(np.abs(corrPlotTimes[1] - speechANLags).argmin())
-autoAxs[0].plot(speechANLags[corrPlotInds[0]: corrPlotInds[1]], speechANAuto[corrPlotInds[0]:corrPlotInds[1]], color=blues(fullColor), alpha=0.75, linewidth=linewidth)
+autoAxs[0].plot(
+    speechANLags[corrPlotInds[0] : corrPlotInds[1]],
+    speechANAuto[corrPlotInds[0] : corrPlotInds[1]],
+    color=blues(fullColor),
+    alpha=0.75,
+    linewidth=linewidth,
+)
 autoAxs[0].set_xlabel("Lags (ms)")
 autoAxs[0].set_ylabel("Autocorrelation coefficient")
-autoAxs[0].set_ylim([-.45, 1])
+autoAxs[0].set_ylim([-0.45, 1])
 autoAxs[0].legend(["Speech audio", "Speech AN model"])
 autoAxs[0].set_title("Speech autocorrelation")
 
 corrPlotInds = []
 corrPlotInds.append(np.abs(corrPlotTimes[0] - clickStimLags).argmin())
 corrPlotInds.append(np.abs(corrPlotTimes[1] - clickStimLags).argmin())
-autoAxs[1].plot(clickStimLags[corrPlotInds[0]: corrPlotInds[1]], clickStimAuto[corrPlotInds[0]:corrPlotInds[1]], color=oranges(partialColor), alpha=0.75, linewidth=linewidth)
+autoAxs[1].plot(
+    clickStimLags[corrPlotInds[0] : corrPlotInds[1]],
+    clickStimAuto[corrPlotInds[0] : corrPlotInds[1]],
+    color=oranges(partialColor),
+    alpha=0.75,
+    linewidth=linewidth,
+)
 
 corrPlotInds = []
 corrPlotInds.append(np.abs(corrPlotTimes[0] - clickANLags).argmin())
 corrPlotInds.append(np.abs(corrPlotTimes[1] - clickANLags).argmin())
-autoAxs[1].plot(clickANLags[corrPlotInds[0]: corrPlotInds[1]], clickANAuto[corrPlotInds[0]:corrPlotInds[1]], color=oranges(fullColor), alpha=0.75, linewidth=linewidth)
+autoAxs[1].plot(
+    clickANLags[corrPlotInds[0] : corrPlotInds[1]],
+    clickANAuto[corrPlotInds[0] : corrPlotInds[1]],
+    color=oranges(fullColor),
+    alpha=0.75,
+    linewidth=linewidth,
+)
 autoAxs[1].set_xlabel("Lags (ms)")
-autoAxs[1].set_ylim([-.45, 1])
+autoAxs[1].set_ylim([-0.45, 1])
 autoAxs[1].legend(["Click audio", "Click AN model"])
 autoAxs[1].set_title("Clicks autocorrelation")
 
 
 # %%
-subjects = ["R3265", "R3275", "R3247", "R3292", "R3293", "R3294", "R3303", "R3304", "R3306", "R3313", "R3317", "R3320"]
+subjects = [
+    "R3265",
+    "R3275",
+    "R3247",
+    "R3292",
+    "R3293",
+    "R3294",
+    "R3303",
+    "R3304",
+    "R3306",
+    "R3313",
+    "R3317",
+    "R3320",
+]
 ic_ras_mm = []
 ic_tkreg_mm = []
 mg_ras_mm = []
@@ -274,7 +339,6 @@ src_fs = mne.setup_volume_source_space(
 )
 
 
-
 parentDir = "/Volumes/Seagate/map/"
 
 ic_spheres = []
@@ -289,9 +353,15 @@ for iSubject, subject in enumerate(subjects):
     mriVol = subjects_dir + "/" + subject + "/mri/aparc.a2009s+aseg.mgz"
     bem = eb.load.unpickle(f"{subjects_dir}/{subject}/bem/conductorModel.pickle")
     trans = f"{parentDir}{subject}/eegAndMeg/eeg/eeg-trans.fif"
-    noise_cov = eb.load.unpickle(f"{parentDir}{subject}/eegAndMeg/meg/highpassNoiseCovariance.pickle")
-    data_cov = eb.load.unpickle(f"{parentDir}{subject}/eegAndMeg/meg/dataCovariance_fs5000.pickle")
-    evoked = eb.load.unpickle(f"{parentDir}{subject}/eegAndMeg/meg/anMeegRecFieldAllFolds_target_easy_lambda0.pickle")[1][0]
+    noise_cov = eb.load.unpickle(
+        f"{parentDir}{subject}/eegAndMeg/meg/highpassNoiseCovariance.pickle"
+    )
+    data_cov = eb.load.unpickle(
+        f"{parentDir}{subject}/eegAndMeg/meg/dataCovariance_fs5000.pickle"
+    )
+    evoked = eb.load.unpickle(
+        f"{parentDir}{subject}/eegAndMeg/meg/anMeegRecFieldAllFolds_target_easy_lambda0.pickle"
+    )[1][0]
     evoked.set_eeg_reference("average", projection=True)
     src = mne.setup_volume_source_space(
         subject,
@@ -339,18 +409,18 @@ for iSubject, subject in enumerate(subjects):
     # # weight_norm = "nai"
     # depthBeam = depth
     # reg = 0.05
-    # lcmv = mne.beamformer.make_lcmv(info=evoked.info, 
-    #                                 forward=fwd, 
-    #                                 data_cov=data_cov, 
-    #                                 reg=reg, 
-    #                                 noise_cov=noise_cov, 
-    #                                 label=None, 
-    #                                 pick_ori=None, 
-    #                                 rank="info", 
-    #                                 weight_norm=weight_norm, 
-    #                                 reduce_rank=False, 
-    #                                 depth=depthBeam, 
-    #                                 inversion="matrix", 
+    # lcmv = mne.beamformer.make_lcmv(info=evoked.info,
+    #                                 forward=fwd,
+    #                                 data_cov=data_cov,
+    #                                 reg=reg,
+    #                                 noise_cov=noise_cov,
+    #                                 label=None,
+    #                                 pick_ori=None,
+    #                                 rank="info",
+    #                                 weight_norm=weight_norm,
+    #                                 reduce_rank=False,
+    #                                 depth=depthBeam,
+    #                                 inversion="matrix",
     #                                 verbose=None)
     # beamResMat = mne.beamformer.make_lcmv_resolution_matrix(lcmv, fwd, evoked.info)
 
@@ -360,10 +430,6 @@ for iSubject, subject in enumerate(subjects):
 
     # 2. Build a KDTree for fast nearest-neighbor lookup
     tree = sp.spatial.KDTree(valid_coords)
-
-
-
-
 
     target_ras_m = ic_tkreg_mm[iSubject] / 1000
 
@@ -400,18 +466,31 @@ for iSubject, subject in enumerate(subjects):
     #     alpha=0.7,
     # )
 
-    result = subprocess.run(["subject2mni_coords", "-m", f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/", "-c", f"{ic_ras_mm[iSubject][0]}", f"{ic_ras_mm[iSubject][1]}",f"{ic_ras_mm[iSubject][2]}"], capture_output=True)
-    lines = result.stdout.decode('utf-8').strip().split('\n')
-    clean_numbers_string = lines[1].strip('[]')
-    target_ras_mni = np.fromstring(clean_numbers_string, sep=' ')
+    result = subprocess.run(
+        [
+            "subject2mni_coords",
+            "-m",
+            f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/",
+            "-c",
+            f"{ic_ras_mm[iSubject][0]}",
+            f"{ic_ras_mm[iSubject][1]}",
+            f"{ic_ras_mm[iSubject][2]}",
+        ],
+        capture_output=True,
+    )
+    lines = result.stdout.decode("utf-8").strip().split("\n")
+    clean_numbers_string = lines[1].strip("[]")
+    target_ras_mni = np.fromstring(clean_numbers_string, sep=" ")
     template = datasets.load_mni152_template()
 
     # 2. Define your MNI coordinate (X, Y, Z) and radius in millimeters
-    radius_mm = radius_mm             # Sphere radius in mm
+    radius_mm = radius_mm  # Sphere radius in mm
 
     # 3. Initialize the sphere masker
     # 'mask_img' ensures the sphere is restricted to actual brain space
-    masker = NiftiSpheresMasker(seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template)
+    masker = NiftiSpheresMasker(
+        seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template
+    )
 
     # 4. Fit the masker to the template to build the spatial configuration
     masker.fit(template)
@@ -423,16 +502,14 @@ for iSubject, subject in enumerate(subjects):
     target_affine = np.eye(3) * 1.5
     stc_psf_mni = morph.apply(stc_psf)
     img = stc_psf_mni.as_volume(src=src_fs)
-                
-    ic_psfs.append(nimg.resample_img(
-        img, 
-        target_affine=target_affine, 
-        interpolation="continuous" # Use 'nearest' for label maps
-    ))
-    
 
-
-
+    ic_psfs.append(
+        nimg.resample_img(
+            img,
+            target_affine=target_affine,
+            interpolation="continuous",  # Use 'nearest' for label maps
+        )
+    )
 
     target_ras_m = mg_tkreg_mm[iSubject] / 1000
 
@@ -469,18 +546,31 @@ for iSubject, subject in enumerate(subjects):
     #     alpha=0.7,
     # )
 
-    result = subprocess.run(["subject2mni_coords", "-m", f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/", "-c", f"{mg_ras_mm[iSubject][0]}", f"{mg_ras_mm[iSubject][1]}",f"{mg_ras_mm[iSubject][2]}"], capture_output=True)
-    lines = result.stdout.decode('utf-8').strip().split('\n')
-    clean_numbers_string = lines[1].strip('[]')
-    target_ras_mni = np.fromstring(clean_numbers_string, sep=' ')
+    result = subprocess.run(
+        [
+            "subject2mni_coords",
+            "-m",
+            f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/",
+            "-c",
+            f"{mg_ras_mm[iSubject][0]}",
+            f"{mg_ras_mm[iSubject][1]}",
+            f"{mg_ras_mm[iSubject][2]}",
+        ],
+        capture_output=True,
+    )
+    lines = result.stdout.decode("utf-8").strip().split("\n")
+    clean_numbers_string = lines[1].strip("[]")
+    target_ras_mni = np.fromstring(clean_numbers_string, sep=" ")
     template = datasets.load_mni152_template()
 
     # 2. Define your MNI coordinate (X, Y, Z) and radius in millimeters
-    radius_mm = radius_mm             # Sphere radius in mm
+    radius_mm = radius_mm  # Sphere radius in mm
 
     # 3. Initialize the sphere masker
     # 'mask_img' ensures the sphere is restricted to actual brain space
-    masker = NiftiSpheresMasker(seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template)
+    masker = NiftiSpheresMasker(
+        seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template
+    )
 
     # 4. Fit the masker to the template to build the spatial configuration
     masker.fit(template)
@@ -492,14 +582,14 @@ for iSubject, subject in enumerate(subjects):
     target_affine = np.eye(3) * 1.5
     stc_psf_mni = morph.apply(stc_psf)
     img = stc_psf_mni.as_volume(src=src_fs)
-                
-    mg_psfs.append(nimg.resample_img(
-        img, 
-        target_affine=target_affine, 
-        interpolation="continuous" # Use 'nearest' for label maps
-    ))
-    
 
+    mg_psfs.append(
+        nimg.resample_img(
+            img,
+            target_affine=target_affine,
+            interpolation="continuous",  # Use 'nearest' for label maps
+        )
+    )
 
     target_ras_m = ac_tkreg_mm[iSubject] / 1000
 
@@ -536,18 +626,31 @@ for iSubject, subject in enumerate(subjects):
     #     alpha=0.7,
     # )
 
-    result = subprocess.run(["subject2mni_coords", "-m", f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/", "-c", f"{ac_ras_mm[iSubject][0]}", f"{ac_ras_mm[iSubject][1]}",f"{ac_ras_mm[iSubject][2]}"], capture_output=True)
-    lines = result.stdout.decode('utf-8').strip().split('\n')
-    clean_numbers_string = lines[1].strip('[]')
-    target_ras_mni = np.fromstring(clean_numbers_string, sep=' ')
+    result = subprocess.run(
+        [
+            "subject2mni_coords",
+            "-m",
+            f"/Volumes/Seagate/map/{subject}/mri/simnibsParc/m2m_{subject}/",
+            "-c",
+            f"{ac_ras_mm[iSubject][0]}",
+            f"{ac_ras_mm[iSubject][1]}",
+            f"{ac_ras_mm[iSubject][2]}",
+        ],
+        capture_output=True,
+    )
+    lines = result.stdout.decode("utf-8").strip().split("\n")
+    clean_numbers_string = lines[1].strip("[]")
+    target_ras_mni = np.fromstring(clean_numbers_string, sep=" ")
     template = datasets.load_mni152_template()
 
     # 2. Define your MNI coordinate (X, Y, Z) and radius in millimeters
-    radius_mm = radius_mm             # Sphere radius in mm
+    radius_mm = radius_mm  # Sphere radius in mm
 
     # 3. Initialize the sphere masker
     # 'mask_img' ensures the sphere is restricted to actual brain space
-    masker = NiftiSpheresMasker(seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template)
+    masker = NiftiSpheresMasker(
+        seeds=[tuple(target_ras_mni)], radius=radius_mm, mask_img=template
+    )
 
     # 4. Fit the masker to the template to build the spatial configuration
     masker.fit(template)
@@ -559,21 +662,14 @@ for iSubject, subject in enumerate(subjects):
     target_affine = np.eye(3) * 1.5
     stc_psf_mni = morph.apply(stc_psf)
     img = stc_psf_mni.as_volume(src=src_fs)
-                
-    ac_psfs.append(nimg.resample_img(
-        img, 
-        target_affine=target_affine, 
-        interpolation="continuous" # Use 'nearest' for label maps
-    ))
-    
 
-
-
-
-
-
-
-    
+    ac_psfs.append(
+        nimg.resample_img(
+            img,
+            target_affine=target_affine,
+            interpolation="continuous",  # Use 'nearest' for label maps
+        )
+    )
 
 
 # %%
@@ -592,12 +688,24 @@ for iSubject, subject in enumerate(subjects):
     mg_psf_mats.append(mg_psfs[iSubject].get_fdata())
     ac_psf_mats.append(ac_psfs[iSubject].get_fdata())
 
-ic_sphere_img = nib.Nifti1Image(np.array(ic_sphere_mats).mean(axis=0), ic_spheres[0].affine, ic_spheres[0].header)
-mg_sphere_img = nib.Nifti1Image(np.array(mg_sphere_mats).mean(axis=0), mg_spheres[0].affine, mg_spheres[0].header)
-ac_sphere_img = nib.Nifti1Image(np.array(ac_sphere_mats).mean(axis=0), ac_spheres[0].affine, ac_spheres[0].header)
-ic_psf_img = nib.Nifti1Image(np.array(ic_psf_mats).mean(axis=0), ic_psfs[0].affine, ic_psfs[0].header)
-mg_psf_img = nib.Nifti1Image(np.array(mg_psf_mats).mean(axis=0), mg_psfs[0].affine, mg_psfs[0].header)
-ac_psf_img = nib.Nifti1Image(np.array(ac_psf_mats).mean(axis=0), ac_psfs[0].affine, ac_psfs[0].header)
+ic_sphere_img = nib.Nifti1Image(
+    np.array(ic_sphere_mats).mean(axis=0), ic_spheres[0].affine, ic_spheres[0].header
+)
+mg_sphere_img = nib.Nifti1Image(
+    np.array(mg_sphere_mats).mean(axis=0), mg_spheres[0].affine, mg_spheres[0].header
+)
+ac_sphere_img = nib.Nifti1Image(
+    np.array(ac_sphere_mats).mean(axis=0), ac_spheres[0].affine, ac_spheres[0].header
+)
+ic_psf_img = nib.Nifti1Image(
+    np.array(ic_psf_mats).mean(axis=0), ic_psfs[0].affine, ic_psfs[0].header
+)
+mg_psf_img = nib.Nifti1Image(
+    np.array(mg_psf_mats).mean(axis=0), mg_psfs[0].affine, mg_psfs[0].header
+)
+ac_psf_img = nib.Nifti1Image(
+    np.array(ac_psf_mats).mean(axis=0), ac_psfs[0].affine, ac_psfs[0].header
+)
 
 # 6. Save the sphere image using nibabel
 nib.save(ic_sphere_img, "/Users/karl/ic_spherical_roi.nii.gz")
@@ -611,7 +719,7 @@ threshold = 0.34  # Have been using this one, because it is close to what MNE au
 data = ic_psf_img.get_fdata()
 data = np.mean(data, axis=3)
 # data = data[:, :, :, 2]
-data[data<threshold] = 0
+data[data < threshold] = 0
 new_img = nib.Nifti1Image(data, ic_psf_img.affine, ic_psf_img.header)
 # Save the resulting upsampled image
 nib.save(new_img, "/Users/karl/ic_pointSpread.nii.gz")
@@ -619,7 +727,7 @@ nib.save(new_img, "/Users/karl/ic_pointSpread.nii.gz")
 data = mg_psf_img.get_fdata()
 data = np.mean(data, axis=3)
 # data = data[:, :, :, 2]
-data[data<threshold] = 0
+data[data < threshold] = 0
 new_img = nib.Nifti1Image(data, mg_psf_img.affine, mg_psf_img.header)
 # Save the resulting upsampled image
 nib.save(new_img, "/Users/karl/mg_pointSpread.nii.gz")
@@ -627,7 +735,7 @@ nib.save(new_img, "/Users/karl/mg_pointSpread.nii.gz")
 data = ac_psf_img.get_fdata()
 data = np.mean(data, axis=3)
 # data = data[:, :, :, 2]
-data[data<threshold] = 0
+data[data < threshold] = 0
 new_img = nib.Nifti1Image(data, ac_psf_img.affine, ac_psf_img.header)
 # Save the resulting upsampled image
 nib.save(new_img, "/Users/karl/ac_pointSpread.nii.gz")
@@ -716,10 +824,10 @@ nv.set_slice_type(slice_type=SliceType.MULTIPLANAR)
 # nv.volumes[1].colormap = "red"
 # nv.volumes[2].colormap = "blue"
 # nv.volumes[0].opacity = 0.4
-     
+
 nv.opts.show_3d_crosshair = True
 nv.opts.crosshair_color = [1, 1, 1, 0.5]
-nv.opts.crosshair_width = .75
+nv.opts.crosshair_width = 0.75
 nv.opts.back_color = [0, 0, 0, 1]
 nv.opts.is_colorbar = True
 nv.opts.view_mode_hot_key = "KeyN"
@@ -738,16 +846,16 @@ nv2.set_slice_type(slice_type=SliceType.RENDER)
 # nv.add_volume(volumes[1])
 # nv.add_volume(volumes[2])
 # nv
-     
+
 
 # nv.volumes[1].colormap = "red"
 # nv.volumes[2].colormap = "blue"
 # nv.volumes[0].opacity = 0.4
-     
+
 
 nv2.opts.show_3d_crosshair = True
 nv2.opts.crosshair_color = [1, 1, 1, 0.5]
-nv2.opts.crosshair_width = .75
+nv2.opts.crosshair_width = 0.75
 nv2.opts.back_color = [0, 0, 0, 1]
 nv2.opts.is_colorbar = True
 nv2.opts.view_mode_hot_key = "KeyN"
@@ -843,10 +951,10 @@ nv3.set_slice_type(slice_type=SliceType.MULTIPLANAR)
 # nv3.volumes[1].colormap = "red"
 # nv3.volumes[2].colormap = "blue"
 # nv3.volumes[0].opacity = 0.4
-     
+
 nv3.opts.show_3d_crosshair = True
 nv3.opts.crosshair_color = [1, 1, 1, 0.5]
-nv3.opts.crosshair_width = .75
+nv3.opts.crosshair_width = 0.75
 nv3.opts.back_color = [0, 0, 0, 1]
 nv3.opts.is_colorbar = True
 nv3.opts.view_mode_hot_key = "KeyN"
@@ -865,22 +973,22 @@ nv4.set_slice_type(slice_type=SliceType.RENDER)
 # nv4.add_volume(volumes[1])
 # nv4.add_volume(volumes[2])
 # nv4
-     
+
 
 # nv4.volumes[1].colormap = "red"
 # nv4.volumes[2].colormap = "blue"
 # nv4.volumes[0].opacity = 0.4
-     
+
 
 nv4.opts.show_3d_crosshair = True
 nv4.opts.crosshair_color = [1, 1, 1, 0.5]
-nv4.opts.crosshair_width = .75
+nv4.opts.crosshair_width = 0.75
 nv4.opts.back_color = [0, 0, 0, 1]
 nv4.opts.is_colorbar = True
 nv4.opts.view_mode_hot_key = "KeyN"
 nv4.set_clip_plane(20, 180, 180)
 nv4.opts.clip_plane_color = [0, 1, 1, 1]
-     
+
 
 nv4.height = 800
 display(nv4)
@@ -970,10 +1078,10 @@ nv5.set_slice_type(slice_type=SliceType.MULTIPLANAR)
 # nv5.volumes[1].colormap = "red"
 # nv5.volumes[2].colormap = "blue"
 # nv5.volumes[0].opacity = 0.4
-     
+
 nv5.opts.show_3d_crosshair = True
 nv5.opts.crosshair_color = [1, 1, 1, 0.5]
-nv5.opts.crosshair_width = .75
+nv5.opts.crosshair_width = 0.75
 nv5.opts.back_color = [0, 0, 0, 1]
 nv5.opts.is_colorbar = True
 nv5.opts.view_mode_hot_key = "KeyN"
@@ -992,22 +1100,22 @@ nv6.set_slice_type(slice_type=SliceType.RENDER)
 # nv6.add_volume(volumes[1])
 # nv6.add_volume(volumes[2])
 # nv6
-     
+
 
 # nv6.volumes[1].colormap = "red"
 # nv6.volumes[2].colormap = "blue"
 # nv6.volumes[0].opacity = 0.4
-     
+
 
 nv6.opts.show_3d_crosshair = True
 nv6.opts.crosshair_color = [1, 1, 1, 0.5]
-nv6.opts.crosshair_width = .75
+nv6.opts.crosshair_width = 0.75
 nv6.opts.back_color = [0, 0, 0, 1]
 nv6.opts.is_colorbar = True
 nv6.opts.view_mode_hot_key = "KeyN"
 nv6.set_clip_plane(20, 180, 180)
 nv6.opts.clip_plane_color = [0, 1, 1, 1]
-     
+
 
 nv6.height = 800
 display(nv6)

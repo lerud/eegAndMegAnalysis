@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.4
+#       jupytext_version: 1.18.1
 #   kernelspec:
 #     display_name: neuroTools
 #     language: python
@@ -53,7 +53,7 @@ n_jobs = 12
 backend = "loky"
 verbose = 49
 
-lambdaSuffixes = ["_lambda0", "_lambda1", "_lambda2", "_lambda3"] 
+lambdaSuffixes = ["_lambda0", "_lambda1", "_lambda2", "_lambda3"]
 
 subjects = [
     "R3045",
@@ -163,7 +163,6 @@ badChanLists = [badChanLists[i] for i in subset]
 typeOfRegressors = ["mix", "target", "target", "distractor", "distractor"]
 
 
-
 # nameOfRegressors = ["_ANmodel_maxFs"]
 
 # nameOfRegressors = [
@@ -220,17 +219,17 @@ def doOneSubject(
     for lambdaSuffix in lambdaSuffixes:
 
         filenameSuffixes = [
-        f"_quiet{lambdaSuffix}",
-        f"_easy{lambdaSuffix}",
-        f"_hard{lambdaSuffix}",
-        f"_easy{lambdaSuffix}",
-        f"_hard{lambdaSuffix}",
-    ]
-        
+            f"_quiet{lambdaSuffix}",
+            f"_easy{lambdaSuffix}",
+            f"_hard{lambdaSuffix}",
+            f"_easy{lambdaSuffix}",
+            f"_hard{lambdaSuffix}",
+        ]
+
         for iType, typeOfRegressor in enumerate(typeOfRegressors):
-            
+
             for iName, nameOfRegressor in enumerate(nameOfRegressors):
-    
+
                 print("\n")
                 print(
                     [

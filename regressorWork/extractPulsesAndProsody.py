@@ -47,15 +47,19 @@ predSubDir = "mixes"
 # testFilename = allDistractorFilenames[21]
 # predSubDir = "distractors"
 
-ANmodel = eb.load.unpickle(f"{parentDir}{predSubDir}/predictors/{os.path.basename(testFilename)[:-4]}_ANmodel_maxFs-1.pickle")
+ANmodel = eb.load.unpickle(
+    f"{parentDir}{predSubDir}/predictors/{os.path.basename(testFilename)[:-4]}_ANmodel_maxFs-1.pickle"
+)
 
 # testFilename = "/Users/karl/eegAndMegAnalysis/regressorWork/clickABRstim.wav"
 # ANmodel = eb.load.unpickle("/Users/karl/eegAndMegAnalysis/regressorWork/clickANmodelEeg.pickle").squeeze()
 
 
 fsAudio, testWav = sp.io.wavfile.read(testFilename)
-testWav = sp.signal.resample(testWav, int(len(testWav)*fs / fsAudio))
-ANmodel = sp.signal.resample(ANmodel, len(testWav))  # It's fine to just use the length of the audio for resampling, because we already know the ANmodel was made from this audio file
+testWav = sp.signal.resample(testWav, int(len(testWav) * fs / fsAudio))
+ANmodel = sp.signal.resample(
+    ANmodel, len(testWav)
+)  # It's fine to just use the length of the audio for resampling, because we already know the ANmodel was made from this audio file
 
 # %%
 f0_min = 40
@@ -73,7 +77,7 @@ f0_max = 600
 
 # with open(test[:-4] + '.PointProcess') as fid:
 #     lines = np.copy(fid.readlines())
-    
+
 # assert len(lines) > 7
 # pulse_times = np.array([float(l.replace(' ', '').strip().split('=')[1]) for l in lines[7:]])
 
@@ -83,11 +87,15 @@ sound = sound.resample(fs)
 t = sound.ts()
 # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "no", "yes")
 # point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, peaks)", f0_min, f0_max, "yes", "no")
-point_process = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", f0_min, f0_max)
+point_process = parselmouth.praat.call(
+    sound, "To PointProcess (periodic, cc)", f0_min, f0_max
+)
 numPoints = parselmouth.praat.call(point_process, "Get number of points")
 glottal_pulse_times = []
-for i in range(1, numPoints+1):
-    glottal_pulse_times.append(parselmouth.praat.call(point_process, "Get time from index", i))
+for i in range(1, numPoints + 1):
+    glottal_pulse_times.append(
+        parselmouth.praat.call(point_process, "Get time from index", i)
+    )
 
 glottal_pulse_times = np.array(glottal_pulse_times)
 
@@ -97,7 +105,9 @@ if readPulsePred:
         suffix = "maxFs"
     elif fs == 5000:
         suffix = "fs5000"
-    pulse_pred_pm_read = eb.load.unpickle(f"{parentDir}{predSubDir}/predictors/{os.path.basename(testFilename)[:-4]}_glottalPulses_{suffix}.pickle")
+    pulse_pred_pm_read = eb.load.unpickle(
+        f"{parentDir}{predSubDir}/predictors/{os.path.basename(testFilename)[:-4]}_glottalPulses_{suffix}.pickle"
+    )
 pulse_pred_pm = createPredictorTimeseries(glottal_pulse_times, fs, len(t), values=1)
 
 
@@ -143,7 +153,10 @@ if ANmodel.shape[0] == pulse_pred_pm.shape[0] - 1:
 ax.plot(t, ANmodel)
 ax.set_xlabel("Time (s)")
 if readPulsePred:
-    plt.legend(["Glottal pulse times", "Glottal pulse times read", "Audio", "AN model"], loc="upper left")
+    plt.legend(
+        ["Glottal pulse times", "Glottal pulse times read", "Audio", "AN model"],
+        loc="upper left",
+    )
 else:
     plt.legend(["Glottal pulse times", "Audio", "AN model"], loc="upper left")
 # ax2 = ax.twinx()
@@ -159,10 +172,10 @@ testWav = sp.stats.zscore(testWav)
 ANmodel = sp.stats.zscore(ANmodel)
 
 # %%
-norm_factor = np.sqrt(np.sum(np.abs(testWav)**2) * np.sum(np.abs(ANmodel)**2))
+norm_factor = np.sqrt(np.sum(np.abs(testWav) ** 2) * np.sum(np.abs(ANmodel) ** 2))
 crossCorr = sp.signal.correlate(ANmodel, testWav, mode="full") / norm_factor
 lags = sp.signal.correlation_lags(len(ANmodel), len(testWav), mode="full")
-lags = lags * 1/fs * 1000  # Now the lags are in milliseconds
+lags = lags * 1 / fs * 1000  # Now the lags are in milliseconds
 
 corrPlotTimes = [-15, 32]  # Start and end of plot in ms
 corrPlotInds = []
@@ -172,7 +185,11 @@ maxTime = lags[np.argmax(crossCorr)]
 maxCorr = crossCorr[np.argmax(crossCorr)]
 
 figC, axC = plt.subplots(figsize=[14, 9])
-axC.plot(lags[corrPlotInds[0]:corrPlotInds[1]], crossCorr[corrPlotInds[0]:corrPlotInds[1]], linewidth=3.5)
+axC.plot(
+    lags[corrPlotInds[0] : corrPlotInds[1]],
+    crossCorr[corrPlotInds[0] : corrPlotInds[1]],
+    linewidth=3.5,
+)
 axC.axvline(x=maxTime, color="black", linewidth=2)
 axC.set_xlabel("Lags (ms)")
 axC.set_ylabel("Correlation coefficient")
