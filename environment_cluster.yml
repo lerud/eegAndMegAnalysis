@@ -4,27 +4,20 @@ name: neuroTools
 channels:
 - conda-forge
 dependencies:
-- python
+- python=3.13
 - eelbrain
-- pip
 - ipython
-- jupyter
-- jupyterlab
-- qtconsole
 - jupytext
-- ipywidgets
 - seaborn
 - pyfftw
 - pillow
 - pyglet
 - pysurfer
 - librosa
-- google-cloud-texttospeech
 - pydub
 - cython
 - sympy
-- matplotlib-inline
-- mne-kit-gui
+- pip
 - pip:
   - https://github.com/christianbrodbeck/TRF-Tools/archive/main.zip
   - https://github.com/christianbrodbeck/gammatone/archive/fmax.zip
@@ -33,7 +26,7 @@ dependencies:
   - rtmixer
   - git+https://github.com/labsn/expyfun
   - praat-parselmouth
-  - wave
   - git+https://github.com/lerud/cochlea
   - simpleaudio
   - black
+  - py-spy
