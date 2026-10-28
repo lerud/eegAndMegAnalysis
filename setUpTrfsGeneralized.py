@@ -34,23 +34,25 @@ from neuroAndSignalTools.deconvGeneralized import *
 # from computeTrfsEEG import computeTrfs
 from computeTrfsMEEG import computeTrfs
 
-matplotlib.use("QtAgg")
-plt.ion()
+# matplotlib.use("QtAgg")
+# plt.ion()
 
 # %load_ext autoreload
 # %autoreload 2
 
 # %%
 # parentDir = "/Users/karl/map/"
-parentDir = "/Volumes/Seagate/map/"
+# parentDir = "/Volumes/Seagate/map/"
+parentDir = "/scratch/zt1/project/jzsimon-prj/user/lerud/Volumes/Seagate/map/"
 
 doParallel = True
-n_jobs = 4
+n_jobs = 9
 backend = "loky"
 verbose = 49
 
-# lambdas = np.logspace(-1, 9, 15)
-lambdas = np.array([0, 1e3, 1e6, 1e9])
+lambdas = np.logspace(-1, 9, 15)
+# lambdas = np.array([0, 1e4, 1e7, 1e10])
+
 
 conditionNames = dict(
     A=[
@@ -208,10 +210,18 @@ subjects = [
     "R3184",
     "R3214",
     "R3265",
+    "R3275",
+    "R3247",
+    "R3292",
+    "R3293",
+    "R3294",
+    "R3303",
+    "R3304",
+    "R3306",
 ]
 
-# subset = [i for i in range(len(subjects))]
-subset = [15]
+subset = [i for i in range(len(subjects))]
+# subset = [6]
 # subset = [6,7,8,9,10,11,12,13,14]
 # subset = np.arange(1, len(subjects))
 subjects = [subjects[i] for i in subset]
@@ -221,6 +231,14 @@ presStopCorrections = [
     0,
     0,
     0,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
     None,
     None,
     None,
@@ -274,10 +292,26 @@ badChanLists = [
     None,
     None,
     None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
 ]
 badChanLists = [badChanLists[i] for i in subset]
 
 conditions = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "A",
+    "B",
+    "C",
+    "D",
     "A",
     "B",
     "C",
@@ -415,7 +449,8 @@ filenameSuffixes = [
     "_hard",
 ]
 
-nameOfRegressors = [["_ANmodel_maxFs"]]
+# nameOfRegressors = [["_ANmodel_maxFs"]]
+# nameOfRegressors = [["_ANmodel_correctedLevels"]]
 # nameOfRegressors = ["_ANmodel_correctedLevels", "~gammatone-1", "~gammatone-on-1"]
 # nameOfRegressors = ["~wordOnsets", "~phoneOnsets"]
 # nameOfRegressors = ["~wordOnsets_gaussian", "~phoneOnsets_gaussian"]
@@ -449,15 +484,17 @@ nameOfRegressors = [["_ANmodel_maxFs"]]
 
 # This needs to be a list of lists now, so to run multiple regressors at once, make it a list with one element,
 # which is a list of strings:
-# nameOfRegressors = [[
-#     "~gammatone-1",
-#     "~gammatone-on-1",
-#     "~wordOnsets_gaussian15msSD",
-#     "~phoneOnsets_gaussian15msSD",
-#     "~phsurp",
-#     "~cohtent",
-#     "~wordsurp",
-# ]]
+nameOfRegressors = [
+    [
+        "~gammatone-1",
+        "~gammatone-on-1",
+        "~wordOnsets_gaussian15msSD",
+        "~phoneOnsets_gaussian15msSD",
+        "~phsurp",
+        "~cohtent",
+        "~wordsurp",
+    ]
+]
 
 # Acoustic only for acoustic rf
 # nameOfRegressors = [[
@@ -508,8 +545,9 @@ nameOfRegressors = [["_ANmodel_maxFs"]]
 # filenamePrefix = "acousticRecFieldAllFolds"
 # filenamePrefix = "linguisticConcurRecField"
 # filenamePrefix = "linguisticRecFieldAllFolds"
-# filenamePrefix = "combinedRecFieldAllFolds"
-filenamePrefix = "anRecFieldAllFolds"
+filenamePrefix = "combinedRecFieldAllFolds"
+# filenamePrefix = "anRecFieldAllFolds"
+# filenamePrefix = "anMeegRecFieldAllFolds"
 
 # newestSubjectsToDo = 1  # Use this to do only the N most recent subjects, meaning the order of the subject list variable above
 # newestSubjectsToDo = len(
@@ -698,8 +736,8 @@ def doOneSubject(
 
 
 # %%
-# for lambdaInd, thisLambda in enumerate(lambdas):
-for lambdaInd, thisLambda in enumerate(lambdas[-1:], start=len(lambdas) - 1):
+for lambdaInd, thisLambda in enumerate(lambdas):
+    # for lambdaInd, thisLambda in enumerate(lambdas[-2:], start=len(lambdas) - 2):
 
     if doParallel:
 
