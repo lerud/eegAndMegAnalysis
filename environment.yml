@@ -3,7 +3,7 @@ name: neuroTools
 channels:
 - conda-forge
 dependencies:
-- python
+- python=3.13
 - eelbrain
 - dipy  # Is this necessary to specify? It seems like a dependency of MNE but didn't end up in the environment
 - ipython
