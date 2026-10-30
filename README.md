@@ -1,7 +1,7 @@
 # Tools and scripts for MEG and EEG analysis
 ## Setup and usage
 - Many of the tools in this repository use auxiliary functions in the repository [neuroAndSignalTools](https://github.com/lerud/neuroAndSignalTools).
-- Setting up a Python environment with `conda` or `mamba` along the lines of `environment.yml` in this repository will work, or `environment_cluster.yml` for minimal visualization and GUI components
+- Setting up a Python environment with `conda` or `mamba` along the lines of `environment.yml` in this repository will work, or `environment_cluster.yml` for minimal visualization and GUI components.
 ## Associated materials
 ### Materials
 - This code is used in the following manuscript:
@@ -17,3 +17,4 @@
 - Constructing a Python environment with `environment.yml` will include all relevant packages for running this Python code. Using the specified Python version ensures that the associated pickled files can be unpickled and used.
 - After changing the variable `parentDir` to where you untarred the files, the script `plotAverageTrfsMEEG.py` should load, plot, and analyze the sensor-space TRFs.
 - The script `plotAbrMlrSources.py` should load the source-space TRFs and plot and analyze them, and the cluster test itself can either be run with that script, or loaded, by changing the variables `doTests` and `loadTests`.
+- The `fsaverage` FreeSurfer outputs included in the dataset should also be untarred (if you don't already have them) and linked correctly in the scripts.
